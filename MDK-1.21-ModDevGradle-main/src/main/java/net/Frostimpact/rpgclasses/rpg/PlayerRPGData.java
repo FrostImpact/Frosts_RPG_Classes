@@ -53,7 +53,6 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         this.dashCooldown = dashCooldown;
     }
 
-    // --- Saving (Required by INBTSerializable) ---
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();

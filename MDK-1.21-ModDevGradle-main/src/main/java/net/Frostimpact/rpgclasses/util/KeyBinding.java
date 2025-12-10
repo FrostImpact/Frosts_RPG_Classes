@@ -15,6 +15,4 @@ public class KeyBinding {
             "key.category.rpgclasses"
     );
 
-    // DELETE the old 'public static void register()' method entirely.
-    // It is no longer needed.
 }

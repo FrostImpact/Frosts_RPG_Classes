@@ -1,6 +1,7 @@
 package net.Frostimpact.rpgclasses.networking.packet;
 
 import net.Frostimpact.rpgclasses.RpgClassesMod;
+import net.Frostimpact.rpgclasses.registry.abilities.AbilityDatabase;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
 import net.minecraft.network.FriendlyByteBuf;
@@ -10,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.network.chat.Component;
+
 
 // NEOFORGE IMPORTS
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -40,6 +42,8 @@ public class PacketDash implements CustomPacketPayload {
 
         // Always enqueue work to the main thread
         context.enqueueWork(() -> {
+
+            var stats = AbilityDatabase.getAbility("dash");
             // In NeoForge, we cast the player from the context
             if (context.player() instanceof ServerPlayer player) {
 
@@ -53,32 +57,39 @@ public class PacketDash implements CustomPacketPayload {
                     // We comment out the 'if' condition that checks for cooldown and mana,
                     // and also comment out the consumption and failure message.
 
-                    /*
+
                     if (rpg.getDashCooldown() <= 0 && rpg.getMana() >= 15) {
-                    */
+
 
                     // Success! Perform the Dash
                     // Comment out resource consumption
-                    // rpg.setDashCooldown(100);
-                    // rpg.useMana(15);
+                    rpg.setDashCooldown(100);
+                    rpg.useMana(15);
 
                     // Physical effects (Core Dash Functionality)
                     player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, player.getSoundSource(), 1f, 1f);
                     player.hurtMarked = true;
 
                     // Push the player forward
-                    player.setDeltaMovement(player.getLookAngle().scale(3));
+                    player.setDeltaMovement(player.getLookAngle().scale(2));
 
                     // Sync data back to client (Optional, but good practice later)
                     // ModMessages.sendToPlayer(new PacketSyncData(rpg.getMana()), player);
 
-                    /*
-                    } else {
+
+                    }
+
+                    else if (rpg.getDashCooldown() > 0) {
                         // Failure Message
-                        String msg = (rpg.getDashCooldown() > 0) ? "Dash on Cooldown!" : "Not enough Mana!";
+                        String msg = "Dash on Cooldown!";
                         player.sendSystemMessage(Component.literal(msg));
                     }
-                    */
+
+                    else if (rpg.getMana() < stats.getAbility_Mana()) {
+                        String msg = "Not enough Mana!";
+                        player.sendSystemMessage(Component.literal(msg));
+                    }
+
                     // *** END OF TEMPORARY DISABLE ***
                 }
             }

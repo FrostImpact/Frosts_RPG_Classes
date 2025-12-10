@@ -28,12 +28,7 @@ public class ModEvents {
         // Copy the class over (always preserve)
         newData.setCurrentClass(oldData.getCurrentClass());
 
-        // Option 1: Keep mana on respawn (uncomment if desired)
-        // newData.setMana(oldData.getMana());
+        newData.setMana(newData.getMaxMana());
 
-        // Option 2: Reset to max mana on respawn (uncomment if desired)
-        // newData.setMana(newData.getMaxMana());
-
-        // Option 3: Keep current default behavior (mana resets to constructor default: 100)
     }
 }
