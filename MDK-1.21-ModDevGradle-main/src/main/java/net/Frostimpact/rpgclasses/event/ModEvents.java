@@ -1,0 +1,27 @@
+package net.Frostimpact.rpgclasses.event;
+
+import net.Frostimpact.rpgclasses.RpgClassesMod;
+import net.Frostimpact.rpgclasses.rpg.ModAttachments;
+import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+
+@EventBusSubscriber(modid = RpgClassesMod.MOD_ID)
+public class ModEvents {
+
+    // This event runs when a player respawns (Clone)
+    @SubscribeEvent
+    public static void onPlayerCloned(PlayerEvent.Clone event) {
+        // Get the old data (from the dead body)
+        PlayerRPGData oldData = event.getOriginal().getData(ModAttachments.PLAYER_RPG);
+        // Get the new data (for the new body)
+        PlayerRPGData newData = event.getEntity().getData(ModAttachments.PLAYER_RPG);
+
+        // Copy the class over
+        newData.setCurrentClass(oldData.getCurrentClass());
+
+        // Decide if you want to keep mana or reset it
+        // newData.setMana(oldData.getMana()); // Uncomment to keep mana
+    }
+}
