@@ -8,6 +8,9 @@ import net.neoforged.bus.api.SubscribeEvent;
 // DELETE: import net.neoforged.fml.common.EventBusSubscriber; // DELETE THIS LINE
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.Frostimpact.rpgclasses.networking.ModMessages; // <--- NEW IMPORT
+import net.Frostimpact.rpgclasses.networking.packet.PacketSyncMana; // <--- NEW IMPORT
+import net.minecraft.server.level.ServerPlayer; // <--- NEW IMPORT
 
 // DELETE THE ENTIRE @EventBusSubscriber ANNOTATION
 public class ServerEvents {
@@ -37,6 +40,34 @@ public class ServerEvents {
     public void onPlayerTick(PlayerTickEvent.Post event) {
         // Must also be non-static now
         // ... (existing tick logic here) ...
+    }
+
+    @SubscribeEvent
+    public void onPlayerTick(PlayerTickEvent.Post event) {
+        if (event.getEntity() instanceof ServerPlayer player) { // Make sure it's ServerPlayer for sending packets
+
+            if (!player.level().isClientSide) {
+
+                PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
+
+                // ... (Your existing Cooldown/Mana Regen logic here) ...
+
+                // --- SEND ACTIONBAR STATUS EVERY 5 TICKS (4 times per second) ---
+                if (player.level().getGameTime() % 5 == 0) {
+                    int currentMana = rpg.getMana();
+                    int maxMana = rpg.getMaxMana(); // Assuming you have this getter
+
+                    // Build the custom status string
+                    String status = String.format("§bMANA: §f%d / %d §7| §cHP: §f%d / %d §7| §6CLASS: §f%s",
+                            currentMana, maxMana,
+                            (int)player.getHealth(), (int)player.getMaxHealth(),
+                            rpg.getCurrentClass());
+
+                    // Send the packet to this specific player
+                    ModMessages.sendToPlayer(new PacketSyncMana(status), player);
+                }
+            }
+        }
     }
 
     // ... (Your other methods must also be non-static) ...
