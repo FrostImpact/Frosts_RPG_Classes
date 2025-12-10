@@ -37,13 +37,11 @@ public class ServerEvents {
 
                 PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
 
-                // Cooldown Management
-                if (rpg.getDashCooldown() > 0) {
-                    rpg.setDashCooldown(rpg.getDashCooldown() - 1);
-                }
+                // Tick ALL ability cooldowns at once
+                rpg.tickCooldowns();
 
                 // Mana Regeneration (1 mana per second = every 20 ticks)
-                if (player.level().getGameTime() % 20 == 0) {
+                if (player.level().getGameTime() % 10 == 0) {
                     if (rpg.getMana() < rpg.getMaxMana()) {
                         rpg.useMana(-1); // Negative to add mana
                     }
