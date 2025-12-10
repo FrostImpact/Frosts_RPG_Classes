@@ -2,10 +2,8 @@ package net.Frostimpact.rpgclasses.rpg;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.HolderLookup;
-// CRITICAL: This must be the NeoForge specific import
 import net.neoforged.neoforge.common.util.INBTSerializable;
 
-// CRITICAL: You must add "implements INBTSerializable<CompoundTag>"
 public class PlayerRPGData implements INBTSerializable<CompoundTag> {
 
     // --- Variables ---
@@ -31,8 +29,20 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         return mana;
     }
 
+    public void setMana(int mana) {
+        this.mana = Math.max(0, Math.min(mana, maxMana));
+    }
+
     public void useMana(int amount) {
-        this.mana = Math.max(0, this.mana - amount);
+        this.mana = Math.max(0, Math.min(this.mana - amount, maxMana));
+    }
+
+    public int getMaxMana() {
+        return maxMana;
+    }
+
+    public void setMaxMana(int maxMana) {
+        this.maxMana = maxMana;
     }
 
     public int getDashCooldown() {
@@ -49,6 +59,7 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         CompoundTag nbt = new CompoundTag();
         nbt.putString("rpg_class", currentClass);
         nbt.putInt("mana", mana);
+        nbt.putInt("max_mana", maxMana);
         nbt.putInt("dash_cooldown", dashCooldown);
         return nbt;
     }
@@ -61,6 +72,9 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         }
         if (nbt.contains("mana")) {
             this.mana = nbt.getInt("mana");
+        }
+        if (nbt.contains("max_mana")) {
+            this.maxMana = nbt.getInt("max_mana");
         }
         if (nbt.contains("dash_cooldown")) {
             this.dashCooldown = nbt.getInt("dash_cooldown");

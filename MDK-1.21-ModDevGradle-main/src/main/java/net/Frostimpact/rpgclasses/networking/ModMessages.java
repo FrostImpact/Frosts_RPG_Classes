@@ -2,9 +2,9 @@ package net.Frostimpact.rpgclasses.networking;
 
 import net.Frostimpact.rpgclasses.RpgClassesMod;
 import net.Frostimpact.rpgclasses.networking.packet.PacketDash;
-import net.Frostimpact.rpgclasses.networking.packet.PacketSyncMana; // <--- NEW IMPORT
+import net.Frostimpact.rpgclasses.networking.packet.PacketSyncMana;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.level.ServerPlayer; // <--- NEW IMPORT
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -31,7 +31,7 @@ public class ModMessages {
                 PacketDash::handle
         );
 
-        // 2. Register PacketSyncMana (Server -> Client) <--- NEW REGISTRATION
+        // 2. Register PacketSyncMana (Server -> Client)
         registrar.playToClient(
                 PacketSyncMana.TYPE,
                 PacketSyncMana.STREAM_CODEC,
@@ -44,8 +44,8 @@ public class ModMessages {
         PacketDistributor.sendToServer(message);
     }
 
-    // Helper to send to a specific player (Used for PacketSyncMana) <--- NEW HELPER
+    // Helper to send to a specific player (Used for PacketSyncMana)
     public static void sendToPlayer(CustomPacketPayload message, ServerPlayer player) {
-        PacketDistributor.sendToPlayer(message, player);
+        PacketDistributor.sendToPlayer(player, message);
     }
 }

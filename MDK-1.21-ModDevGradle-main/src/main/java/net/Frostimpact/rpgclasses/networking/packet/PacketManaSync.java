@@ -8,23 +8,23 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class PacketSyncMana implements CustomPacketPayload {
+public class PacketManaSync implements CustomPacketPayload {
 
     // Unique identifier for this packet
-    public static final CustomPacketPayload.Type<PacketSyncMana> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(RpgClassesMod.MOD_ID, "sync_mana"));
+    public static final CustomPacketPayload.Type<PacketManaSync> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(RpgClassesMod.MOD_ID, "mana_sync"));
 
     // Codec to read/write the packet data
-    public static final StreamCodec<FriendlyByteBuf, PacketSyncMana> STREAM_CODEC = StreamCodec.of(
+    public static final StreamCodec<FriendlyByteBuf, PacketManaSync> STREAM_CODEC = StreamCodec.of(
             // Encoder: Writes the status string to the buffer
             (buf, message) -> buf.writeUtf(message.statusText),
             // Decoder: Reads the status string and creates a new packet instance
-            (buf) -> new PacketSyncMana(buf.readUtf())
+            (buf) -> new PacketManaSync(buf.readUtf())
     );
 
     private final String statusText;
 
-    public PacketSyncMana(String statusText) {
+    public PacketManaSync(String statusText) {
         this.statusText = statusText;
     }
 
@@ -34,12 +34,12 @@ public class PacketSyncMana implements CustomPacketPayload {
     }
 
     // Client-side handling logic
-    public static void handle(PacketSyncMana message, IPayloadContext context) {
+    public static void handle(PacketManaSync message, IPayloadContext context) {
         context.enqueueWork(() -> {
             // Check if the current client is the player receiving the packet
             if (Minecraft.getInstance().player != null) {
-                // Send the text to the Actionbar (System Message)
-                Minecraft.getInstance().player.sendSystemMessage(
+                // Display the text in the Actionbar
+                Minecraft.getInstance().player.displayClientMessage(
                         net.minecraft.network.chat.Component.literal(message.statusText),
                         true // Set 'overlay' to true to make it appear in the actionbar
                 );
