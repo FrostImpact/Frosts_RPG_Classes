@@ -1,5 +1,8 @@
 package net.Frostimpact.rpgclasses.ability;
 
+import net.Frostimpact.rpgclasses.ability.BLADEDANCER.BladeDanceAbility;
+import net.Frostimpact.rpgclasses.ability.BLADEDANCER.DashAbility;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +13,7 @@ public class AbilityRegistry {
     public static void registerAll() {
         register(new DashAbility());
         // Add more abilities here as you create them
-        // register(new BladeDanceAbility());
+        register(new BladeDanceAbility());
         // register(new ParryAbility());
         // register(new BladeWaltzAbility());
     }

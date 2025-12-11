@@ -1,5 +1,6 @@
-package net.Frostimpact.rpgclasses.ability;
+package net.Frostimpact.rpgclasses.ability.BLADEDANCER;
 
+import net.Frostimpact.rpgclasses.ability.Ability;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;

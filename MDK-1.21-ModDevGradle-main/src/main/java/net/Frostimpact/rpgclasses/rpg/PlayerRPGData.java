@@ -21,6 +21,12 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     private Vec3 dashDirection = Vec3.ZERO;
     private double dashTargetDistance = 0;
 
+    private boolean bladeDanceActive = false;
+    private int bladeDanceTicks = 0;
+    private int bladeDanceBlades = 0;
+    private int bladeDanceDamageCooldown = 0;
+
+    //DASH
     public boolean isDashActive() { return dashActive; }
     public void setDashActive(boolean active) { this.dashActive = active; }
     public Vec3 getDashStartPos() { return dashStartPos; }
@@ -29,6 +35,32 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     public void setDashDirection(Vec3 dir) { this.dashDirection = dir; }
     public double getDashTargetDistance() { return dashTargetDistance; }
     public void setDashTargetDistance(double dist) { this.dashTargetDistance = dist; }
+
+    //BLADE DANCE
+    public boolean isBladeDanceActive() { return bladeDanceActive; }
+    public void setBladeDanceActive(boolean active) { this.bladeDanceActive = active; }
+
+    public int getBladeDanceTicks() { return bladeDanceTicks; }
+    public void setBladeDanceTicks(int ticks) { this.bladeDanceTicks = ticks; }
+
+    public int getBladeDanceBlades() { return bladeDanceBlades; }
+    public void setBladeDanceBlades(int blades) { this.bladeDanceBlades = blades; }
+
+    public int getBladeDanceDamageCooldown() { return bladeDanceDamageCooldown; }
+    public void setBladeDanceDamageCooldown(int ticks) { this.bladeDanceDamageCooldown = ticks; }
+
+    private java.util.List<Integer> bladeDanceSwordIds = new java.util.ArrayList<>();
+
+    public java.util.List<Integer> getBladeDanceSwordIds() { return bladeDanceSwordIds; }
+    public void setBladeDanceSwordIds(java.util.List<Integer> ids) { this.bladeDanceSwordIds = ids; }
+    public void addBladeDanceSword(int entityId) { this.bladeDanceSwordIds.add(entityId); }
+    public void clearBladeDanceSwords() { this.bladeDanceSwordIds.clear(); }
+
+    public void removeBlade() {
+        if (bladeDanceBlades > 0) {
+            bladeDanceBlades--;
+        }
+    }
 
     public PlayerRPGData() {
         // Default constructor
@@ -91,6 +123,10 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         nbt.putBoolean("dash_active", dashActive);
         nbt.putDouble("dash_target", dashTargetDistance);
 
+        nbt.putBoolean("blade_dance_active", bladeDanceActive);
+        nbt.putInt("blade_dance_ticks", bladeDanceTicks);
+        nbt.putInt("blade_dance_blades", bladeDanceBlades);
+
         // Save cooldowns
         CompoundTag cooldownsTag = new CompoundTag();
         for (Map.Entry<String, Integer> entry : abilityCooldowns.entrySet()) {
@@ -105,6 +141,17 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+
+        if (nbt.contains("blade_dance_active")) {
+            this.bladeDanceActive = nbt.getBoolean("blade_dance_active");
+        }
+        if (nbt.contains("blade_dance_ticks")) {
+            this.bladeDanceTicks = nbt.getInt("blade_dance_ticks");
+        }
+        if (nbt.contains("blade_dance_blades")) {
+            this.bladeDanceBlades = nbt.getInt("blade_dance_blades");
+        }
+
         if (nbt.contains("rpg_class")) {
             this.currentClass = nbt.getString("rpg_class");
         }

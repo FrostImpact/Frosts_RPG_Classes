@@ -27,13 +27,12 @@ public class RpgClassesMod {
 
     private void registerKeyMappings(final RegisterKeyMappingsEvent event) {
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.DASH_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.BLADE_DANCE_KEY); // Add this
         System.out.println("RPG Classes: Keybind Registered!");
 
-        // IMPORTANT: Register database FIRST
         AbilityDatabase.registerAll();
         System.out.println("RPG Classes: Database Registered!");
 
-        // THEN register abilities (they need the database)
         AbilityRegistry.registerAll();
         System.out.println("RPG Classes: Abilities Registered!");
     }

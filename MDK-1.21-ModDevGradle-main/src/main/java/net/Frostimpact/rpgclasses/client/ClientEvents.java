@@ -14,5 +14,11 @@ public class ClientEvents {
         if (KeyBinding.DASH_KEY.consumeClick()) {
             ModMessages.sendToServer(new PacketUseAbility("dash"));
         }
+
+        // Add Blade Dance keybind
+        if (KeyBinding.BLADE_DANCE_KEY.consumeClick()) {
+            ModMessages.sendToServer(new PacketUseAbility("blade_dance"));
+        }
     }
+
 }

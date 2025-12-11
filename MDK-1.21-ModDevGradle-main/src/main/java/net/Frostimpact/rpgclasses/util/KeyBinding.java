@@ -15,4 +15,12 @@ public class KeyBinding {
             "key.category.rpgclasses"
     );
 
+    public static final KeyMapping BLADE_DANCE_KEY = new KeyMapping(
+            "key.rpgclasses.blade_dance",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_C, // C key
+            "key.category.rpgclasses"
+    );
+
 }
