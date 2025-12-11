@@ -33,7 +33,12 @@ public class ModEvents {
         newData.setCurrentClass(oldData.getCurrentClass());
 
         newData.setMana(newData.getMaxMana());
+
+        // BLADEMANCER: Reset tempo on death
+        newData.resetTempo();
+
     }
+
 
     /**
      * This event runs when a living entity takes damage.
@@ -84,6 +89,55 @@ public class ModEvents {
 
                     rpg.setBladeDanceActive(false);
                     player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cAll blades destroyed!"));
+                }
+            }
+        }
+    }
+     //This event runs when a player attacks an entity.
+     //We use it to handle the TEMPO passive ability.
+
+    @SubscribeEvent
+    public static void onPlayerAttack(net.neoforged.neoforge.event.entity.player.AttackEntityEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
+
+            // Only trigger TEMPO for Bladedancer class
+            if (rpg.getCurrentClass().equals("BLADEDANCER")) {
+
+                // Add a tempo stack
+                rpg.addTempoStack();
+
+                // Check tempo stacks
+                if (rpg.getTempoStacks() == 3) {
+                    // Grant Strength I
+                    player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                            net.minecraft.world.effect.MobEffects.DAMAGE_BOOST,
+                            999999, // Infinite duration (removed manually)
+                            0,      // Strength I
+                            false,  // Not ambient
+                            false,  // Don't show particles
+                            true    // Show icon
+                    ));
+                    rpg.setTempoActive(true);
+
+                    // Visual feedback
+                    player.level().playSound(null, player.blockPosition(),
+                            net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP,
+                            net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 1.5f);
+
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§6⚔ TEMPO ACTIVE! §7(Strength I)"));
+
+                } else if (rpg.getTempoStacks() >= 4) {
+                    // 4th hit - remove Strength and reset
+                    player.removeEffect(net.minecraft.world.effect.MobEffects.DAMAGE_BOOST);
+                    rpg.resetTempo();
+
+                    // Visual feedback
+                    player.level().playSound(null, player.blockPosition(),
+                            net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP,
+                            net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 0.8f);
+
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§7TEMPO reset"));
                 }
             }
         }

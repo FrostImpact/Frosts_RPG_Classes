@@ -20,5 +20,4 @@ public class ClientEvents {
             ModMessages.sendToServer(new PacketUseAbility("blade_dance"));
         }
     }
-
 }

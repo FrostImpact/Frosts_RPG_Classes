@@ -10,21 +10,26 @@ import java.util.Map;
 
 public class PlayerRPGData implements INBTSerializable<CompoundTag> {
 
-    // --- Variables ---
+    // Variables
     private String currentClass = "NONE";
     private int mana = 100;
     private int maxMana = 100;
     private Map<String, Integer> abilityCooldowns = new HashMap<>();
 
+    //DASH
     private boolean dashActive = false;
     private Vec3 dashStartPos = Vec3.ZERO;
     private Vec3 dashDirection = Vec3.ZERO;
     private double dashTargetDistance = 0;
 
+    //BLADE DANCE
     private boolean bladeDanceActive = false;
     private int bladeDanceTicks = 0;
     private int bladeDanceBlades = 0;
     private int bladeDanceDamageCooldown = 0;
+
+    private int tempoStacks = 0;
+    private boolean tempoActive = false;
 
     //DASH
     public boolean isDashActive() { return dashActive; }
@@ -60,6 +65,22 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         if (bladeDanceBlades > 0) {
             bladeDanceBlades--;
         }
+    }
+
+    //TEMPO
+    public int getTempoStacks() { return tempoStacks; }
+    public void setTempoStacks(int stacks) { this.tempoStacks = stacks; }
+
+    public boolean isTempoActive() { return tempoActive; }
+    public void setTempoActive(boolean active) { this.tempoActive = active; }
+
+    public void addTempoStack() {
+        this.tempoStacks++;
+    }
+
+    public void resetTempo() {
+        this.tempoStacks = 0;
+        this.tempoActive = false;
     }
 
     public PlayerRPGData() {
@@ -127,6 +148,9 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         nbt.putInt("blade_dance_ticks", bladeDanceTicks);
         nbt.putInt("blade_dance_blades", bladeDanceBlades);
 
+        nbt.putInt("tempo_stacks", tempoStacks);
+        nbt.putBoolean("tempo_active", tempoActive);
+
         // Save cooldowns
         CompoundTag cooldownsTag = new CompoundTag();
         for (Map.Entry<String, Integer> entry : abilityCooldowns.entrySet()) {
@@ -167,6 +191,13 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         }
         if (nbt.contains("dash_target")) {
             this.dashTargetDistance = nbt.getDouble("dash_target");
+        }
+
+        if (nbt.contains("tempo_stacks")) {
+            this.tempoStacks = nbt.getInt("tempo_stacks");
+        }
+        if (nbt.contains("tempo_active")) {
+            this.tempoActive = nbt.getBoolean("tempo_active");
         }
 
         // Load cooldowns
