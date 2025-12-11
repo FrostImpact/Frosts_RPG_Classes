@@ -3,6 +3,7 @@ package net.Frostimpact.rpgclasses.networking;
 import net.Frostimpact.rpgclasses.RpgClassesMod;
 import net.Frostimpact.rpgclasses.networking.packet.PacketUseAbility;
 import net.Frostimpact.rpgclasses.networking.packet.PacketSyncMana;
+import net.Frostimpact.rpgclasses.networking.packet.PacketSyncCooldowns;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
@@ -36,6 +37,13 @@ public class ModMessages {
                 PacketSyncMana.TYPE,
                 PacketSyncMana.STREAM_CODEC,
                 PacketSyncMana::handle
+        );
+
+        // 3. Register PacketSyncCooldowns (Server -> Client)
+        registrar.playToClient(
+                PacketSyncCooldowns.TYPE,
+                PacketSyncCooldowns.STREAM_CODEC,
+                PacketSyncCooldowns::handle
         );
     }
 

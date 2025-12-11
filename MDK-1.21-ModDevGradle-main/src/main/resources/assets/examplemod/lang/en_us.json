@@ -1,5 +1,9 @@
 {
   "itemGroup.examplemod": "Example Mod Tab",
   "block.examplemod.example_block": "Example Block",
-  "item.examplemod.example_item": "Example Item"
+  "item.examplemod.example_item": "Example Item",
+
+  "key.category.rpgclasses": "RPG Classes",
+  "key.rpgclasses.dash": "Dash Ability",
+  "key.rpgclasses.blade_dance": "Blade Dance Ability"
 }

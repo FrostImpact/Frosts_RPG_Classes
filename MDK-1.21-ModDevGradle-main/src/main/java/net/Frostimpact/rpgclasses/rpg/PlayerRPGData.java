@@ -134,6 +134,14 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         abilityCooldowns.entrySet().removeIf(entry -> entry.getValue() <= 0);
     }
 
+    public void clearAllCooldowns() {
+        abilityCooldowns.clear();
+    }
+
+    public Map<String, Integer> getAllCooldowns() {
+        return new HashMap<>(abilityCooldowns);
+    }
+
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
 
@@ -209,8 +217,4 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
             }
         }
     }
-
-
-
-
 }

@@ -1,6 +1,6 @@
 package net.Frostimpact.rpgclasses.ability;
 
-import net.Frostimpact.rpgclasses.ability.BLADEDANCER.BladeDanceAbility;
+import net.Frostimpact.rpgclasses.ability.BLADEDANCER.BLADE_DANCE.BladeDanceAbility;
 import net.Frostimpact.rpgclasses.ability.BLADEDANCER.DashAbility;
 
 import java.util.HashMap;

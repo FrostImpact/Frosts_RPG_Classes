@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.minecraft.world.entity.Display;
+
 
 public class ServerEvents {
 
@@ -74,7 +74,7 @@ public class ServerEvents {
                         rpg.setBladeDanceDamageCooldown(5);
                     }
 
-                // Update sword positions every tick
+                    // Update sword positions every tick
                     if (!rpg.getBladeDanceSwordIds().isEmpty()) {
                         double angle = (player.level().getGameTime() * 0.15) % (2 * Math.PI);
                         int swordIndex = 0;
@@ -135,19 +135,26 @@ public class ServerEvents {
                     }
                 }
 
-                // --- SEND ACTIONBAR STATUS EVERY 5 TICKS (4 times per second) ---
+                // --- SEND ACTIONBAR STATUS AND SYNC COOLDOWNS EVERY 5 TICKS (4 times per second) ---
                 if (player.level().getGameTime() % 5 == 0) {
                     int currentMana = rpg.getMana();
                     int maxMana = rpg.getMaxMana();
 
-                    // Build the custom status string
+                    // Build the custom status string for action bar
                     String status = String.format("§bMANA: §f%d / %d §7| §cHP: §f%d / %d §7| §6CLASS: §f%s",
                             currentMana, maxMana,
                             (int)player.getHealth(), (int)player.getMaxHealth(),
                             rpg.getCurrentClass());
 
-                    // Send the packet to this specific player
+                    // Send the action bar packet
                     ModMessages.sendToPlayer(new PacketSyncMana(status), player);
+
+                    // Send cooldown sync packet
+                    ModMessages.sendToPlayer(new net.Frostimpact.rpgclasses.networking.packet.PacketSyncCooldowns(
+                            rpg.getAllCooldowns(),
+                            currentMana,
+                            maxMana
+                    ), player);
                 }
             }
         }

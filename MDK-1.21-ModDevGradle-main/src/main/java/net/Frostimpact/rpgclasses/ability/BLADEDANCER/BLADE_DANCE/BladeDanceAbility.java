@@ -1,4 +1,4 @@
-package net.Frostimpact.rpgclasses.ability.BLADEDANCER;
+package net.Frostimpact.rpgclasses.ability.BLADEDANCER.BLADE_DANCE;
 
 import net.Frostimpact.rpgclasses.ability.Ability;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;

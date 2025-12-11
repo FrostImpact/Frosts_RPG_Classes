@@ -49,12 +49,12 @@ public class PacketUseAbility implements CustomPacketPayload {
 
                 // Check if player can use it
                 if (!ability.canUse(rpgData)) {
-                    if (rpgData.getAbilityCooldown(ability.getId()) > 0) {
-                        int secondsLeft = (rpgData.getAbilityCooldown(ability.getId()) + 19) / 20;
-                        player.sendSystemMessage(Component.literal("§c" + ability.getName() + " on cooldown! (" + secondsLeft + "s)"));
-                    } else if (rpgData.getMana() < ability.getManaCost()) {
-                        player.sendSystemMessage(Component.literal("§cNot enough mana! Need " + ability.getManaCost()));
-                    }
+                    //if (rpgData.getAbilityCooldown(ability.getId()) > 0) {
+                        //int secondsLeft = (rpgData.getAbilityCooldown(ability.getId()) + 19) / 20;
+                        //player.sendSystemMessage(Component.literal("§c" + ability.getName() + " on cooldown! (" + secondsLeft + "s)"));
+                    //} else if (rpgData.getMana() < ability.getManaCost()) {
+                        //player.sendSystemMessage(Component.literal("§cNot enough mana! Need " + ability.getManaCost()));
+                    //}
                     return;
                 }
 
@@ -68,4 +68,3 @@ public class PacketUseAbility implements CustomPacketPayload {
         });
     }
 }
-
