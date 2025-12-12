@@ -1,6 +1,16 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
+
+        maven {
+            name = "NeoForge"
+            url = "https://maven.neoforged.net/"
+        }
+
+        maven {
+            name = "Sinytra"
+            url = "https://mvnrepository.com/artifact/org.sinytra.forgified-fabric-api"
+        }
     }
 }
 
