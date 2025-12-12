@@ -18,7 +18,22 @@ version = mod_version
 group = mod_group_id
 
 repositories {
-    // Add here additional repositories if required by some of the dependencies below.
+    mavenCentral()
+
+    // The Modrinth Maven we added earlier (Keep this!)
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+
+    // Add the Lagrange Dynamics Maven Repository (Ldilb source)
 }
 
 base {
@@ -112,6 +127,9 @@ configurations {
 }
 
 dependencies {
+
+    implementation "maven.modrinth:photon-editor:mc1.21.1-2.0.4-neoforge"
+    implementation "maven.modrinth:ldlib2:mc1.21.1-2.0.4-neoforge"
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
