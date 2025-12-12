@@ -232,10 +232,16 @@ public class JuggernautHandler {
         }
     }
 
-    // === HELPER METHOD FOR CRUSH IMPACT ===
+// Replace the performCrushImpact method in JuggernautHandler.java with this:
+
+    // Replace the performCrushImpact method in JuggernautHandler.java with this:
+
     private static void performCrushImpact(ServerPlayer player, ServerLevel level, boolean isPowered) {
         double radius = 5.0;
         float damage = isPowered ? 10.0f : 6.0f;
+        double centerX = player.getX();
+        double centerY = player.getY();
+        double centerZ = player.getZ();
 
         // 1. DAMAGE ENEMIES
         level.getEntitiesOfClass(
@@ -250,52 +256,120 @@ public class JuggernautHandler {
             }
         });
 
-        // 2. CENTRAL EXPLOSION
-        //level.sendParticles(
-        //ParticleTypes.EXPLOSION_EMITTER, // Huge explosion visual
-        //player.getX(), player.getY(), player.getZ(),
-        //1, 0, 0, 0, 0
-        //);
+        // 2. MASSIVE EXPLOSION with dust cloud
+        level.sendParticles(
+                ParticleTypes.EXPLOSION_EMITTER,
+                centerX, centerY, centerZ,
+                1, 0, 0, 0, 0
+        );
 
-        // 3. RADIATING CRIT SHOCKWAVE
-        // Launches particles outward from center
-        int waveParticles = 150;
-        for (int i = 0; i < waveParticles; i++) {
-            double angle = (2 * Math.PI * i) / waveParticles;
+        // Ground dust cloud
+        level.sendParticles(
+                ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                centerX, centerY + 0.1, centerZ,
+                50, 2.5, 0.5, 2.5, 0.05
+        );
 
-            // Start at player feet
-            double startX = player.getX();
-            double startZ = player.getZ();
+        // 3. EXPANDING SHOCKWAVE - Multiple waves for depth
+        int numWaves = isPowered ? 5 : 3;
+        for (int wave = 0; wave < numWaves; wave++) {
+            double waveRadius = radius * (wave + 1) / numWaves;
+            int particlesPerWave = (int)(80 * (wave + 1) / numWaves);
 
-            // High velocity to radiate outward quickly
-            double velocityX = Math.cos(angle) * 1.5; // Fast speed
-            double velocityZ = Math.sin(angle) * 1.5;
+            for (int i = 0; i < particlesPerWave; i++) {
+                double angle = (2 * Math.PI * i) / particlesPerWave;
+                double x = centerX + Math.cos(angle) * waveRadius;
+                double z = centerZ + Math.sin(angle) * waveRadius;
 
+                // Ground cracks
+                level.sendParticles(
+                        ParticleTypes.CRIT,
+                        x, centerY + 0.1, z,
+                        2, 0.1, 0, 0.1, 0.1
+                );
+
+                // Debris flying outward
+                if (i % 3 == 0) {
+                    level.sendParticles(
+                            ParticleTypes.POOF,
+                            x * 0.7, centerY + 0.3, z * 0.7,
+                            3,
+                            Math.cos(angle) * 0.3, 0.2, Math.sin(angle) * 0.3,
+                            0.5
+                    );
+                }
+            }
+        }
+
+        // 4. GROUND RUPTURE - Vertical debris
+        for (int i = 0; i < 40; i++) {
+            double angle = Math.random() * 2 * Math.PI;
+            double dist = Math.random() * radius;
+            double x = centerX + Math.cos(angle) * dist;
+            double z = centerZ + Math.sin(angle) * dist;
+
+            // Chunks of ground flying up
             level.sendParticles(
-                    ParticleTypes.CRIT,
-                    startX, player.getY() + 0.1, startZ,
-                    0, // Count 0 for velocity control
-                    velocityX, 0.05, velocityZ, // XYZ Velocity (0.05 Y for slight lift)
+                    ParticleTypes.LARGE_SMOKE,
+                    x, centerY, z,
+                    0,
+                    (Math.random() - 0.5) * 0.3,
+                    Math.random() * 0.8 + 0.4,
+                    (Math.random() - 0.5) * 0.3,
                     1.0
             );
         }
 
-        // 4. STATIC EDGE RING (The "End" of the AOE)
-        // Creates a solid ring exactly at the max radius so players see the limit
-        int ringParticles = 100;
-        for (int i = 0; i < ringParticles; i++) {
-            double angle = (2 * Math.PI * i) / ringParticles;
-            double ringX = player.getX() + Math.cos(angle) * radius;
-            double ringZ = player.getZ() + Math.sin(angle) * radius;
+        // 5. POWERED MODE - Extra epic effects
+        if (isPowered) {
+            // Lightning strikes
+            for (int i = 0; i < 3; i++) {
+                double angle = (2 * Math.PI * i) / 3;
+                double x = centerX + Math.cos(angle) * (radius * 0.7);
+                double z = centerZ + Math.sin(angle) * (radius * 0.7);
 
-            level.sendParticles(
-                    ParticleTypes.CRIT, // Matching particle type
-                    ringX, player.getY() + 0.1, ringZ,
-                    1, 0, 0, 0, 0 // No velocity, just sits there
-            );
+                // Vertical lightning bolt
+                for (int j = 0; j < 20; j++) {
+                    level.sendParticles(
+                            ParticleTypes.ELECTRIC_SPARK,
+                            x, centerY + j * 0.2, z,
+                            2, 0.1, 0, 0.1, 0
+                    );
+                }
+            }
+
+            // Energy rings expanding outward
+            for (int ring = 0; ring < 3; ring++) {
+                double ringRadius = radius * (ring + 1) / 3;
+                int particlesInRing = 60;
+
+                for (int i = 0; i < particlesInRing; i++) {
+                    double angle = (2 * Math.PI * i) / particlesInRing;
+                    double x = centerX + Math.cos(angle) * ringRadius;
+                    double z = centerZ + Math.sin(angle) * ringRadius;
+
+                    level.sendParticles(
+                            ParticleTypes.SOUL_FIRE_FLAME,
+                            x, centerY + 0.5 + ring * 0.3, z,
+                            1, 0, 0, 0, 0
+                    );
+                }
+            }
         }
 
+        // 6. CRATER EDGE - Static ring marking impact zone
+        int edgeParticles = 100;
+        for (int i = 0; i < edgeParticles; i++) {
+            double angle = (2 * Math.PI * i) / edgeParticles;
+            double x = centerX + Math.cos(angle) * radius;
+            double z = centerZ + Math.sin(angle) * radius;
 
+            level.sendParticles(
+                    ParticleTypes.ASH,
+                    x, centerY + 0.05, z,
+                    2, 0.05, 0, 0.05, 0
+            );
+        }
     }
 
     @SubscribeEvent
