@@ -71,4 +71,37 @@ public class KeyBinding {
             InputConstants.KEY_Z,
             "key.category.rpgclasses"
     );
+
+    // MANAFORGE Keys
+    public static final KeyMapping MAGIC_MISSILE_KEY = new KeyMapping(
+            "key.rpgclasses.magic_missile",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_V,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping SURGE_KEY = new KeyMapping(
+            "key.rpgclasses.surge",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_C,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping OPEN_RIFT_KEY = new KeyMapping(
+            "key.rpgclasses.open_rift",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_X,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping COALESCENCE_KEY = new KeyMapping(
+            "key.rpgclasses.coalescence",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_Z,
+            "key.category.rpgclasses"
+    );
 }

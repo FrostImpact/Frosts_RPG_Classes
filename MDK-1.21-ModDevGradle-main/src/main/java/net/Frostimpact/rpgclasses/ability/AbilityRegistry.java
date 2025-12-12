@@ -8,6 +8,10 @@ import net.Frostimpact.rpgclasses.ability.JUGGERNAUT.SwapAbility;
 import net.Frostimpact.rpgclasses.ability.JUGGERNAUT.CrushAbility;
 import net.Frostimpact.rpgclasses.ability.JUGGERNAUT.FortifyAbility;
 import net.Frostimpact.rpgclasses.ability.JUGGERNAUT.LeapAbility;
+import net.Frostimpact.rpgclasses.ability.MANAFORGE.MagicMissileAbility;
+import net.Frostimpact.rpgclasses.ability.MANAFORGE.SurgeAbility;
+import net.Frostimpact.rpgclasses.ability.MANAFORGE.OpenRiftAbility;
+import net.Frostimpact.rpgclasses.ability.MANAFORGE.CoalescenceAbility;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +32,12 @@ public class AbilityRegistry {
         register(new CrushAbility());
         register(new FortifyAbility());
         register(new LeapAbility());
+
+        // MANAFORGE Abilities
+        register(new MagicMissileAbility());
+        register(new SurgeAbility());
+        register(new OpenRiftAbility());
+        register(new CoalescenceAbility());
     }
 
     private static void register(Ability ability) {

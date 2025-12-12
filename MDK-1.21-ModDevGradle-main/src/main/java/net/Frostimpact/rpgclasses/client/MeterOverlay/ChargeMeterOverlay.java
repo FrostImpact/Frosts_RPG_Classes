@@ -1,4 +1,4 @@
-package net.Frostimpact.rpgclasses.client;
+package net.Frostimpact.rpgclasses.client.MeterOverlay;
 
 import net.Frostimpact.rpgclasses.RpgClassesMod;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;

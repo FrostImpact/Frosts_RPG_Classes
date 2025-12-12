@@ -1,4 +1,4 @@
-package net.Frostimpact.rpgclasses.client;
+package net.Frostimpact.rpgclasses.client.MeterOverlay;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.Frostimpact.rpgclasses.RpgClassesMod;

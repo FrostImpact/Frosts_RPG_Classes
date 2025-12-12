@@ -9,17 +9,23 @@ public class AbilityDatabase {
 
     public static void registerAll() {
 
-        //BLADEDANCER
+        // BLADEDANCER
         register("dash", new AbilityStats("Dash", 5, 15));
         register("blade_dance", new AbilityStats("Blade Dance", 12, 35));
         register("parry", new AbilityStats("Parry", 6, 15));
         register("blade_waltz", new AbilityStats("Blade Waltz", 30, 50));
 
-        //JUGGERNAUT
+        // JUGGERNAUT
         register("swap", new AbilityStats("Swap", 3, 10));
         register("crush", new AbilityStats("Crush", 5, 25));
         register("fortify", new AbilityStats("Fortify", 10, 25));
         register("leap", new AbilityStats("Leap", 12, 35));
+
+        // MANAFORGE
+        register("magic_missile", new AbilityStats("Magic Missile", 2, 10));
+        register("surge", new AbilityStats("Surge", 20, 40));
+        register("open_rift", new AbilityStats("Open Rift", 15, 35));
+        register("coalescence", new AbilityStats("Coalescence", 25, 30));
     }
 
     private static void register(String id, AbilityStats stats) {

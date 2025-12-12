@@ -63,6 +63,25 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     private boolean crushActive = false;
     private boolean crushPowered = false;
 
+    // MANAFORGE - ACCUMULATION PASSIVE
+    private int manaforgeArcana = 0;
+    private int manaforgeLastAttackTick = 0;
+
+    // MANAFORGE - SURGE
+    private boolean surgeActive = false;
+    private int surgeTicks = 0;
+    private int surgeChargeTime = 0;
+
+    // MANAFORGE - OPEN RIFT
+    private boolean riftActive = false;
+    private int riftTicks = 0;
+    private Vec3 riftPosition = Vec3.ZERO;
+
+    // MANAFORGE - COALESCENCE
+    private boolean coalescenceActive = false;
+    private int coalescenceTicks = 0;
+    private float coalescenceStoredDamage = 0;
+
     //DASH
     public boolean isDashActive() {
         return dashActive;
@@ -411,6 +430,98 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         return new HashMap<>(abilityCooldowns);
     }
 
+    // ACCUMULATION
+    public int getManaforgeArcana() {
+        return manaforgeArcana;
+    }
+
+    public void setManaforgeArcana(int arcana) {
+        this.manaforgeArcana = Math.max(0, Math.min(arcana, 100));
+    }
+
+    public int getManaforgeLastAttackTick() {
+        return manaforgeLastAttackTick;
+    }
+
+    public void setManaforgeLastAttackTick(int tick) {
+        this.manaforgeLastAttackTick = tick;
+    }
+
+    // SURGE
+    public boolean isSurgeActive() {
+        return surgeActive;
+    }
+
+    public void setSurgeActive(boolean active) {
+        this.surgeActive = active;
+    }
+
+    public int getSurgeTicks() {
+        return surgeTicks;
+    }
+
+    public void setSurgeTicks(int ticks) {
+        this.surgeTicks = ticks;
+    }
+
+    public int getSurgeChargeTime() {
+        return surgeChargeTime;
+    }
+
+    public void setSurgeChargeTime(int time) {
+        this.surgeChargeTime = time;
+    }
+
+    // RIFT
+    public boolean isRiftActive() {
+        return riftActive;
+    }
+
+    public void setRiftActive(boolean active) {
+        this.riftActive = active;
+    }
+
+    public int getRiftTicks() {
+        return riftTicks;
+    }
+
+    public void setRiftTicks(int ticks) {
+        this.riftTicks = ticks;
+    }
+
+    public Vec3 getRiftPosition() {
+        return riftPosition;
+    }
+
+    public void setRiftPosition(Vec3 pos) {
+        this.riftPosition = pos;
+    }
+
+    // COALESCENCE
+    public boolean isCoalescenceActive() {
+        return coalescenceActive;
+    }
+
+    public void setCoalescenceActive(boolean active) {
+        this.coalescenceActive = active;
+    }
+
+    public int getCoalescenceTicks() {
+        return coalescenceTicks;
+    }
+
+    public void setCoalescenceTicks(int ticks) {
+        this.coalescenceTicks = ticks;
+    }
+
+    public float getCoalescenceStoredDamage() {
+        return coalescenceStoredDamage;
+    }
+
+    public void setCoalescenceStoredDamage(float damage) {
+        this.coalescenceStoredDamage = damage;
+    }
+
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
 
@@ -453,6 +564,23 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         nbt.putBoolean("crush_active", crushActive);
         nbt.putBoolean("crush_powered", crushPowered);
 
+        nbt.putInt("manaforge_arcana", manaforgeArcana);
+        nbt.putInt("manaforge_last_attack", manaforgeLastAttackTick);
+
+        nbt.putBoolean("surge_active", surgeActive);
+        nbt.putInt("surge_ticks", surgeTicks);
+        nbt.putInt("surge_charge_time", surgeChargeTime);
+
+        nbt.putBoolean("rift_active", riftActive);
+        nbt.putInt("rift_ticks", riftTicks);
+        nbt.putDouble("rift_x", riftPosition.x);
+        nbt.putDouble("rift_y", riftPosition.y);
+        nbt.putDouble("rift_z", riftPosition.z);
+
+        nbt.putBoolean("coalescence_active", coalescenceActive);
+        nbt.putInt("coalescence_ticks", coalescenceTicks);
+        nbt.putFloat("coalescence_stored", coalescenceStoredDamage);
+
         // Save cooldowns
         CompoundTag cooldownsTag = new CompoundTag();
         for (Map.Entry<String, Integer> entry : abilityCooldowns.entrySet()) {
@@ -461,6 +589,8 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         nbt.put("cooldowns", cooldownsTag);
 
         return nbt;
+
+
     }
 
     @Override
@@ -559,6 +689,46 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
             this.crushPowered = nbt.getBoolean("crush_powered");
         }
 
+        if (nbt.contains("manaforge_arcana")) {
+            this.manaforgeArcana = nbt.getInt("manaforge_arcana");
+        }
+        if (nbt.contains("manaforge_last_attack")) {
+            this.manaforgeLastAttackTick = nbt.getInt("manaforge_last_attack");
+        }
+
+        if (nbt.contains("surge_active")) {
+            this.surgeActive = nbt.getBoolean("surge_active");
+        }
+        if (nbt.contains("surge_ticks")) {
+            this.surgeTicks = nbt.getInt("surge_ticks");
+        }
+        if (nbt.contains("surge_charge_time")) {
+            this.surgeChargeTime = nbt.getInt("surge_charge_time");
+        }
+
+        if (nbt.contains("rift_active")) {
+            this.riftActive = nbt.getBoolean("rift_active");
+        }
+        if (nbt.contains("rift_ticks")) {
+            this.riftTicks = nbt.getInt("rift_ticks");
+        }
+        if (nbt.contains("rift_x")) {
+            double x = nbt.getDouble("rift_x");
+            double y = nbt.getDouble("rift_y");
+            double z = nbt.getDouble("rift_z");
+            this.riftPosition = new Vec3(x, y, z);
+        }
+
+        if (nbt.contains("coalescence_active")) {
+            this.coalescenceActive = nbt.getBoolean("coalescence_active");
+        }
+        if (nbt.contains("coalescence_ticks")) {
+            this.coalescenceTicks = nbt.getInt("coalescence_ticks");
+        }
+        if (nbt.contains("coalescence_stored")) {
+            this.coalescenceStoredDamage = nbt.getFloat("coalescence_stored");
+        }
+
         // Load cooldowns
         if (nbt.contains("cooldowns")) {
             CompoundTag cooldownsTag = nbt.getCompound("cooldowns");
@@ -567,5 +737,7 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
                 abilityCooldowns.put(key, cooldownsTag.getInt(key));
             }
         }
+
     }
+
 }

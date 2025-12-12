@@ -13,5 +13,10 @@
   "key.rpgclasses.swap": "Swap Mode",
   "key.rpgclasses.crush": "Crush",
   "key.rpgclasses.fortify": "Fortify",
-  "key.rpgclasses.leap": "Leap"
+  "key.rpgclasses.leap": "Leap",
+
+  "key.rpgclasses.magic_missile": "Magic Missile",
+  "key.rpgclasses.surge": "Surge",
+  "key.rpgclasses.open_rift": "Open Rift",
+  "key.rpgclasses.coalescence": "Coalescence"
 }

@@ -34,6 +34,9 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
         CLASS_ABILITIES.put("JUGGERNAUT", new String[]{
                 "swap", "crush", "fortify", "leap"
         });
+        CLASS_ABILITIES.put("MANAFORGE", new String[]{
+                "magic_missile", "surge", "open_rift", "coalescence"
+        });
     }
 
     private static final int ICON_SIZE = 16;
@@ -58,16 +61,8 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
         PlayerRPGData rpg = mc.player.getData(ModAttachments.PLAYER_RPG);
         String currentClass = rpg.getCurrentClass();
 
-        // Get abilities for current class
         String[] trackedAbilities = CLASS_ABILITIES.get(currentClass);
-        if (trackedAbilities == null) {
-            // Debug - draw a red error box if class not found
-            int screenWidth = mc.getWindow().getGuiScaledWidth();
-            int screenHeight = mc.getWindow().getGuiScaledHeight();
-            graphics.fill(screenWidth / 2 - 50, screenHeight - 40, screenWidth / 2 + 50, screenHeight - 20, 0x80FF0000);
-            graphics.drawString(mc.font, "CLASS: " + currentClass, screenWidth / 2 - 45, screenHeight - 35, 0xFFFFFFFF, false);
-            return;
-        }
+        if (trackedAbilities == null) return;
 
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
@@ -143,6 +138,16 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
                 case "crush" -> new ItemStack(Items.IRON_AXE);
                 case "fortify" -> new ItemStack(Items.IRON_CHESTPLATE);
                 case "leap" -> new ItemStack(Items.LEATHER_BOOTS);
+                default -> new ItemStack(Items.BARRIER);
+            };
+        }
+
+        if (className.equals("MANAFORGE")) {
+            return switch (abilityId) {
+                case "magic_missile" -> new ItemStack(Items.AMETHYST_SHARD);
+                case "surge" -> new ItemStack(Items.DRAGON_BREATH);
+                case "open_rift" -> new ItemStack(Items.ENDER_PEARL);
+                case "coalescence" -> new ItemStack(Items.TOTEM_OF_UNDYING);
                 default -> new ItemStack(Items.BARRIER);
             };
         }

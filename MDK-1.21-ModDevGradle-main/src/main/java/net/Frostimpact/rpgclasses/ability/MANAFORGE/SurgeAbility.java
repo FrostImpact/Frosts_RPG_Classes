@@ -59,53 +59,32 @@ public class SurgeAbility extends Ability {
         int ticksRemaining = rpgData.getSurgeTicks();
         int totalTicks = rpgData.getSurgeChargeTime();
 
-        // Charging particles - intensify as we get closer
+        // Charging phase
         if (ticksRemaining > 0) {
             rpgData.setSurgeTicks(ticksRemaining - 1);
 
-            // Calculate charge percentage
-            float chargePercent = 1.0f - ((float) ticksRemaining / totalTicks);
+            // Calculate progress (0.0 at start -> 1.0 at finish)
+            float progress = 1.0f - ((float) ticksRemaining / totalTicks);
 
-            // Particle intensity increases with charge
-            int particleCount = (int)(5 + (chargePercent * 20));
+            // --- VISUAL: CONDENSING BEAM ---
+            // Radius starts broad (3.0 blocks) and shrinks to tight (0.2 blocks)
+            double startRadius = 3.0;
+            double endRadius = 0.2;
+            double currentRadius = startRadius - ((startRadius - endRadius) * progress);
 
-            // Swirling energy around player
-            double time = (totalTicks - ticksRemaining) * 0.2;
-            for (int i = 0; i < particleCount; i++) {
-                double angle = time + (i * 2 * Math.PI / particleCount);
-                double radius = 1.5 - (chargePercent * 0.5); // Contracts inward
-                double height = 0.5 + (Math.sin(time * 2) * 0.3);
+            // Render the "ghost" beam tunnel (condensing)
+            renderBeam(player, level, 20.0, currentRadius, false);
 
-                double x = player.getX() + Math.cos(angle) * radius;
-                double y = player.getY() + 1 + height;
-                double z = player.getZ() + Math.sin(angle) * radius;
+            // Player charging particles (keep the swirl around the body)
+            level.sendParticles(ParticleTypes.ENCHANT,
+                    player.getX(), player.getY() + 1.0, player.getZ(),
+                    2, 0.5, 0.5, 0.5, 0.1);
 
-                // Purple energy particles
-                level.sendParticles(
-                        ParticleTypes.WITCH,
-                        x, y, z,
-                        1, 0, 0, 0, 0
-                );
-
-                level.sendParticles(
-                        ParticleTypes.DRAGON_BREATH,
-                        x, y, z,
-                        1, 0, 0, 0, 0
-                );
-            }
-
-            // Central charging effect
-            level.sendParticles(
-                    ParticleTypes.ENCHANT,
-                    player.getX(), player.getY() + 1.5, player.getZ(),
-                    (int)(chargePercent * 5), 0.2, 0.2, 0.2, 0.5
-            );
-
-            // Sound buildup
-            if (ticksRemaining % 10 == 0) {
-                float pitch = 0.8f + (chargePercent * 0.8f);
+            // Sound: Pitch rises as we get closer to firing
+            if (ticksRemaining % 5 == 0) {
+                float pitch = 0.5f + (progress * 1.5f);
                 level.playSound(null, player.blockPosition(),
-                        SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.3f, pitch);
+                        SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.2f, pitch);
             }
 
         } else {
@@ -116,118 +95,118 @@ public class SurgeAbility extends Ability {
     }
 
     private static void fireSurgeBeam(ServerPlayer player, PlayerRPGData rpgData, ServerLevel level) {
-        // Calculate beam direction
-        Vec3 lookVec = player.getLookAngle();
         double beamLength = 20.0;
+        Vec3 lookVec = player.getLookAngle().normalize();
+        Vec3 eyePos = player.getEyePosition();
 
-        // Calculate damage based on charge time
+        // 1. VISUAL: RAPID EXPANSION
+        // We pass 'true' to trigger the explosion particle logic
+        renderBeam(player, level, beamLength, 0, true);
+
+        // 2. CORE BEAM (Bright center line)
+        for (double d = 0; d < beamLength; d += 0.5) {
+            Vec3 pos = eyePos.add(lookVec.scale(d));
+            level.sendParticles(ParticleTypes.END_ROD,
+                    pos.x, pos.y, pos.z,
+                    1, 0, 0, 0, 0);
+        }
+
+        // --- DAMAGE CALCULATION ---
         int chargeTime = rpgData.getSurgeChargeTime();
         float baseDamage = 15.0f;
-        float bonusDamage = (chargeTime - BASE_CHARGE_TIME) * 0.5f; // 0.5 damage per extra tick
+        float bonusDamage = (chargeTime - BASE_CHARGE_TIME) * 0.5f;
         float totalDamage = baseDamage + bonusDamage;
-
-        // Create beam visual effect
-        for (double d = 0; d < beamLength; d += 0.3) {
-            double x = player.getX() + lookVec.x * d;
-            double y = player.getY() + player.getEyeHeight() + lookVec.y * d;
-            double z = player.getZ() + lookVec.z * d;
-
-            // Core beam - bright purple
-            level.sendParticles(
-                    ParticleTypes.DRAGON_BREATH,
-                    x, y, z,
-                    3, 0.2, 0.2, 0.2, 0.01
-            );
-
-            // Outer glow - witch particles
-            level.sendParticles(
-                    ParticleTypes.WITCH,
-                    x, y, z,
-                    2, 0.3, 0.3, 0.3, 0.02
-            );
-
-            // Energy crackle
-            if (Math.random() < 0.3) {
-                level.sendParticles(
-                        ParticleTypes.ELECTRIC_SPARK,
-                        x, y, z,
-                        1, 0.1, 0.1, 0.1, 0.1
-                );
-            }
-
-            // Enchantment sparkles
-            level.sendParticles(
-                    ParticleTypes.ENCHANT,
-                    x, y, z,
-                    1, 0.15, 0.15, 0.15, 0.3
-            );
-        }
 
         // Hit detection along beam
         for (double d = 0; d < beamLength; d += 0.5) {
-            double x = player.getX() + lookVec.x * d;
-            double y = player.getY() + player.getEyeHeight() + lookVec.y * d;
-            double z = player.getZ() + lookVec.z * d;
+            Vec3 hitPos = eyePos.add(lookVec.scale(d));
 
             level.getEntitiesOfClass(
                     net.minecraft.world.entity.LivingEntity.class,
-                    new net.minecraft.world.phys.AABB(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1),
+                    new net.minecraft.world.phys.AABB(
+                            hitPos.x - 1, hitPos.y - 1, hitPos.z - 1,
+                            hitPos.x + 1, hitPos.y + 1, hitPos.z + 1),
                     entity -> entity != player && entity.isAlive()
             ).forEach(entity -> {
                 entity.hurt(player.damageSources().playerAttack(player), totalDamage);
 
-                // Hit impact particles
-                level.sendParticles(
-                        ParticleTypes.EXPLOSION,
+                // Impact visuals
+                level.sendParticles(ParticleTypes.EXPLOSION,
                         entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(),
-                        5, 0.3, 0.3, 0.3, 0.1
-                );
-
-                level.sendParticles(
-                        ParticleTypes.WITCH,
-                        entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(),
-                        10, 0.4, 0.4, 0.4, 0.15
-                );
+                        2, 0.2, 0.2, 0.2, 0.05);
             });
         }
 
-        // Explosion at end of beam
-        double endX = player.getX() + lookVec.x * beamLength;
-        double endY = player.getY() + player.getEyeHeight() + lookVec.y * beamLength;
-        double endZ = player.getZ() + lookVec.z * beamLength;
-
-        level.sendParticles(
-                ParticleTypes.EXPLOSION_EMITTER,
-                endX, endY, endZ,
-                1, 0, 0, 0, 0
-        );
-
-        // Purple explosion wave
-        for (int i = 0; i < 50; i++) {
-            double angle = Math.random() * 2 * Math.PI;
-            double pitch = (Math.random() - 0.5) * Math.PI;
-            double dist = Math.random() * 3;
-
-            double xOff = Math.cos(angle) * Math.cos(pitch) * dist;
-            double yOff = Math.sin(pitch) * dist;
-            double zOff = Math.sin(angle) * Math.cos(pitch) * dist;
-
-            level.sendParticles(
-                    ParticleTypes.DRAGON_BREATH,
-                    endX, endY, endZ,
-                    0, xOff * 0.3, yOff * 0.3, zOff * 0.3, 0.5
-            );
-        }
+        // Final explosion at end of beam
+        Vec3 endPos = eyePos.add(lookVec.scale(beamLength));
+        level.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
+                endPos.x, endPos.y, endPos.z, 1, 0, 0, 0, 0);
 
         // Sounds
         level.playSound(null, player.blockPosition(),
                 SoundEvents.DRAGON_FIREBALL_EXPLODE, SoundSource.PLAYERS, 2.0f, 0.8f);
-
         level.playSound(null, player.blockPosition(),
                 SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.0f, 1.5f);
 
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                "§5✦ SURGE! §c" + String.format("%.1f", totalDamage) + " damage"
+                "§5✦ SURGE FIRED! §c" + String.format("%.1f", totalDamage) + " damage"
         ));
+    }
+
+    /**
+     * Renders the beam particles.
+     * @param radius The distance from the center of the beam to spawn particles.
+     * @param expand If true, particles shoot outwards with velocity. If false, they are static/condensing.
+     */
+    private static void renderBeam(ServerPlayer player, ServerLevel level, double length, double radius, boolean expand) {
+        Vec3 eyePos = player.getEyePosition();
+        Vec3 lookVec = player.getLookAngle().normalize();
+
+        // --- Vector Math: Create a coordinate system relative to the look direction ---
+        // This ensures the rings are always perpendicular to the beam, even if looking up/down.
+        Vec3 arbitraryUp = Math.abs(lookVec.y) > 0.95 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0);
+        Vec3 right = lookVec.cross(arbitraryUp).normalize();
+        Vec3 relativeUp = right.cross(lookVec).normalize();
+
+        // Optimization: larger steps during charge (static) to save FPS, detailed steps during fire (expand)
+        double stepSize = expand ? 0.5 : 1.0;
+
+        for (double d = 0; d < length; d += stepSize) {
+            Vec3 centerPos = eyePos.add(lookVec.scale(d));
+
+            // Draw the ring
+            int particleCount = expand ? 8 : 4; // More particles for the explosion
+
+            for (int i = 0; i < particleCount; i++) {
+                double angle = (2 * Math.PI / particleCount) * i;
+
+                // Calculate offset on the perpendicular plane
+                // We add a slight twist (d * 0.2) to make the tunnel look spiraled
+                double twist = expand ? 0 : (d * 0.2);
+                double finalAngle = angle + twist;
+
+                double xOff = (right.x * Math.cos(finalAngle)) + (relativeUp.x * Math.sin(finalAngle));
+                double yOff = (right.y * Math.cos(finalAngle)) + (relativeUp.y * Math.sin(finalAngle));
+                double zOff = (right.z * Math.cos(finalAngle)) + (relativeUp.z * Math.sin(finalAngle));
+
+                if (expand) {
+                    // EXPANSION: Spawn at center, blast OUTWARDS using velocity
+                    level.sendParticles(ParticleTypes.DRAGON_BREATH,
+                            centerPos.x, centerPos.y, centerPos.z,
+                            0, // Count 0 activates Velocity Mode
+                            xOff * 0.3, yOff * 0.3, zOff * 0.3, // Velocity vector
+                            0.5 // Speed
+                    );
+                } else {
+                    // CONDENSING: Spawn at Radius, stay static (creates the tunnel)
+                    level.sendParticles(ParticleTypes.WITCH,
+                            centerPos.x + (xOff * radius),
+                            centerPos.y + (yOff * radius),
+                            centerPos.z + (zOff * radius),
+                            1, 0, 0, 0, 0
+                    );
+                }
+            }
+        }
     }
 }
