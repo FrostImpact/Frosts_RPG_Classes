@@ -19,7 +19,7 @@ public class MagicMissileAbility extends Ability {
     public boolean execute(ServerPlayer player, PlayerRPGData rpgData) {
         // Get ARCANA for bonus projectiles
         int arcana = rpgData.getManaforgeArcana();
-        int bonusProjectiles = arcana / 25; // 1 extra per 25 ARCANA (max 4 extra)
+        int bonusProjectiles = arcana / 25; // 1 extra per 25 ARCANA (max 4 extra at 100)
         int totalProjectiles = 1 + bonusProjectiles;
 
         // Spawn projectiles
@@ -30,7 +30,7 @@ public class MagicMissileAbility extends Ability {
             spawnMissile(player, lookVec, 0);
         } else {
             // Multiple projectiles - spread pattern
-            double spreadAngle = 0.15; // Radians
+            double spreadAngle = 0.15; // Radians (about 8.6 degrees)
             double angleStep = (spreadAngle * 2) / (totalProjectiles - 1);
 
             for (int i = 0; i < totalProjectiles; i++) {
@@ -42,6 +42,13 @@ public class MagicMissileAbility extends Ability {
         // Consume ARCANA if not in COALESCENCE
         if (!rpgData.isCoalescenceActive() && bonusProjectiles > 0) {
             rpgData.setManaforgeArcana(0);
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "§5✦ " + totalProjectiles + " missiles! §7ARCANA consumed"
+            ));
+        } else if (totalProjectiles > 1) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "§5✦ " + totalProjectiles + " missiles!"
+            ));
         }
 
         // Sound effect
@@ -70,7 +77,7 @@ public class MagicMissileAbility extends Ability {
             ).normalize();
         }
 
-        // Spawn position (slightly in front of player)
+        // Spawn position (slightly in front of player at eye height)
         Vec3 spawnPos = player.position()
                 .add(0, player.getEyeHeight() - 0.1, 0)
                 .add(direction.scale(0.5));
@@ -83,7 +90,13 @@ public class MagicMissileAbility extends Ability {
         );
 
         missile.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
-        missile.shoot(direction.x, direction.y, direction.z, 1.5f, 0);
+
+        // Set the velocity directly instead of using shoot()
+        float speed = 1.5f;
+        missile.setDeltaMovement(direction.scale(speed));
+
+        // Mark for physics update
+        missile.hurtMarked = true;
 
         player.level().addFreshEntity(missile);
     }

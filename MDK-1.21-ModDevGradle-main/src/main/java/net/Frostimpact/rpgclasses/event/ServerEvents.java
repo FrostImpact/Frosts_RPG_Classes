@@ -216,7 +216,7 @@ public class ServerEvents {
                     }
                 }
 
-                // Sync every 5 ticks
+                // Sync every 5 ticks - NOW INCLUDING ARCANA
                 if (player.level().getGameTime() % 5 == 0) {
                     int currentMana = rpg.getMana();
                     int maxMana = rpg.getMaxMana();
@@ -228,13 +228,15 @@ public class ServerEvents {
 
                     ModMessages.sendToPlayer(new PacketSyncMana(status), player);
 
+                    // NEW: Include arcana in the sync packet
                     ModMessages.sendToPlayer(new net.Frostimpact.rpgclasses.networking.packet.PacketSyncCooldowns(
                             rpg.getAllCooldowns(),
                             currentMana,
                             maxMana,
                             rpg.getJuggernautCharge(),
                             rpg.getJuggernautMaxCharge(),
-                            rpg.isJuggernautShieldMode()
+                            rpg.isJuggernautShieldMode(),
+                            rpg.getManaforgeArcana() // NEW: Pass arcana value
                     ), player);
                 }
             }

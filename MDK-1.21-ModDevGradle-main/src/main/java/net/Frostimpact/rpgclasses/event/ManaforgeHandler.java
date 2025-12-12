@@ -4,6 +4,8 @@ import net.Frostimpact.rpgclasses.RpgClassesMod;
 import net.Frostimpact.rpgclasses.ability.MANAFORGE.SurgeAbility;
 import net.Frostimpact.rpgclasses.ability.MANAFORGE.OpenRiftAbility;
 import net.Frostimpact.rpgclasses.ability.MANAFORGE.CoalescenceAbility;
+import net.Frostimpact.rpgclasses.networking.ModMessages;
+import net.Frostimpact.rpgclasses.networking.packet.PacketSyncCooldowns;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
 import net.minecraft.network.chat.Component;
@@ -104,6 +106,19 @@ public class ManaforgeHandler {
                     );
                 }
             }
+
+            // === SYNC ARCANA MORE FREQUENTLY (Every tick for Manaforge) ===
+            if (level.getGameTime() % 2 == 0) { // Every 2 ticks instead of 5
+                ModMessages.sendToPlayer(new PacketSyncCooldowns(
+                        rpg.getAllCooldowns(),
+                        rpg.getMana(),
+                        rpg.getMaxMana(),
+                        rpg.getJuggernautCharge(),
+                        rpg.getJuggernautMaxCharge(),
+                        rpg.isJuggernautShieldMode(),
+                        rpg.getManaforgeArcana()
+                ), player);
+            }
         }
     }
 
@@ -126,30 +141,43 @@ public class ManaforgeHandler {
                 rpg.setManaforgeLastAttackTick(0);
 
                 // Visual feedback
-                if (newArcana % 10 == 0 || newArcana == 100) {
-                    ServerLevel level = player.serverLevel();
+                ServerLevel level = player.serverLevel();
 
-                    level.sendParticles(
-                            ParticleTypes.DRAGON_BREATH,
-                            player.getX(), player.getY() + 1.5, player.getZ(),
-                            3, 0.2, 0.2, 0.2, 0.05
-                    );
+                level.sendParticles(
+                        ParticleTypes.DRAGON_BREATH,
+                        player.getX(), player.getY() + 1.5, player.getZ(),
+                        3, 0.2, 0.2, 0.2, 0.05
+                );
 
-                    // Sound feedback at milestones
-                    if (newArcana == 100) {
-                        level.playSound(null, player.blockPosition(),
-                                net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP,
-                                net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 2.0f);
+                // Sound feedback at milestones
+                if (newArcana == 100) {
+                    level.playSound(null, player.blockPosition(),
+                            net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP,
+                            net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 2.0f);
 
-                        player.sendSystemMessage(Component.literal(
-                                "§5✦ MAX ARCANA! §7[100/100]"
-                        ));
-                    } else if (newArcana == 50) {
-                        player.sendSystemMessage(Component.literal(
-                                "§5ARCANA: §7[" + newArcana + "/100]"
-                        ));
-                    }
+                    player.sendSystemMessage(Component.literal(
+                            "§5✦ MAX ARCANA! §7[100/100]"
+                    ));
+                } else if (newArcana % 25 == 0) {
+                    level.playSound(null, player.blockPosition(),
+                            net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP,
+                            net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 1.5f);
+
+                    player.sendSystemMessage(Component.literal(
+                            "§5ARCANA: §7[" + newArcana + "/100] §a+" + (newArcana / 25) + " projectiles!"
+                    ));
                 }
+
+                // Force immediate sync after arcana gain
+                ModMessages.sendToPlayer(new PacketSyncCooldowns(
+                        rpg.getAllCooldowns(),
+                        rpg.getMana(),
+                        rpg.getMaxMana(),
+                        rpg.getJuggernautCharge(),
+                        rpg.getJuggernautMaxCharge(),
+                        rpg.isJuggernautShieldMode(),
+                        rpg.getManaforgeArcana()
+                ), player);
             }
         }
     }
@@ -192,6 +220,17 @@ public class ManaforgeHandler {
                 player.sendSystemMessage(Component.literal(
                         "§5✦ " + String.format("%.1f", damage) + " damage absorbed!"
                 ));
+
+                // Force immediate sync
+                ModMessages.sendToPlayer(new PacketSyncCooldowns(
+                        rpg.getAllCooldowns(),
+                        rpg.getMana(),
+                        rpg.getMaxMana(),
+                        rpg.getJuggernautCharge(),
+                        rpg.getJuggernautMaxCharge(),
+                        rpg.isJuggernautShieldMode(),
+                        rpg.getManaforgeArcana()
+                ), player);
             }
         }
     }

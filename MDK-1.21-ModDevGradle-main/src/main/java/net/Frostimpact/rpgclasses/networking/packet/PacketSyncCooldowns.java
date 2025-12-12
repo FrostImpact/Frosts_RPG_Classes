@@ -29,34 +29,41 @@ public class PacketSyncCooldowns implements CustomPacketPayload {
     private final int juggernautCharge;
     private final int juggernautMaxCharge;
     private final boolean isShieldMode;
+    private final int manaforgeArcana;
+
+    private static long lastLogTime = 0;
+    private static int lastLoggedArcana = -1;
 
     public PacketSyncCooldowns(Map<String, Integer> cooldowns, int mana, int maxMana) {
-        this(cooldowns, mana, maxMana, 0, 100, true);
+        this(cooldowns, mana, maxMana, 0, 100, true, 0);
     }
 
-    public PacketSyncCooldowns(Map<String, Integer> cooldowns, int mana, int maxMana, int juggernautCharge, int juggernautMaxCharge, boolean isShieldMode) {
+    public PacketSyncCooldowns(Map<String, Integer> cooldowns, int mana, int maxMana,
+                               int juggernautCharge, int juggernautMaxCharge, boolean isShieldMode) {
+        this(cooldowns, mana, maxMana, juggernautCharge, juggernautMaxCharge, isShieldMode, 0);
+    }
+
+    public PacketSyncCooldowns(Map<String, Integer> cooldowns, int mana, int maxMana,
+                               int juggernautCharge, int juggernautMaxCharge,
+                               boolean isShieldMode, int manaforgeArcana) {
         this.cooldowns = cooldowns;
         this.mana = mana;
         this.maxMana = maxMana;
         this.juggernautCharge = juggernautCharge;
         this.juggernautMaxCharge = juggernautMaxCharge;
         this.isShieldMode = isShieldMode;
+        this.manaforgeArcana = manaforgeArcana;
     }
 
     private static void encode(FriendlyByteBuf buf, PacketSyncCooldowns message) {
-        // Write mana data
         buf.writeInt(message.mana);
         buf.writeInt(message.maxMana);
-
-        // Write juggernaut data
         buf.writeInt(message.juggernautCharge);
         buf.writeInt(message.juggernautMaxCharge);
         buf.writeBoolean(message.isShieldMode);
+        buf.writeInt(message.manaforgeArcana);
 
-        // Write cooldown map size
         buf.writeInt(message.cooldowns.size());
-
-        // Write each cooldown entry
         for (Map.Entry<String, Integer> entry : message.cooldowns.entrySet()) {
             buf.writeUtf(entry.getKey());
             buf.writeInt(entry.getValue());
@@ -64,26 +71,23 @@ public class PacketSyncCooldowns implements CustomPacketPayload {
     }
 
     private static PacketSyncCooldowns decode(FriendlyByteBuf buf) {
-        // Read mana data
         int mana = buf.readInt();
         int maxMana = buf.readInt();
-
-        // Read juggernaut data
         int juggernautCharge = buf.readInt();
         int juggernautMaxCharge = buf.readInt();
         boolean isShieldMode = buf.readBoolean();
+        int manaforgeArcana = buf.readInt();
 
-        // Read cooldown map
         int size = buf.readInt();
         Map<String, Integer> cooldowns = new HashMap<>();
-
         for (int i = 0; i < size; i++) {
             String key = buf.readUtf();
             int value = buf.readInt();
             cooldowns.put(key, value);
         }
 
-        return new PacketSyncCooldowns(cooldowns, mana, maxMana, juggernautCharge, juggernautMaxCharge, isShieldMode);
+        return new PacketSyncCooldowns(cooldowns, mana, maxMana, juggernautCharge,
+                juggernautMaxCharge, isShieldMode, manaforgeArcana);
     }
 
     @Override
@@ -93,22 +97,43 @@ public class PacketSyncCooldowns implements CustomPacketPayload {
 
     public static void handle(PacketSyncCooldowns message, IPayloadContext context) {
         context.enqueueWork(() -> {
-            if (Minecraft.getInstance().player != null) {
-                PlayerRPGData rpg = Minecraft.getInstance().player.getData(ModAttachments.PLAYER_RPG);
+            try {
+                if (Minecraft.getInstance().player != null) {
+                    PlayerRPGData rpg = Minecraft.getInstance().player.getData(ModAttachments.PLAYER_RPG);
 
-                // Update mana
-                rpg.setMana(message.mana);
-                rpg.setMaxMana(message.maxMana);
+                    if (rpg != null) {
+                        // Update mana
+                        rpg.setMana(message.mana);
+                        rpg.setMaxMana(message.maxMana);
 
-                // Update juggernaut data
-                rpg.setJuggernautCharge(message.juggernautCharge);
-                rpg.setJuggernautShieldMode(message.isShieldMode);
+                        // Update juggernaut data
+                        rpg.setJuggernautCharge(message.juggernautCharge);
+                        rpg.setJuggernautShieldMode(message.isShieldMode);
 
-                // Clear and update all cooldowns
-                rpg.clearAllCooldowns();
-                for (Map.Entry<String, Integer> entry : message.cooldowns.entrySet()) {
-                    rpg.setAbilityCooldown(entry.getKey(), entry.getValue());
+                        // Update manaforge arcana
+                        int oldArcana = rpg.getManaforgeArcana();
+                        rpg.setManaforgeArcana(message.manaforgeArcana);
+
+                        // Debug logging - only log when arcana changes or every 5 seconds
+                        long currentTime = System.currentTimeMillis();
+                        if (message.manaforgeArcana != lastLoggedArcana || (currentTime - lastLogTime) > 5000) {
+                            System.out.println("RPG Classes [PACKET]: Received arcana update: " + oldArcana + " -> " + message.manaforgeArcana);
+                            lastLoggedArcana = message.manaforgeArcana;
+                            lastLogTime = currentTime;
+                        }
+
+                        // Clear and update all cooldowns
+                        rpg.clearAllCooldowns();
+                        for (Map.Entry<String, Integer> entry : message.cooldowns.entrySet()) {
+                            rpg.setAbilityCooldown(entry.getKey(), entry.getValue());
+                        }
+                    } else {
+                        System.err.println("RPG Classes [PACKET]: Player RPG data is null!");
+                    }
                 }
+            } catch (Exception e) {
+                System.err.println("RPG Classes: Error handling cooldown sync packet: " + e.getMessage());
+                e.printStackTrace();
             }
         });
     }

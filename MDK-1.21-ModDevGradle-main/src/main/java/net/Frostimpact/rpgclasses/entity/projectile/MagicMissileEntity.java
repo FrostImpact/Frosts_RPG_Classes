@@ -2,7 +2,6 @@ package net.Frostimpact.rpgclasses.entity.projectile;
 
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-//import net.minecraft.network.synched.SynchedEntityData;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -22,134 +21,176 @@ public class MagicMissileEntity extends Projectile {
     private static final float DAMAGE = 8.0f;
     private static final int MAX_LIFETIME = 100; // 5 seconds
     private int tickCount = 0;
+    private boolean hasHit = false;
 
     public MagicMissileEntity(EntityType<? extends MagicMissileEntity> type, Level level) {
         super(type, level);
-        this.noCulling = true; // Always render even if off-screen slightly
+        this.noCulling = true;
     }
 
     public MagicMissileEntity(EntityType<? extends MagicMissileEntity> type, Level level, LivingEntity shooter) {
         this(type, level);
         this.setOwner(shooter);
-        // Start position: Eye height of shooter
         this.setPos(shooter.getX(), shooter.getEyeY() - 0.1, shooter.getZ());
     }
 
-    // --- ESSENTIAL METHODS FOR "PROJECTILE" BASE CLASS ---
-
-    //@Override
-    //protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        // Required by 1.21+, but we don't need any data synced for now.
-    //}
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        // Required override - no synched data needed
+    }
 
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
-        // Save/Load lifetime so missile doesn't reset on server restart
         this.tickCount = tag.getInt("Age");
+        this.hasHit = tag.getBoolean("HasHit");
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
         tag.putInt("Age", this.tickCount);
-    }
-
-    // -----------------------------------------------------
-
-    @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-
+        tag.putBoolean("HasHit", this.hasHit);
     }
 
     @Override
     public void tick() {
         super.tick();
+
+        if (this.hasHit) {
+            this.discard();
+            return;
+        }
+
         this.tickCount++;
 
-        // 1. Check for expiration
+        // Check for expiration
         if (this.tickCount > MAX_LIFETIME) {
             this.discard();
             return;
         }
 
-        // 2. Handle Movement & Collision (Since we aren't using ThrowableProjectile, we do this manually)
+        // Check for hits
         HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
         if (hitResult.getType() != HitResult.Type.MISS) {
             this.onHit(hitResult);
         }
 
         // Apply movement
-        Vec3 currentMovement = this.getDeltaMovement();
-        double nextX = this.getX() + currentMovement.x;
-        double nextY = this.getY() + currentMovement.y;
-        double nextZ = this.getZ() + currentMovement.z;
+        Vec3 movement = this.getDeltaMovement();
+        Vec3 nextPos = this.position().add(movement);
+        this.setPos(nextPos.x, nextPos.y, nextPos.z);
 
-        // Update position
-        this.setPos(nextX, nextY, nextZ);
+        // Update rotation to face direction of travel
+        this.setYRot((float) (Math.atan2(movement.x, movement.z) * (180 / Math.PI)));
+        this.setXRot((float) (Math.atan2(movement.y, Math.sqrt(movement.x * movement.x + movement.z * movement.z)) * (180 / Math.PI)));
 
-        // Keep it flying straight (No gravity logic here keeps it straight)
-        // If you wanted it to slow down (drag), you would multiply currentMovement by 0.99 here.
-
-        // 3. Particles
+        // Spawn particles
         if (this.level() instanceof ServerLevel serverLevel) {
             Vec3 pos = this.position();
 
-            // Primary Trail
-            serverLevel.sendParticles(ParticleTypes.WITCH, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
+            // Primary trail (purple/cyan magic particles)
+            serverLevel.sendParticles(ParticleTypes.WITCH,
+                    pos.x, pos.y, pos.z,
+                    1, 0.05, 0.05, 0.05, 0.01);
 
-            // Secondary Trail
-            serverLevel.sendParticles(ParticleTypes.DRAGON_BREATH, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
+            // Secondary trail (dragon breath for ethereal effect)
+            if (this.tickCount % 2 == 0) {
+                serverLevel.sendParticles(ParticleTypes.DRAGON_BREATH,
+                        pos.x, pos.y, pos.z,
+                        1, 0.05, 0.05, 0.05, 0.005);
+            }
 
-            // Occasional Sparkle
+            // Sparkles
             if (this.tickCount % 4 == 0) {
-                serverLevel.sendParticles(ParticleTypes.ENCHANT, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
+                serverLevel.sendParticles(ParticleTypes.ENCHANT,
+                        pos.x, pos.y, pos.z,
+                        1, 0.1, 0.1, 0.1, 0.02);
             }
         }
     }
 
     @Override
     protected void onHitEntity(EntityHitResult result) {
+        if (this.hasHit) return;
+
         super.onHitEntity(result);
 
         if (!this.level().isClientSide) {
             Entity target = result.getEntity();
             Entity owner = this.getOwner();
 
-            // Safety check: Don't hit yourself immediately
-            if (owner != null && target == owner) return;
+            // Don't hit the owner
+            if (target == owner) return;
 
-            // Deal Damage
-            target.hurt(this.damageSources().magic(), DAMAGE); // Using .magic() source fits the theme better!
+            if (target instanceof LivingEntity livingTarget) {
+                // Deal damage
+                livingTarget.hurt(this.damageSources().magic(), DAMAGE);
 
-            // Particles on Impact
-            if (this.level() instanceof ServerLevel serverLevel) {
-                serverLevel.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.5), target.getZ(), 10, 0.2, 0.2, 0.2, 0.05);
+                // Impact particles
+                if (this.level() instanceof ServerLevel serverLevel) {
+                    serverLevel.sendParticles(ParticleTypes.CRIT,
+                            target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(),
+                            10, 0.2, 0.2, 0.2, 0.1);
+
+                    serverLevel.sendParticles(ParticleTypes.WITCH,
+                            target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(),
+                            5, 0.3, 0.3, 0.3, 0.05);
+                }
             }
+
+            this.hasHit = true;
         }
     }
 
     @Override
     protected void onHit(HitResult result) {
+        if (this.hasHit) return;
+
         super.onHit(result);
 
-        // Stop the missile when it hits anything
         if (!this.level().isClientSide) {
-            // Impact Sound
+            // Impact sound
             this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
                     SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0f, 1.5f);
 
-            // Impact Particles (Explosion style)
+            // Impact particles
             if (this.level() instanceof ServerLevel serverLevel) {
-                serverLevel.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY(), this.getZ(), 15, 0.2, 0.2, 0.2, 0.1);
-                serverLevel.sendParticles(ParticleTypes.FLASH, this.getX(), this.getY(), this.getZ(), 1, 0, 0, 0, 0);
+                serverLevel.sendParticles(ParticleTypes.WITCH,
+                        this.getX(), this.getY(), this.getZ(),
+                        15, 0.2, 0.2, 0.2, 0.1);
+
+                serverLevel.sendParticles(ParticleTypes.FLASH,
+                        this.getX(), this.getY(), this.getZ(),
+                        1, 0, 0, 0, 0);
             }
 
-            this.discard(); // Kill the entity
+            this.hasHit = true;
+            this.discard();
         }
     }
 
-    // Helper to allow the projectile to hit entities
     @Override
     protected boolean canHitEntity(Entity entity) {
-        return super.canHitEntity(entity) && !entity.isSpectator();
+        if (!super.canHitEntity(entity)) return false;
+        if (entity.isSpectator()) return false;
+        if (entity == this.getOwner()) return false;
+
+        // Only hit living entities
+        return entity instanceof LivingEntity;
+    }
+
+    @Override
+    public boolean shouldRenderAtSqrDistance(double distance) {
+        // Render up to 64 blocks away
+        return distance < 4096.0;
+    }
+
+    @Override
+    public boolean isPickable() {
+        return false;
+    }
+
+    @Override
+    public boolean isPushable() {
+        return false;
     }
 }
