@@ -28,8 +28,36 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     private int bladeDanceBlades = 0;
     private int bladeDanceDamageCooldown = 0;
 
+    //TEMPO
     private int tempoStacks = 0;
     private boolean tempoActive = false;
+
+    //PARRY
+    private boolean parryActive = false;
+    private int parryTicks = 0;
+    private boolean parrySuccessful = false;
+
+    //FINAL WALTZ
+    private boolean finalWaltzActive = false;
+    private int finalWaltzTicks = 0;
+    private int finalWaltzOverflow = 0;
+
+    //JUGGERNAUT - INERTIA PASSIVE
+    private boolean juggernautShieldMode = true; // Start in SHIELD mode
+    private int juggernautCharge = 0;
+    private int juggernautMaxCharge = 100;
+    private boolean chargeDecaying = false;
+    private int chargeDecayTicks = 0;
+    private static final int MAX_DECAY_TICKS = 240; // 12 seconds
+
+    //JUGGERNAUT - FORTIFY
+    private boolean fortifyActive = false;
+    private int fortifyTicks = 0;
+
+    //JUGGERNAUT - LEAP
+    private boolean leapActive = false;
+    private double leapStartY = 0;
+    private boolean leapShieldMode = false;
 
     //DASH
     public boolean isDashActive() { return dashActive; }
@@ -82,6 +110,90 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         this.tempoStacks = 0;
         this.tempoActive = false;
     }
+
+    //PARRY
+    public boolean isParryActive() { return parryActive; }
+    public void setParryActive(boolean active) { this.parryActive = active; }
+
+    public int getParryTicks() { return parryTicks; }
+    public void setParryTicks(int ticks) { this.parryTicks = ticks; }
+
+    public boolean isParrySuccessful() { return parrySuccessful; }
+    public void setParrySuccessful(boolean successful) { this.parrySuccessful = successful; }
+
+    //FINAL WALTZ
+    public boolean isFinalWaltzActive() { return finalWaltzActive; }
+    public void setFinalWaltzActive(boolean active) { this.finalWaltzActive = active; }
+
+    public int getFinalWaltzTicks() { return finalWaltzTicks; }
+    public void setFinalWaltzTicks(int ticks) { this.finalWaltzTicks = ticks; }
+
+    public int getFinalWaltzOverflow() { return finalWaltzOverflow; }
+    public void setFinalWaltzOverflow(int overflow) { this.finalWaltzOverflow = overflow; }
+
+    //JUGGERNAUT - INERTIA
+    public boolean isJuggernautShieldMode() { return juggernautShieldMode; }
+    public void setJuggernautShieldMode(boolean mode) { this.juggernautShieldMode = mode; }
+
+    public int getJuggernautCharge() { return juggernautCharge; }
+    public void setJuggernautCharge(int charge) {
+        this.juggernautCharge = Math.max(0, Math.min(charge, juggernautMaxCharge));
+    }
+
+    public void addJuggernautCharge(int amount) {
+        setJuggernautCharge(this.juggernautCharge + amount);
+    }
+
+    public void removeJuggernautCharge(int amount) {
+        setJuggernautCharge(this.juggernautCharge - amount);
+    }
+
+    public int getJuggernautMaxCharge() { return juggernautMaxCharge; }
+
+    public boolean isChargeDecaying() { return chargeDecaying; }
+    public void startChargeDecay() {
+        this.chargeDecaying = true;
+        this.chargeDecayTicks = 0;
+    }
+    public void stopChargeDecay() {
+        this.chargeDecaying = false;
+        this.chargeDecayTicks = 0;
+    }
+
+    public int getChargeDecayTicks() { return chargeDecayTicks; }
+    public void tickChargeDecay() {
+        if (chargeDecaying) {
+            chargeDecayTicks++;
+            if (chargeDecayTicks >= MAX_DECAY_TICKS) {
+                // Fully depleted - switch back to SHIELD
+                this.juggernautCharge = 0;
+                this.juggernautShieldMode = true;
+                this.chargeDecaying = false;
+                this.chargeDecayTicks = 0;
+            } else {
+                // Gradual decay
+                float decayRate = (float) juggernautCharge / MAX_DECAY_TICKS;
+                removeJuggernautCharge((int) Math.ceil(decayRate));
+            }
+        }
+    }
+
+    //JUGGERNAUT - FORTIFY
+    public boolean isFortifyActive() { return fortifyActive; }
+    public void setFortifyActive(boolean active) { this.fortifyActive = active; }
+
+    public int getFortifyTicks() { return fortifyTicks; }
+    public void setFortifyTicks(int ticks) { this.fortifyTicks = ticks; }
+
+    //JUGGERNAUT - LEAP
+    public boolean isLeapActive() { return leapActive; }
+    public void setLeapActive(boolean active) { this.leapActive = active; }
+
+    public double getLeapStartY() { return leapStartY; }
+    public void setLeapStartY(double y) { this.leapStartY = y; }
+
+    public boolean isLeapShieldMode() { return leapShieldMode; }
+    public void setLeapShieldMode(boolean mode) { this.leapShieldMode = mode; }
 
     public PlayerRPGData() {
         // Default constructor
@@ -159,6 +271,27 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         nbt.putInt("tempo_stacks", tempoStacks);
         nbt.putBoolean("tempo_active", tempoActive);
 
+        nbt.putBoolean("parry_active", parryActive);
+        nbt.putInt("parry_ticks", parryTicks);
+        nbt.putBoolean("parry_successful", parrySuccessful);
+
+        nbt.putBoolean("final_waltz_active", finalWaltzActive);
+        nbt.putInt("final_waltz_ticks", finalWaltzTicks);
+        nbt.putInt("final_waltz_overflow", finalWaltzOverflow);
+
+        // Juggernaut data
+        nbt.putBoolean("juggernaut_shield_mode", juggernautShieldMode);
+        nbt.putInt("juggernaut_charge", juggernautCharge);
+        nbt.putBoolean("charge_decaying", chargeDecaying);
+        nbt.putInt("charge_decay_ticks", chargeDecayTicks);
+
+        nbt.putBoolean("fortify_active", fortifyActive);
+        nbt.putInt("fortify_ticks", fortifyTicks);
+
+        nbt.putBoolean("leap_active", leapActive);
+        nbt.putDouble("leap_start_y", leapStartY);
+        nbt.putBoolean("leap_shield_mode", leapShieldMode);
+
         // Save cooldowns
         CompoundTag cooldownsTag = new CompoundTag();
         for (Map.Entry<String, Integer> entry : abilityCooldowns.entrySet()) {
@@ -167,8 +300,6 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         nbt.put("cooldowns", cooldownsTag);
 
         return nbt;
-
-
     }
 
     @Override
@@ -206,6 +337,57 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         }
         if (nbt.contains("tempo_active")) {
             this.tempoActive = nbt.getBoolean("tempo_active");
+        }
+
+        if (nbt.contains("parry_active")) {
+            this.parryActive = nbt.getBoolean("parry_active");
+        }
+        if (nbt.contains("parry_ticks")) {
+            this.parryTicks = nbt.getInt("parry_ticks");
+        }
+        if (nbt.contains("parry_successful")) {
+            this.parrySuccessful = nbt.getBoolean("parry_successful");
+        }
+
+        if (nbt.contains("final_waltz_active")) {
+            this.finalWaltzActive = nbt.getBoolean("final_waltz_active");
+        }
+        if (nbt.contains("final_waltz_ticks")) {
+            this.finalWaltzTicks = nbt.getInt("final_waltz_ticks");
+        }
+        if (nbt.contains("final_waltz_overflow")) {
+            this.finalWaltzOverflow = nbt.getInt("final_waltz_overflow");
+        }
+
+        // Juggernaut data
+        if (nbt.contains("juggernaut_shield_mode")) {
+            this.juggernautShieldMode = nbt.getBoolean("juggernaut_shield_mode");
+        }
+        if (nbt.contains("juggernaut_charge")) {
+            this.juggernautCharge = nbt.getInt("juggernaut_charge");
+        }
+        if (nbt.contains("charge_decaying")) {
+            this.chargeDecaying = nbt.getBoolean("charge_decaying");
+        }
+        if (nbt.contains("charge_decay_ticks")) {
+            this.chargeDecayTicks = nbt.getInt("charge_decay_ticks");
+        }
+
+        if (nbt.contains("fortify_active")) {
+            this.fortifyActive = nbt.getBoolean("fortify_active");
+        }
+        if (nbt.contains("fortify_ticks")) {
+            this.fortifyTicks = nbt.getInt("fortify_ticks");
+        }
+
+        if (nbt.contains("leap_active")) {
+            this.leapActive = nbt.getBoolean("leap_active");
+        }
+        if (nbt.contains("leap_start_y")) {
+            this.leapStartY = nbt.getDouble("leap_start_y");
+        }
+        if (nbt.contains("leap_shield_mode")) {
+            this.leapShieldMode = nbt.getBoolean("leap_shield_mode");
         }
 
         // Load cooldowns

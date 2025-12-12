@@ -3,12 +3,16 @@ package net.Frostimpact.rpgclasses.event;
 import net.Frostimpact.rpgclasses.RpgClassesMod;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 /**
@@ -36,13 +40,13 @@ public class ModEvents {
 
         // BLADEMANCER: Reset tempo on death
         newData.resetTempo();
-
+        newData.setFinalWaltzActive(false);
+        newData.setParryActive(false);
     }
-
 
     /**
      * This event runs when a living entity takes damage.
-     * We use it to handle Blade Dance blade removal.
+     * We use it to handle Blade Dance blade removal and Parry success.
      */
     @SubscribeEvent
     public static void onPlayerHurt(LivingIncomingDamageEvent event) {
@@ -50,7 +54,51 @@ public class ModEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
 
-            // If Blade Dance is active, remove a blade and heal
+            // PARRY HANDLING
+            if (rpg.isParryActive() && !rpg.isParrySuccessful()) {
+                // Mark parry as successful
+                rpg.setParrySuccessful(true);
+
+                // Refresh DASH cooldown
+                rpg.setAbilityCooldown("dash", 0);
+
+                // Grant 3 TEMPO stacks
+                rpg.setTempoStacks(rpg.getTempoStacks() + 3);
+
+                // Apply TEMPO effect if needed
+                if (rpg.getTempoStacks() >= 3) {
+                    int strengthLevel = 0;
+
+                    // During Final Waltz, check for Strength II at 6 stacks
+                    if (rpg.isFinalWaltzActive() && rpg.getTempoStacks() >= 6) {
+                        strengthLevel = 1; // Strength II
+                    }
+
+                    player.addEffect(new MobEffectInstance(
+                            MobEffects.DAMAGE_BOOST,
+                            999999,
+                            strengthLevel,
+                            false,
+                            false,
+                            true
+                    ));
+                    rpg.setTempoActive(true);
+                }
+
+                // Success feedback
+                player.level().playSound(null, player.blockPosition(),
+                        SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.5f, 2.0f);
+
+                ((net.minecraft.server.level.ServerLevel) player.level()).sendParticles(
+                        net.minecraft.core.particles.ParticleTypes.CRIT,
+                        player.getX(), player.getY() + 1, player.getZ(),
+                        20, 0.5, 0.5, 0.5, 0.1
+                );
+
+                player.sendSystemMessage(Component.literal("§e⚔ PERFECT PARRY! §7DASH REFRESHED"));
+            }
+
+            // BLADE DANCE HANDLING
             if (rpg.isBladeDanceActive() && rpg.getBladeDanceBlades() > 0) {
                 // Remove one sword entity first
                 if (!rpg.getBladeDanceSwordIds().isEmpty()) {
@@ -72,7 +120,7 @@ public class ModEvents {
                         SoundEvents.GLASS_BREAK,
                         SoundSource.PLAYERS, 0.8f, 1.5f);
 
-                player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                player.sendSystemMessage(Component.literal(
                         "§cBlade shattered! §a+2 HP §7(" + rpg.getBladeDanceBlades() + " blades remaining)"
                 ));
 
@@ -88,16 +136,18 @@ public class ModEvents {
                     rpg.clearBladeDanceSwords();
 
                     rpg.setBladeDanceActive(false);
-                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cAll blades destroyed!"));
+                    player.sendSystemMessage(Component.literal("§cAll blades destroyed!"));
                 }
             }
         }
     }
-     //This event runs when a player attacks an entity.
-     //We use it to handle the TEMPO passive ability.
 
+    /**
+     * This event runs when a player attacks an entity.
+     * We use it to handle the TEMPO passive ability.
+     */
     @SubscribeEvent
-    public static void onPlayerAttack(net.neoforged.neoforge.event.entity.player.AttackEntityEvent event) {
+    public static void onPlayerAttack(AttackEntityEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
 
@@ -107,37 +157,71 @@ public class ModEvents {
                 // Add a tempo stack
                 rpg.addTempoStack();
 
-                // Check tempo stacks
-                if (rpg.getTempoStacks() == 3) {
-                    // Grant Strength I
-                    player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                            net.minecraft.world.effect.MobEffects.DAMAGE_BOOST,
-                            999999, // Infinite duration (removed manually)
-                            0,      // Strength I
-                            false,  // Not ambient
-                            false,  // Don't show particles
-                            true    // Show icon
-                    ));
-                    rpg.setTempoActive(true);
+                // Handle TEMPO logic based on Final Waltz state
+                if (rpg.isFinalWaltzActive()) {
+                    // FINAL WALTZ: TEMPO can overflow
+                    if (rpg.getTempoStacks() == 3) {
+                        // Grant Strength I
+                        player.addEffect(new MobEffectInstance(
+                                MobEffects.DAMAGE_BOOST,
+                                999999,
+                                0, // Strength I
+                                false,
+                                false,
+                                true
+                        ));
+                        rpg.setTempoActive(true);
 
-                    // Visual feedback
-                    player.level().playSound(null, player.blockPosition(),
-                            net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP,
-                            net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 1.5f);
+                        player.level().playSound(null, player.blockPosition(),
+                                SoundEvents.EXPERIENCE_ORB_PICKUP,
+                                SoundSource.PLAYERS, 0.5f, 1.5f);
+                    } else if (rpg.getTempoStacks() >= 6) {
+                        // Upgrade to Strength II
+                        player.removeEffect(MobEffects.DAMAGE_BOOST);
+                        player.addEffect(new MobEffectInstance(
+                                MobEffects.DAMAGE_BOOST,
+                                999999,
+                                1, // Strength II
+                                false,
+                                false,
+                                true
+                        ));
 
-                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§6⚔ TEMPO ACTIVE! §7(Strength I)"));
+                        // Track overflow stacks
+                        int overflow = rpg.getTempoStacks() - 6;
+                        rpg.setFinalWaltzOverflow(overflow);
 
-                } else if (rpg.getTempoStacks() >= 4) {
-                    // 4th hit - remove Strength and reset
-                    player.removeEffect(net.minecraft.world.effect.MobEffects.DAMAGE_BOOST);
-                    rpg.resetTempo();
+                        player.level().playSound(null, player.blockPosition(),
+                                SoundEvents.PLAYER_LEVELUP,
+                                SoundSource.PLAYERS, 0.5f, 2.0f);
+                    }
+                } else {
+                    // NORMAL: Standard TEMPO behavior
+                    if (rpg.getTempoStacks() == 3) {
+                        // Grant Strength I
+                        player.addEffect(new MobEffectInstance(
+                                MobEffects.DAMAGE_BOOST,
+                                999999,
+                                0, // Strength I
+                                false,
+                                false,
+                                true
+                        ));
+                        rpg.setTempoActive(true);
 
-                    // Visual feedback
-                    player.level().playSound(null, player.blockPosition(),
-                            net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP,
-                            net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 0.8f);
+                        player.level().playSound(null, player.blockPosition(),
+                                SoundEvents.EXPERIENCE_ORB_PICKUP,
+                                SoundSource.PLAYERS, 0.5f, 1.5f);
 
-                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§7TEMPO reset"));
+                    } else if (rpg.getTempoStacks() >= 4) {
+                        // 4th hit - remove Strength and reset
+                        player.removeEffect(MobEffects.DAMAGE_BOOST);
+                        rpg.resetTempo();
+
+                        player.level().playSound(null, player.blockPosition(),
+                                SoundEvents.EXPERIENCE_ORB_PICKUP,
+                                SoundSource.PLAYERS, 0.5f, 0.8f);
+                    }
                 }
             }
         }

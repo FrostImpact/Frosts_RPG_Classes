@@ -19,20 +19,28 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @EventBusSubscriber(modid = RpgClassesMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class AbilityCooldownOverlay implements LayeredDraw.Layer {
 
-    private static final String[] TRACKED_ABILITIES = {
-            "dash",
-            "blade_dance",
-            "parry",
-            "blade_waltz"
-    };
+    // Define tracked abilities per class
+    private static final Map<String, String[]> CLASS_ABILITIES = new HashMap<>();
+
+    static {
+        CLASS_ABILITIES.put("BLADEDANCER", new String[]{
+                "dash", "blade_dance", "parry", "blade_waltz"
+        });
+        CLASS_ABILITIES.put("JUGGERNAUT", new String[]{
+                "swap", "crush", "fortify", "leap"
+        });
+    }
 
     // UI Constants
     private static final int ICON_SIZE = 16;
-    private static final int SLOT_SIZE = 18; // 1px border around 16px icon
-    private static final int SLOT_SPACING = 22; // Space between slots
+    private static final int SLOT_SIZE = 18;
+    private static final int SLOT_SPACING = 22;
 
     @SubscribeEvent
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
@@ -49,24 +57,26 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
         if (mc.player == null || mc.options.hideGui) return;
 
         PlayerRPGData rpg = mc.player.getData(ModAttachments.PLAYER_RPG);
+        String currentClass = rpg.getCurrentClass();
+
+        // Get abilities for current class
+        String[] trackedAbilities = CLASS_ABILITIES.get(currentClass);
+        if (trackedAbilities == null) return;
 
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
 
-        // Start X: Center + Offset. Start Y: Bottom aligned with hotbar
         int startX = (screenWidth / 2) + 95;
         int startY = screenHeight - 22;
 
-        for (int i = 0; i < TRACKED_ABILITIES.length; i++) {
-            String abilityId = TRACKED_ABILITIES[i];
+        for (int i = 0; i < trackedAbilities.length; i++) {
+            String abilityId = trackedAbilities[i];
             Ability ability = AbilityRegistry.getAbility(abilityId);
             if (ability == null) continue;
 
-            // Calculate position for this slot
             int slotX = startX + (i * SLOT_SPACING);
             int slotY = startY;
 
-            // Center the 16x16 icon inside the 18x18 slot
             int iconX = slotX + 1;
             int iconY = slotY + 1;
 
@@ -76,44 +86,33 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
             int currentMana = rpg.getMana();
 
             // 1. Draw Slot Background
-            // Draw a dark gray background
             graphics.fill(slotX, slotY, slotX + SLOT_SIZE, slotY + SLOT_SIZE, 0x90000000);
-            // Draw a border
             graphics.renderOutline(slotX, slotY, SLOT_SIZE, SLOT_SIZE, 0xFF333333);
 
             // 2. Render Icon
-            ItemStack icon = getPlaceholderIcon(abilityId);
+            ItemStack icon = getAbilityIcon(currentClass, abilityId);
             graphics.renderItem(icon, iconX, iconY);
 
             // 3. Render Mana Check
             if (currentMana < manaCost) {
                 RenderSystem.disableDepthTest();
-                // use PoseStack translation to ensure z-index correctness if needed,
-                // but usually disabling depth test is enough for 2D GUI overlays.
                 graphics.fill(iconX, iconY, iconX + ICON_SIZE, iconY + ICON_SIZE, 0x600000AA);
                 RenderSystem.enableDepthTest();
             }
 
-            // Render Cooldown "Tick Down"
+            // 4. Render Cooldown
             if (cooldownTicks > 0 && maxCooldown > 0) {
                 RenderSystem.disableDepthTest();
 
-                // IT SHOULD NEVER EXCEEDS 1.0, JUST MAKING SURE
                 float progress = (float) cooldownTicks / (float) maxCooldown;
                 progress = Math.min(1.0f, Math.max(0.0f, progress));
 
-                // Calculate height of the cooldown box
                 int boxHeight = (int) (progress * ICON_SIZE);
-
                 boxHeight = Math.min(ICON_SIZE, Math.max(0, boxHeight));
 
-                // Calculate the top edge of the overlay
-                // If boxHeight is 16, top is iconY (Full Cover)
-                // If boxHeight is 0, top is iconY + 16 (No Cover)
                 int boxTop = iconY + (ICON_SIZE - boxHeight);
                 int boxBottom = iconY + ICON_SIZE;
 
-                // Draw the "Cooldown Shutter"
                 graphics.fill(iconX, boxTop, iconX + ICON_SIZE, boxBottom, 0x80FFFFFF);
 
                 RenderSystem.enableDepthTest();
@@ -121,13 +120,29 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
         }
     }
 
-    private ItemStack getPlaceholderIcon(String abilityId) {
-        return switch (abilityId) {
-            case "dash" -> new ItemStack(Items.FEATHER);
-            case "blade_dance" -> new ItemStack(Items.IRON_SWORD);
-            case "parry" -> new ItemStack(Items.SHIELD);
-            case "blade_waltz" -> new ItemStack(Items.DIAMOND_SWORD);
-            default -> new ItemStack(Items.BARRIER);
-        };
+    private ItemStack getAbilityIcon(String className, String abilityId) {
+        // BLADEDANCER Icons
+        if (className.equals("BLADEDANCER")) {
+            return switch (abilityId) {
+                case "dash" -> new ItemStack(Items.FEATHER);
+                case "blade_dance" -> new ItemStack(Items.IRON_SWORD);
+                case "parry" -> new ItemStack(Items.SHIELD);
+                case "blade_waltz" -> new ItemStack(Items.DIAMOND_SWORD);
+                default -> new ItemStack(Items.BARRIER);
+            };
+        }
+
+        // JUGGERNAUT Icons
+        if (className.equals("JUGGERNAUT")) {
+            return switch (abilityId) {
+                case "swap" -> new ItemStack(Items.SHIELD);
+                case "crush" -> new ItemStack(Items.IRON_AXE);
+                case "fortify" -> new ItemStack(Items.IRON_CHESTPLATE);
+                case "leap" -> new ItemStack(Items.LEATHER_BOOTS);
+                default -> new ItemStack(Items.BARRIER);
+            };
+        }
+
+        return new ItemStack(Items.BARRIER);
     }
 }

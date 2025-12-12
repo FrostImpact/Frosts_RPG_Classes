@@ -2,22 +2,59 @@ package net.Frostimpact.rpgclasses.client;
 
 import net.Frostimpact.rpgclasses.networking.ModMessages;
 import net.Frostimpact.rpgclasses.networking.packet.PacketUseAbility;
+import net.Frostimpact.rpgclasses.rpg.ModAttachments;
+import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
 import net.Frostimpact.rpgclasses.util.KeyBinding;
+import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 
 public class ClientEvents {
 
-    // This method listens for key presses during the game (on NeoForge bus)
     @SubscribeEvent
     public void onKeyInput(InputEvent.Key event) {
-        if (KeyBinding.DASH_KEY.consumeClick()) {
-            ModMessages.sendToServer(new PacketUseAbility("dash"));
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+
+        PlayerRPGData rpg = mc.player.getData(ModAttachments.PLAYER_RPG);
+        String currentClass = rpg.getCurrentClass();
+
+        // BLADEDANCER Keys
+        if (currentClass.equals("BLADEDANCER")) {
+            if (KeyBinding.DASH_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("dash"));
+            }
+
+            if (KeyBinding.BLADE_DANCE_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("blade_dance"));
+            }
+
+            if (KeyBinding.PARRY_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("parry"));
+            }
+
+            if (KeyBinding.FINAL_WALTZ_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("blade_waltz"));
+            }
         }
 
-        // Add Blade Dance keybind
-        if (KeyBinding.BLADE_DANCE_KEY.consumeClick()) {
-            ModMessages.sendToServer(new PacketUseAbility("blade_dance"));
+        // JUGGERNAUT Keys
+        if (currentClass.equals("JUGGERNAUT")) {
+            if (KeyBinding.SWAP_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("swap"));
+            }
+
+            if (KeyBinding.CRUSH_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("crush"));
+            }
+
+            if (KeyBinding.FORTIFY_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("fortify"));
+            }
+
+            if (KeyBinding.LEAP_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("leap"));
+            }
         }
     }
 }

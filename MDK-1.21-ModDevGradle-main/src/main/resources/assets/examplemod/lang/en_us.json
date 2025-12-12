@@ -4,6 +4,14 @@
   "item.examplemod.example_item": "Example Item",
 
   "key.category.rpgclasses": "RPG Classes",
+
   "key.rpgclasses.dash": "Dash Ability",
-  "key.rpgclasses.blade_dance": "Blade Dance Ability"
+  "key.rpgclasses.blade_dance": "Blade Dance Ability",
+  "key.rpgclasses.parry": "Parry Ability",
+  "key.rpgclasses.blade_waltz": "Final Waltz Ability",
+
+  "key.rpgclasses.swap": "Swap Mode",
+  "key.rpgclasses.crush": "Crush",
+  "key.rpgclasses.fortify": "Fortify",
+  "key.rpgclasses.leap": "Leap"
 }

@@ -12,8 +12,14 @@ public class AbilityDatabase {
         //BLADEDANCER
         register("dash", new AbilityStats("Dash", 5, 15));
         register("blade_dance", new AbilityStats("Blade Dance", 12, 35));
-        register("parry",     new AbilityStats("Parry", 6, 15));
-        register("blade_waltz",     new AbilityStats("Blade Waltz", 30, 50));
+        register("parry", new AbilityStats("Parry", 6, 15));
+        register("blade_waltz", new AbilityStats("Blade Waltz", 30, 50));
+
+        //JUGGERNAUT
+        register("swap", new AbilityStats("Swap", 3, 10));
+        register("crush", new AbilityStats("Crush", 5, 25));
+        register("fortify", new AbilityStats("Fortify", 10, 25));
+        register("leap", new AbilityStats("Leap", 12, 35));
     }
 
     private static void register(String id, AbilityStats stats) {

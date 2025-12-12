@@ -26,7 +26,6 @@ public class RpgClassesMod {
         // Register client events only on client side
         if (FMLEnvironment.dist == Dist.CLIENT) {
             NeoForge.EVENT_BUS.register(new ClientEvents());
-            // EntityHealthBar uses @EventBusSubscriber so it registers automatically
         }
 
         // Server events work on both sides
@@ -36,7 +35,13 @@ public class RpgClassesMod {
     private void registerKeyMappings(final RegisterKeyMappingsEvent event) {
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.DASH_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.BLADE_DANCE_KEY);
-        System.out.println("RPG Classes: Keybind Registered!");
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.PARRY_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.FINAL_WALTZ_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.CRUSH_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.FORTIFY_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.LEAP_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.SWAP_KEY);
+        System.out.println("RPG Classes: Keybinds Registered!");
 
         AbilityDatabase.registerAll();
         System.out.println("RPG Classes: Database Registered!");
