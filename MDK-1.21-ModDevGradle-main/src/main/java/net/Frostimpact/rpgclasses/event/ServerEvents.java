@@ -4,6 +4,7 @@ import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
 import net.Frostimpact.rpgclasses.networking.ModMessages;
 import net.Frostimpact.rpgclasses.networking.packet.PacketSyncMana;
+import net.Frostimpact.rpgclasses.networking.packet.PacketSyncClass;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -15,29 +16,45 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 public class ServerEvents {
 
-    // --- TEMPORARY FIX: SET CLASS ON LOGIN ---
     @SubscribeEvent
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        // Only run this on the server side
-        if (!event.getEntity().level().isClientSide) {
+        if (!event.getEntity().level().isClientSide && event.getEntity() instanceof ServerPlayer player) {
+            PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
 
-            PlayerRPGData rpg = event.getEntity().getData(ModAttachments.PLAYER_RPG);
-
-            // 1. Force set the class
+            // Force set the class and initialize
             rpg.setCurrentClass("JUGGERNAUT");
+            rpg.setJuggernautShieldMode(true);
+            rpg.setJuggernautCharge(0);
 
-            // 2. Send a confirmation message
-            event.getEntity().sendSystemMessage(Component.literal("§a[TEMP FIX] Your class is set to: §6JUGGERNAUT"));
+            // Set mana to max
+            rpg.setMana(rpg.getMaxMana());
+
+            // IMPORTANT: Sync class to client immediately
+            ModMessages.sendToPlayer(new PacketSyncClass("JUGGERNAUT"), player);
+
+            // Send confirmation
+            player.sendSystemMessage(Component.literal("§a[RPG Classes] Class set to: §6JUGGERNAUT"));
+
+            System.out.println("[SERVER] Player " + player.getName().getString() + " logged in. Class: " + rpg.getCurrentClass());
         }
     }
 
-    // --- PLAYER TICK EVENT (COMBINED VERSION) ---
+    @SubscribeEvent
+    public void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (!event.getEntity().level().isClientSide && event.getEntity() instanceof ServerPlayer player) {
+            PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
+
+            // Re-sync class after respawn
+            ModMessages.sendToPlayer(new PacketSyncClass(rpg.getCurrentClass()), player);
+
+            System.out.println("[SERVER] Player " + player.getName().getString() + " respawned. Re-syncing class: " + rpg.getCurrentClass());
+        }
+    }
+
     @SubscribeEvent
     public void onPlayerTick(PlayerTickEvent.Post event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-
             if (!player.level().isClientSide) {
-
                 PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
 
                 // Tick ALL ability cooldowns at once
@@ -49,8 +66,6 @@ public class ServerEvents {
 
                     if (rpg.getParryTicks() <= 0) {
                         rpg.setParryActive(false);
-
-                        // If parry wasn't successful, provide feedback
                         if (!rpg.isParrySuccessful()) {
                             player.sendSystemMessage(Component.literal("§7Parry window expired"));
                         }
@@ -61,7 +76,6 @@ public class ServerEvents {
                 if (rpg.isFinalWaltzActive()) {
                     rpg.setFinalWaltzTicks(rpg.getFinalWaltzTicks() - 1);
 
-                    // Visual feedback - particle trail
                     if (player.level().getGameTime() % 10 == 0) {
                         ((net.minecraft.server.level.ServerLevel) player.level()).sendParticles(
                                 net.minecraft.core.particles.ParticleTypes.ENCHANTED_HIT,
@@ -70,12 +84,8 @@ public class ServerEvents {
                         );
                     }
 
-                    // Check if duration ended
                     if (rpg.getFinalWaltzTicks() <= 0) {
-                        // End Final Waltz
                         rpg.setFinalWaltzActive(false);
-
-                        // Remove any active TEMPO effects
                         player.removeEffect(MobEffects.DAMAGE_BOOST);
                         rpg.resetTempo();
                         rpg.setFinalWaltzOverflow(0);
@@ -90,20 +100,16 @@ public class ServerEvents {
 
                 // Handle Blade Dance
                 if (rpg.isBladeDanceActive()) {
-                    // Check if being used during Final Waltz
                     if (rpg.isFinalWaltzActive()) {
-                        // End Final Waltz when Blade Dance is activated
                         int overflow = rpg.getFinalWaltzOverflow();
                         int extraBlades = overflow / 2;
 
                         if (extraBlades > 0) {
-                            // Add extra blades
                             int newBladeCount = rpg.getBladeDanceBlades() + extraBlades;
                             rpg.setBladeDanceBlades(newBladeCount);
 
                             player.sendSystemMessage(Component.literal("§5✦ FINAL WALTZ consumed! §6+" + extraBlades + " extra blades!"));
 
-                            // Spawn extra blade entities
                             for (int i = 0; i < extraBlades; i++) {
                                 net.minecraft.world.entity.decoration.ArmorStand swordStand = new net.minecraft.world.entity.decoration.ArmorStand(
                                         net.minecraft.world.entity.EntityType.ARMOR_STAND,
@@ -123,7 +129,6 @@ public class ServerEvents {
                             }
                         }
 
-                        // End Final Waltz
                         rpg.setFinalWaltzActive(false);
                         rpg.setFinalWaltzTicks(0);
                         rpg.setFinalWaltzOverflow(0);
@@ -131,15 +136,12 @@ public class ServerEvents {
                         rpg.resetTempo();
                     }
 
-                    // Tick down duration
                     rpg.setBladeDanceTicks(rpg.getBladeDanceTicks() - 1);
 
-                    // Tick down damage cooldown
                     if (rpg.getBladeDanceDamageCooldown() > 0) {
                         rpg.setBladeDanceDamageCooldown(rpg.getBladeDanceDamageCooldown() - 1);
                     }
 
-                    // Deal damage to nearby enemies every 10 ticks (0.5 seconds)
                     if (player.level().getGameTime() % 10 == 0 && rpg.getBladeDanceDamageCooldown() == 0) {
                         double radius = 3.0;
 
@@ -159,7 +161,6 @@ public class ServerEvents {
                         rpg.setBladeDanceDamageCooldown(5);
                     }
 
-                    // Update sword positions every tick
                     if (!rpg.getBladeDanceSwordIds().isEmpty()) {
                         double angle = (player.level().getGameTime() * 0.15) % (2 * Math.PI);
                         int swordIndex = 0;
@@ -181,7 +182,6 @@ public class ServerEvents {
                         }
                     }
 
-                    // Check if duration ended
                     if (rpg.getBladeDanceTicks() <= 0) {
                         for (Integer swordId : rpg.getBladeDanceSwordIds()) {
                             net.minecraft.world.entity.Entity entity = player.level().getEntity(swordId);
@@ -209,14 +209,14 @@ public class ServerEvents {
                     }
                 }
 
-                // Mana Regeneration (1 mana per second = every 20 ticks)
+                // Mana Regeneration
                 if (player.level().getGameTime() % 5 == 0) {
                     if (rpg.getMana() < rpg.getMaxMana()) {
                         rpg.useMana(-1);
                     }
                 }
 
-                // --- SEND ACTIONBAR STATUS AND SYNC COOLDOWNS EVERY 5 TICKS ---
+                // Sync every 5 ticks
                 if (player.level().getGameTime() % 5 == 0) {
                     int currentMana = rpg.getMana();
                     int maxMana = rpg.getMaxMana();

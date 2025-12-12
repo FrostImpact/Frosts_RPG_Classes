@@ -59,35 +59,93 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     private double leapStartY = 0;
     private boolean leapShieldMode = false;
 
+    //JUGGERNAUT - CRUSH (New)
+    private boolean crushActive = false;
+    private boolean crushPowered = false;
+
     //DASH
-    public boolean isDashActive() { return dashActive; }
-    public void setDashActive(boolean active) { this.dashActive = active; }
-    public Vec3 getDashStartPos() { return dashStartPos; }
-    public void setDashStartPos(Vec3 pos) { this.dashStartPos = pos; }
-    public Vec3 getDashDirection() { return dashDirection; }
-    public void setDashDirection(Vec3 dir) { this.dashDirection = dir; }
-    public double getDashTargetDistance() { return dashTargetDistance; }
-    public void setDashTargetDistance(double dist) { this.dashTargetDistance = dist; }
+    public boolean isDashActive() {
+        return dashActive;
+    }
+
+    public void setDashActive(boolean active) {
+        this.dashActive = active;
+    }
+
+    public Vec3 getDashStartPos() {
+        return dashStartPos;
+    }
+
+    public void setDashStartPos(Vec3 pos) {
+        this.dashStartPos = pos;
+    }
+
+    public Vec3 getDashDirection() {
+        return dashDirection;
+    }
+
+    public void setDashDirection(Vec3 dir) {
+        this.dashDirection = dir;
+    }
+
+    public double getDashTargetDistance() {
+        return dashTargetDistance;
+    }
+
+    public void setDashTargetDistance(double dist) {
+        this.dashTargetDistance = dist;
+    }
 
     //BLADE DANCE
-    public boolean isBladeDanceActive() { return bladeDanceActive; }
-    public void setBladeDanceActive(boolean active) { this.bladeDanceActive = active; }
+    public boolean isBladeDanceActive() {
+        return bladeDanceActive;
+    }
 
-    public int getBladeDanceTicks() { return bladeDanceTicks; }
-    public void setBladeDanceTicks(int ticks) { this.bladeDanceTicks = ticks; }
+    public void setBladeDanceActive(boolean active) {
+        this.bladeDanceActive = active;
+    }
 
-    public int getBladeDanceBlades() { return bladeDanceBlades; }
-    public void setBladeDanceBlades(int blades) { this.bladeDanceBlades = blades; }
+    public int getBladeDanceTicks() {
+        return bladeDanceTicks;
+    }
 
-    public int getBladeDanceDamageCooldown() { return bladeDanceDamageCooldown; }
-    public void setBladeDanceDamageCooldown(int ticks) { this.bladeDanceDamageCooldown = ticks; }
+    public void setBladeDanceTicks(int ticks) {
+        this.bladeDanceTicks = ticks;
+    }
+
+    public int getBladeDanceBlades() {
+        return bladeDanceBlades;
+    }
+
+    public void setBladeDanceBlades(int blades) {
+        this.bladeDanceBlades = blades;
+    }
+
+    public int getBladeDanceDamageCooldown() {
+        return bladeDanceDamageCooldown;
+    }
+
+    public void setBladeDanceDamageCooldown(int ticks) {
+        this.bladeDanceDamageCooldown = ticks;
+    }
 
     private java.util.List<Integer> bladeDanceSwordIds = new java.util.ArrayList<>();
 
-    public java.util.List<Integer> getBladeDanceSwordIds() { return bladeDanceSwordIds; }
-    public void setBladeDanceSwordIds(java.util.List<Integer> ids) { this.bladeDanceSwordIds = ids; }
-    public void addBladeDanceSword(int entityId) { this.bladeDanceSwordIds.add(entityId); }
-    public void clearBladeDanceSwords() { this.bladeDanceSwordIds.clear(); }
+    public java.util.List<Integer> getBladeDanceSwordIds() {
+        return bladeDanceSwordIds;
+    }
+
+    public void setBladeDanceSwordIds(java.util.List<Integer> ids) {
+        this.bladeDanceSwordIds = ids;
+    }
+
+    public void addBladeDanceSword(int entityId) {
+        this.bladeDanceSwordIds.add(entityId);
+    }
+
+    public void clearBladeDanceSwords() {
+        this.bladeDanceSwordIds.clear();
+    }
 
     public void removeBlade() {
         if (bladeDanceBlades > 0) {
@@ -96,11 +154,21 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     }
 
     //TEMPO
-    public int getTempoStacks() { return tempoStacks; }
-    public void setTempoStacks(int stacks) { this.tempoStacks = stacks; }
+    public int getTempoStacks() {
+        return tempoStacks;
+    }
 
-    public boolean isTempoActive() { return tempoActive; }
-    public void setTempoActive(boolean active) { this.tempoActive = active; }
+    public void setTempoStacks(int stacks) {
+        this.tempoStacks = stacks;
+    }
+
+    public boolean isTempoActive() {
+        return tempoActive;
+    }
+
+    public void setTempoActive(boolean active) {
+        this.tempoActive = active;
+    }
 
     public void addTempoStack() {
         this.tempoStacks++;
@@ -112,30 +180,68 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     }
 
     //PARRY
-    public boolean isParryActive() { return parryActive; }
-    public void setParryActive(boolean active) { this.parryActive = active; }
+    public boolean isParryActive() {
+        return parryActive;
+    }
 
-    public int getParryTicks() { return parryTicks; }
-    public void setParryTicks(int ticks) { this.parryTicks = ticks; }
+    public void setParryActive(boolean active) {
+        this.parryActive = active;
+    }
 
-    public boolean isParrySuccessful() { return parrySuccessful; }
-    public void setParrySuccessful(boolean successful) { this.parrySuccessful = successful; }
+    public int getParryTicks() {
+        return parryTicks;
+    }
+
+    public void setParryTicks(int ticks) {
+        this.parryTicks = ticks;
+    }
+
+    public boolean isParrySuccessful() {
+        return parrySuccessful;
+    }
+
+    public void setParrySuccessful(boolean successful) {
+        this.parrySuccessful = successful;
+    }
 
     //FINAL WALTZ
-    public boolean isFinalWaltzActive() { return finalWaltzActive; }
-    public void setFinalWaltzActive(boolean active) { this.finalWaltzActive = active; }
+    public boolean isFinalWaltzActive() {
+        return finalWaltzActive;
+    }
 
-    public int getFinalWaltzTicks() { return finalWaltzTicks; }
-    public void setFinalWaltzTicks(int ticks) { this.finalWaltzTicks = ticks; }
+    public void setFinalWaltzActive(boolean active) {
+        this.finalWaltzActive = active;
+    }
 
-    public int getFinalWaltzOverflow() { return finalWaltzOverflow; }
-    public void setFinalWaltzOverflow(int overflow) { this.finalWaltzOverflow = overflow; }
+    public int getFinalWaltzTicks() {
+        return finalWaltzTicks;
+    }
+
+    public void setFinalWaltzTicks(int ticks) {
+        this.finalWaltzTicks = ticks;
+    }
+
+    public int getFinalWaltzOverflow() {
+        return finalWaltzOverflow;
+    }
+
+    public void setFinalWaltzOverflow(int overflow) {
+        this.finalWaltzOverflow = overflow;
+    }
 
     //JUGGERNAUT - INERTIA
-    public boolean isJuggernautShieldMode() { return juggernautShieldMode; }
-    public void setJuggernautShieldMode(boolean mode) { this.juggernautShieldMode = mode; }
+    public boolean isJuggernautShieldMode() {
+        return juggernautShieldMode;
+    }
 
-    public int getJuggernautCharge() { return juggernautCharge; }
+    public void setJuggernautShieldMode(boolean mode) {
+        this.juggernautShieldMode = mode;
+    }
+
+    public int getJuggernautCharge() {
+        return juggernautCharge;
+    }
+
     public void setJuggernautCharge(int charge) {
         this.juggernautCharge = Math.max(0, Math.min(charge, juggernautMaxCharge));
     }
@@ -148,19 +254,28 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         setJuggernautCharge(this.juggernautCharge - amount);
     }
 
-    public int getJuggernautMaxCharge() { return juggernautMaxCharge; }
+    public int getJuggernautMaxCharge() {
+        return juggernautMaxCharge;
+    }
 
-    public boolean isChargeDecaying() { return chargeDecaying; }
+    public boolean isChargeDecaying() {
+        return chargeDecaying;
+    }
+
     public void startChargeDecay() {
         this.chargeDecaying = true;
         this.chargeDecayTicks = 0;
     }
+
     public void stopChargeDecay() {
         this.chargeDecaying = false;
         this.chargeDecayTicks = 0;
     }
 
-    public int getChargeDecayTicks() { return chargeDecayTicks; }
+    public int getChargeDecayTicks() {
+        return chargeDecayTicks;
+    }
+
     public void tickChargeDecay() {
         if (chargeDecaying) {
             chargeDecayTicks++;
@@ -179,21 +294,63 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     }
 
     //JUGGERNAUT - FORTIFY
-    public boolean isFortifyActive() { return fortifyActive; }
-    public void setFortifyActive(boolean active) { this.fortifyActive = active; }
+    public boolean isFortifyActive() {
+        return fortifyActive;
+    }
 
-    public int getFortifyTicks() { return fortifyTicks; }
-    public void setFortifyTicks(int ticks) { this.fortifyTicks = ticks; }
+    public void setFortifyActive(boolean active) {
+        this.fortifyActive = active;
+    }
+
+    public int getFortifyTicks() {
+        return fortifyTicks;
+    }
+
+    public void setFortifyTicks(int ticks) {
+        this.fortifyTicks = ticks;
+    }
 
     //JUGGERNAUT - LEAP
-    public boolean isLeapActive() { return leapActive; }
-    public void setLeapActive(boolean active) { this.leapActive = active; }
+    public boolean isLeapActive() {
+        return leapActive;
+    }
 
-    public double getLeapStartY() { return leapStartY; }
-    public void setLeapStartY(double y) { this.leapStartY = y; }
+    public void setLeapActive(boolean active) {
+        this.leapActive = active;
+    }
 
-    public boolean isLeapShieldMode() { return leapShieldMode; }
-    public void setLeapShieldMode(boolean mode) { this.leapShieldMode = mode; }
+    public double getLeapStartY() {
+        return leapStartY;
+    }
+
+    public void setLeapStartY(double y) {
+        this.leapStartY = y;
+    }
+
+    public boolean isLeapShieldMode() {
+        return leapShieldMode;
+    }
+
+    public void setLeapShieldMode(boolean mode) {
+        this.leapShieldMode = mode;
+    }
+
+    //JUGGERNAUT - CRUSH (New)
+    public boolean isCrushActive() {
+        return crushActive;
+    }
+
+    public void setCrushActive(boolean active) {
+        this.crushActive = active;
+    }
+
+    public boolean isCrushPowered() {
+        return crushPowered;
+    }
+
+    public void setCrushPowered(boolean powered) {
+        this.crushPowered = powered;
+    }
 
     public PlayerRPGData() {
         // Default constructor
@@ -292,6 +449,10 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         nbt.putDouble("leap_start_y", leapStartY);
         nbt.putBoolean("leap_shield_mode", leapShieldMode);
 
+        // Save Crush Data
+        nbt.putBoolean("crush_active", crushActive);
+        nbt.putBoolean("crush_powered", crushPowered);
+
         // Save cooldowns
         CompoundTag cooldownsTag = new CompoundTag();
         for (Map.Entry<String, Integer> entry : abilityCooldowns.entrySet()) {
@@ -388,6 +549,14 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         }
         if (nbt.contains("leap_shield_mode")) {
             this.leapShieldMode = nbt.getBoolean("leap_shield_mode");
+        }
+
+        // Load Crush Data
+        if (nbt.contains("crush_active")) {
+            this.crushActive = nbt.getBoolean("crush_active");
+        }
+        if (nbt.contains("crush_powered")) {
+            this.crushPowered = nbt.getBoolean("crush_powered");
         }
 
         // Load cooldowns

@@ -25,7 +25,6 @@ import java.util.Map;
 @EventBusSubscriber(modid = RpgClassesMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class AbilityCooldownOverlay implements LayeredDraw.Layer {
 
-    // Define tracked abilities per class
     private static final Map<String, String[]> CLASS_ABILITIES = new HashMap<>();
 
     static {
@@ -37,7 +36,6 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
         });
     }
 
-    // UI Constants
     private static final int ICON_SIZE = 16;
     private static final int SLOT_SIZE = 18;
     private static final int SLOT_SPACING = 22;
@@ -49,6 +47,7 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
                 ResourceLocation.fromNamespaceAndPath(RpgClassesMod.MOD_ID, "ability_cooldowns"),
                 new AbilityCooldownOverlay()
         );
+        System.out.println("RPG Classes: Ability Cooldown Overlay Registered!");
     }
 
     @Override
@@ -61,7 +60,14 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
 
         // Get abilities for current class
         String[] trackedAbilities = CLASS_ABILITIES.get(currentClass);
-        if (trackedAbilities == null) return;
+        if (trackedAbilities == null) {
+            // Debug - draw a red error box if class not found
+            int screenWidth = mc.getWindow().getGuiScaledWidth();
+            int screenHeight = mc.getWindow().getGuiScaledHeight();
+            graphics.fill(screenWidth / 2 - 50, screenHeight - 40, screenWidth / 2 + 50, screenHeight - 20, 0x80FF0000);
+            graphics.drawString(mc.font, "CLASS: " + currentClass, screenWidth / 2 - 45, screenHeight - 35, 0xFFFFFFFF, false);
+            return;
+        }
 
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
@@ -85,22 +91,22 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
             int manaCost = ability.getManaCost();
             int currentMana = rpg.getMana();
 
-            // 1. Draw Slot Background
+            // Draw Slot Background
             graphics.fill(slotX, slotY, slotX + SLOT_SIZE, slotY + SLOT_SIZE, 0x90000000);
             graphics.renderOutline(slotX, slotY, SLOT_SIZE, SLOT_SIZE, 0xFF333333);
 
-            // 2. Render Icon
+            // Render Icon
             ItemStack icon = getAbilityIcon(currentClass, abilityId);
             graphics.renderItem(icon, iconX, iconY);
 
-            // 3. Render Mana Check
+            // Render Mana Check
             if (currentMana < manaCost) {
                 RenderSystem.disableDepthTest();
                 graphics.fill(iconX, iconY, iconX + ICON_SIZE, iconY + ICON_SIZE, 0x600000AA);
                 RenderSystem.enableDepthTest();
             }
 
-            // 4. Render Cooldown
+            // Render Cooldown
             if (cooldownTicks > 0 && maxCooldown > 0) {
                 RenderSystem.disableDepthTest();
 
@@ -121,7 +127,6 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
     }
 
     private ItemStack getAbilityIcon(String className, String abilityId) {
-        // BLADEDANCER Icons
         if (className.equals("BLADEDANCER")) {
             return switch (abilityId) {
                 case "dash" -> new ItemStack(Items.FEATHER);
@@ -132,7 +137,6 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
             };
         }
 
-        // JUGGERNAUT Icons
         if (className.equals("JUGGERNAUT")) {
             return switch (abilityId) {
                 case "swap" -> new ItemStack(Items.SHIELD);
