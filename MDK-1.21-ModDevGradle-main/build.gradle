@@ -127,9 +127,9 @@ configurations {
 }
 
 dependencies {
-
+    implementation "maven.modrinth:ldlib:mc1.21.1-2.0.4-neoforge"
     implementation "maven.modrinth:photon-editor:mc1.21.1-2.0.4-neoforge"
-    implementation "maven.modrinth:ldlib2:mc1.21.1-2.0.4-neoforge"
+
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
