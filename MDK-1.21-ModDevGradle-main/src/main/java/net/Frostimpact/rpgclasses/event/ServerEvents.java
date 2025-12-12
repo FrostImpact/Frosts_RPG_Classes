@@ -231,7 +231,10 @@ public class ServerEvents {
                     ModMessages.sendToPlayer(new net.Frostimpact.rpgclasses.networking.packet.PacketSyncCooldowns(
                             rpg.getAllCooldowns(),
                             currentMana,
-                            maxMana
+                            maxMana,
+                            rpg.getJuggernautCharge(),
+                            rpg.getJuggernautMaxCharge(),
+                            rpg.isJuggernautShieldMode()
                     ), player);
                 }
             }

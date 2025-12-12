@@ -29,7 +29,6 @@ public class SwapAbility extends Ability {
             rpgData.startChargeDecay();
 
 
-
             // Refresh LEAP cooldown
             rpgData.setAbilityCooldown("leap", 0);
 
@@ -119,31 +118,44 @@ public class SwapAbility extends Ability {
 
     // Spawns an EXPANDING SPHERE of particles
     private void spawnSphericalPulse(ServerLevel level, ServerPlayer player, Vector3f color) {
-        net.minecraft.core.particles.DustParticleOptions dust =
-                new net.minecraft.core.particles.DustParticleOptions(color, 1.5f);
+        // Use simpler particle type for better visibility
+        int particles = 100;
+        double radius = 4.0; // Sphere radius
 
-        int particles = 150; // High count for a dense sphere look
-        double sphereSpeed = 0.5; // How fast the sphere expands
+        // Create concentric rings at different heights for sphere effect
+        for (int ring = 0; ring < 10; ring++) {
+            double yHeight = -1.0 + (ring * 0.2); // -1 to +1 range
+            double ringRadius = Math.sqrt(1 - yHeight * yHeight) * radius;
+            int particlesInRing = (int)(particles * ringRadius / radius);
 
-        // Using Fibonacci Sphere algorithm to distribute points evenly on a sphere surface
-        double phi = Math.PI * (3. - Math.sqrt(5.)); // Golden angle
+            for (int i = 0; i < particlesInRing; i++) {
+                double angle = (2 * Math.PI * i) / particlesInRing;
+                double xOffset = Math.cos(angle) * ringRadius;
+                double zOffset = Math.sin(angle) * ringRadius;
 
-        for (int i = 0; i < particles; i++) {
-            double y = 1 - (i / (float) (particles - 1)) * 2; // y goes from 1 to -1
-            double radius = Math.sqrt(1 - y * y); // radius at y
+                // Spawn CRIT particles with velocity pushing outward
+                level.sendParticles(
+                        net.minecraft.core.particles.ParticleTypes.CRIT,
+                        player.getX() + xOffset * 0.3,
+                        player.getY() + 1.0 + (yHeight * radius * 0.3),
+                        player.getZ() + zOffset * 0.3,
+                        2, // Spawn 2 particles per point
+                        xOffset * 0.1, yHeight * 0.5, zOffset * 0.1, // Velocity
+                        0.3 // Speed
+                );
 
-            double theta = phi * i; // golden angle increment
-
-            double x = Math.cos(theta) * radius;
-            double z = Math.sin(theta) * radius;
-
-            // Apply velocity directly (particles move away from center)
-            level.sendParticles(dust,
-                    player.getX(), player.getY() + 1.0, player.getZ(), // Start at player's center mass (approx)
-                    0, // Count 0 allows velocity
-                    x * sphereSpeed, y * sphereSpeed, z * sphereSpeed, // XYZ Velocity
-                    1.0 // Speed Multiplier
-            );
+                // Add FLAME particles for color
+                level.sendParticles(
+                        net.minecraft.core.particles.ParticleTypes.FLAME,
+                        player.getX() + xOffset * 0.2,
+                        player.getY() + 1.0 + (yHeight * radius * 0.2),
+                        player.getZ() + zOffset * 0.2,
+                        1,
+                        xOffset * 0.15, yHeight * 0.6, zOffset * 0.15,
+                        0.2
+                );
+            }
         }
     }
+
 }

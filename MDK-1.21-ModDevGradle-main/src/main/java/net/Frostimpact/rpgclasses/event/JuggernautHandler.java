@@ -28,14 +28,27 @@ public class JuggernautHandler {
             if (!rpg.getCurrentClass().equals("JUGGERNAUT")) return;
 
             // Handle charge decay in SHATTER mode
+            // Handle charge decay in SHATTER mode
             if (!rpg.isJuggernautShieldMode() && rpg.isChargeDecaying()) {
+                int oldCharge = rpg.getJuggernautCharge();
                 rpg.tickChargeDecay();
+                int newCharge = rpg.getJuggernautCharge();
 
-                if (rpg.getJuggernautCharge() == 0 && rpg.isJuggernautShieldMode()) {
+                // Check if mode was auto-switched to SHIELD
+                if (oldCharge > 0 && newCharge == 0 && rpg.isJuggernautShieldMode()) {
                     player.removeEffect(MobEffects.DAMAGE_BOOST);
-                    player.sendSystemMessage(Component.literal("§c⚠ Charge depleted → §b🛡 SHIELD MODE"));
-                    player.level().playSound(null, player.blockPosition(),
+                    player.sendSystemMessage(Component.literal("§c⚠ Charge depleted → §b🛡 AUTO SHIELD MODE"));
+
+                    ServerLevel level = (ServerLevel) player.level();
+                    level.playSound(null, player.blockPosition(),
                             SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.0f, 0.8f);
+
+                    // Visual feedback for auto-swap
+                    level.sendParticles(
+                            ParticleTypes.TOTEM_OF_UNDYING,
+                            player.getX(), player.getY() + 1, player.getZ(),
+                            20, 0.5, 0.5, 0.5, 0.1
+                    );
                 }
             }
 
@@ -239,9 +252,9 @@ public class JuggernautHandler {
 
         // 2. CENTRAL EXPLOSION
         //level.sendParticles(
-                //ParticleTypes.EXPLOSION_EMITTER, // Huge explosion visual
-                //player.getX(), player.getY(), player.getZ(),
-                //1, 0, 0, 0, 0
+        //ParticleTypes.EXPLOSION_EMITTER, // Huge explosion visual
+        //player.getX(), player.getY(), player.getZ(),
+        //1, 0, 0, 0, 0
         //);
 
         // 3. RADIATING CRIT SHOCKWAVE
@@ -298,14 +311,14 @@ public class JuggernautHandler {
 
                 if (rpg.isFortifyActive()) {
                     chargeGain += 10;
-
                 }
 
                 int oldCharge = rpg.getJuggernautCharge();
                 rpg.addJuggernautCharge(chargeGain);
                 int newCharge = rpg.getJuggernautCharge();
 
-                if (player.level().getGameTime() % 20 == 0) {
+                // Send message every time charge is gained (removed the time check that was preventing messages)
+                if (chargeGain > 0) {
                     player.sendSystemMessage(Component.literal("§b+" + (newCharge - oldCharge) + " CHARGE §7[" + newCharge + "]"));
                 }
             }
