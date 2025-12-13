@@ -1,5 +1,6 @@
 package net.Frostimpact.rpgclasses.ability.MARKSMAN;
 
+import net.Frostimpact.rpgclasses.RpgClassesMod;
 import net.Frostimpact.rpgclasses.ability.Ability;
 import net.Frostimpact.rpgclasses.entity.projectile.SeekerArrowEntity;
 import net.Frostimpact.rpgclasses.registry.ModEntities;
@@ -8,6 +9,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
+import net.Frostimpact.rpgclasses.ability.Ability;
+import net.Frostimpact.rpgclasses.entity.projectile.SeekerArrowEntity;
+import net.Frostimpact.rpgclasses.registry.ModEntities;
+import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
+import net.Frostimpact.rpgclasses.networking.ModMessages;
+import net.minecraft.server.level.ServerPlayer;
 
 public class SeekersAbility extends Ability {
 
@@ -84,6 +91,22 @@ public class SeekersAbility extends Ability {
         rpgData.useMana(manaCost);
         rpgData.setAbilityCooldown(id, getCooldownTicks());
 
+        // Force immediate sync after consuming charges
+        net.Frostimpact.rpgclasses.networking.ModMessages.sendToPlayer(
+                new net.Frostimpact.rpgclasses.networking.packet.PacketSyncCooldowns(
+                        rpgData.getAllCooldowns(),
+                        rpgData.getMana(),
+                        rpgData.getMaxMana(),
+                        rpgData.getJuggernautCharge(),
+                        rpgData.getJuggernautMaxCharge(),
+                        rpgData.isJuggernautShieldMode(),
+                        rpgData.getManaforgeArcana(),
+                        rpgData.getTempoStacks(),
+                        rpgData.isTempoActive(),
+                        rpgData.getMarksmanSeekerCharges()
+                ), player);
+
         return true;
+
     }
 }

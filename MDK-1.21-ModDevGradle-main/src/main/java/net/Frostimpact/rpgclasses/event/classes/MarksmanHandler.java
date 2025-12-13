@@ -65,6 +65,23 @@ public class MarksmanHandler {
                         player.sendSystemMessage(Component.literal(
                                 "§a+ SEEKER §7[" + rpg.getMarksmanSeekerCharges() + "/" + MAX_SEEKER_CHARGES + "]"
                         ));
+
+                        // Force immediate sync
+                        net.Frostimpact.rpgclasses.networking.ModMessages.sendToPlayer(
+                                new net.Frostimpact.rpgclasses.networking.packet.PacketSyncCooldowns(
+                                        rpg.getAllCooldowns(),
+                                        rpg.getMana(),
+                                        rpg.getMaxMana(),
+                                        rpg.getJuggernautCharge(),
+                                        rpg.getJuggernautMaxCharge(),
+                                        rpg.isJuggernautShieldMode(),
+                                        rpg.getManaforgeArcana(),
+                                        rpg.getTempoStacks(),
+                                        rpg.isTempoActive(),
+                                        rpg.getMarksmanSeekerCharges()
+                                ), player);
+
+
                     }
                 }
 
