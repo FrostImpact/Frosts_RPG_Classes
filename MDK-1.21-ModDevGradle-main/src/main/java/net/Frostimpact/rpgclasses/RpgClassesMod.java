@@ -29,6 +29,9 @@ public class RpgClassesMod {
         // Register entities
         ModEntities.register(modEventBus);
 
+        // Register items
+        net.Frostimpact.rpgclasses.registry.ModItems.register(modEventBus);
+
         // Register key mappings
         modEventBus.addListener(this::registerKeyMappings);
 

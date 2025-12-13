@@ -1,4 +1,4 @@
-package net.Frostimpact.rpgclasses.event;
+package net.Frostimpact.rpgclasses.event.classes;
 
 import net.Frostimpact.rpgclasses.RpgClassesMod;
 import net.Frostimpact.rpgclasses.ability.MANAFORGE.SurgeAbility;
@@ -129,6 +129,11 @@ public class ManaforgeHandler {
 
             if (!rpg.getCurrentClass().equals("MANAFORGE")) return;
 
+            // CHECK: Only trigger if attack is fully charged
+            if (player.getAttackStrengthScale(0.5f) < 1.0f) {
+                return; // Ignore spam clicks
+            }
+
             // ACCUMULATION PASSIVE - Gain ARCANA on hit
             if (!rpg.isCoalescenceActive()) {
                 int currentArcana = rpg.getManaforgeArcana();
@@ -176,7 +181,10 @@ public class ManaforgeHandler {
                         rpg.getJuggernautCharge(),
                         rpg.getJuggernautMaxCharge(),
                         rpg.isJuggernautShieldMode(),
-                        rpg.getManaforgeArcana()
+                        rpg.getManaforgeArcana(),
+                        rpg.getTempoStacks(),
+                        rpg.isTempoActive(),
+                        rpg.getMarksmanSeekerCharges()
                 ), player);
             }
         }

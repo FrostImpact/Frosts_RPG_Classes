@@ -34,11 +34,21 @@ public class SeekerChargeOverlay implements LayeredDraw.Layer {
     @Override
     public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui) return;
 
-        PlayerRPGData rpg = mc.player.getData(ModAttachments.PLAYER_RPG);
+        // Add safety checks
+        if (mc.player == null || mc.options.hideGui || mc.level == null) return;
 
-        if (!rpg.getCurrentClass().equals("MARKSMAN")) return;
+        PlayerRPGData rpg;
+        try {
+            rpg = mc.player.getData(ModAttachments.PLAYER_RPG);
+            if (rpg == null) return;
+        } catch (Exception e) {
+            return;
+        }
+
+        // Check class
+        String currentClass = rpg.getCurrentClass();
+        if (currentClass == null || !currentClass.equals("MARKSMAN")) return;
 
         int charges = rpg.getMarksmanSeekerCharges();
         int maxCharges = 5;
@@ -73,7 +83,6 @@ public class SeekerChargeOverlay implements LayeredDraw.Layer {
     }
 
     private void drawOrnateCharge(GuiGraphics graphics, int x, int y, int size, boolean filled) {
-        // Glow effect for filled charges
         if (filled) {
             long time = System.currentTimeMillis() / 200;
             if (time % 2 == 0) {
@@ -81,47 +90,41 @@ public class SeekerChargeOverlay implements LayeredDraw.Layer {
             }
         }
 
-        // Outer decorative frame
         int outerColor = filled ? 0xFF00AA00 : 0xFF003300;
         graphics.fill(x - 2, y - 2, x + size + 2, y - 1, outerColor);
         graphics.fill(x - 2, y + size + 1, x + size + 2, y + size + 2, outerColor);
         graphics.fill(x - 2, y - 1, x - 1, y + size + 1, outerColor);
         graphics.fill(x + size + 1, y - 1, x + size + 2, y + size + 1, outerColor);
 
-        // Main frame
         int frameColor = filled ? 0xFF005500 : 0xFF001100;
         graphics.fill(x - 1, y - 1, x + size + 1, y, frameColor);
         graphics.fill(x - 1, y + size, x + size + 1, y + size + 1, frameColor);
         graphics.fill(x - 1, y, x, y + size, frameColor);
         graphics.fill(x + size, y, x + size + 1, y + size, frameColor);
 
-        // Diamond shape (arrow-like)
         int centerX = x + size / 2;
         int centerY = y + size / 2;
         int halfSize = size / 2 - 1;
 
         int color1, color2;
         if (filled) {
-            color1 = 0xFF00FF00; // Bright lime
-            color2 = 0xFF00AA00; // Dark green
+            color1 = 0xFF00FF00;
+            color2 = 0xFF00AA00;
         } else {
-            color1 = 0xFF003300; // Very dark green
-            color2 = 0xFF001100; // Almost black green
+            color1 = 0xFF003300;
+            color2 = 0xFF001100;
         }
 
-        // Draw diamond with gradient
         for (int dy = -halfSize; dy <= halfSize; dy++) {
             int width = halfSize - Math.abs(dy);
             int lineY = centerY + dy;
 
-            // Gradient from top to bottom
             float gradientRatio = (dy + halfSize) / (float)(halfSize * 2);
             int gradientColor = interpolateColor(color1, color2, gradientRatio);
 
             graphics.fill(centerX - width, lineY, centerX + width + 1, lineY + 1, gradientColor);
         }
 
-        // Highlight on top half (for filled charges)
         if (filled) {
             for (int dy = -halfSize; dy <= -halfSize / 2; dy++) {
                 int width = halfSize - Math.abs(dy);
@@ -129,18 +132,15 @@ public class SeekerChargeOverlay implements LayeredDraw.Layer {
                 graphics.fill(centerX - width, lineY, centerX + width + 1, lineY + 1, 0x60FFFFFF);
             }
 
-            // Bright center line (like an arrow shaft)
             graphics.fill(centerX, centerY - halfSize, centerX + 1, centerY + halfSize + 1, 0x80FFFFFF);
         }
 
-        // Corner decorations
         int cornerColor = filled ? 0xFF66FF66 : 0xFF224422;
         graphics.fill(x - 1, y - 1, x, y, cornerColor);
         graphics.fill(x + size, y - 1, x + size + 1, y, cornerColor);
         graphics.fill(x - 1, y + size, x, y + size + 1, cornerColor);
         graphics.fill(x + size, y + size, x + size + 1, y + size + 1, cornerColor);
 
-        // Arrow fletching (decorative detail at bottom)
         if (filled) {
             int fletchY = centerY + halfSize - 2;
             graphics.fill(centerX - 3, fletchY, centerX - 1, fletchY + 3, 0xFF00CC00);

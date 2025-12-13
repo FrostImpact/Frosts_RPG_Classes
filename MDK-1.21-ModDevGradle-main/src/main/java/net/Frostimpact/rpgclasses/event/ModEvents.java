@@ -151,6 +151,12 @@ public class ModEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
 
+            // CHECK: Only trigger if attack is fully charged
+            // getAttackStrengthScale(0.5f) returns 1.0 for fully charged attacks
+            if (player.getAttackStrengthScale(0.5f) < 1.0f) {
+                return; // Ignore spam clicks
+            }
+
             // Only trigger TEMPO for Bladedancer class
             if (rpg.getCurrentClass().equals("BLADEDANCER")) {
 
@@ -226,4 +232,6 @@ public class ModEvents {
             }
         }
     }
+
+
 }

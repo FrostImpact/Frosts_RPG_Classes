@@ -19,5 +19,6 @@
   "key.rpgclasses.cloak": "Cloak (Sneak)",
   "key.rpgclasses.stun_bolt": "Stun Bolt",
   "key.rpgclasses.cycle_quiver": "Cycle Quiver",
-  "key.rpgclasses.hired_gun": "Hired Gun"
+  "key.rpgclasses.hired_gun": "Hired Gun",
+  "item.rpgclasses.shortbow": "Shortbow"
 }

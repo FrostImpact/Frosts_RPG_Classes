@@ -45,11 +45,18 @@ public class ModMessages {
                 PacketSyncCooldowns::handle
         );
 
-        // 4. PacketSyncClass (Server -> Client) - NEW
+        // 4. PacketSyncClass (Server -> Client)
         registrar.playToClient(
                 PacketSyncClass.TYPE,
                 PacketSyncClass.STREAM_CODEC,
                 PacketSyncClass::handle
+        );
+
+        // 5. PacketFireShortbow (Client -> Server) - NEW
+        registrar.playToServer(
+                net.Frostimpact.rpgclasses.networking.packet.PacketFireShortbow.TYPE,
+                net.Frostimpact.rpgclasses.networking.packet.PacketFireShortbow.STREAM_CODEC,
+                net.Frostimpact.rpgclasses.networking.packet.PacketFireShortbow::handle
         );
 
         System.out.println("RPG Classes: All packets registered!");

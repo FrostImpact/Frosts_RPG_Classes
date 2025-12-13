@@ -1,7 +1,9 @@
-package net.Frostimpact.rpgclasses.client.MeterOverlay;
+package net.Frostimpact.rpgclasses.client.MeterOverlay.BaseOverlay;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.Frostimpact.rpgclasses.RpgClassesMod;
+import net.Frostimpact.rpgclasses.rpg.ModAttachments;
+import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -14,7 +16,7 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 @EventBusSubscriber(modid = RpgClassesMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
-public class HealthBarOverlay implements LayeredDraw.Layer {
+public class ManaBarOverlay implements LayeredDraw.Layer {
 
     private static final int BAR_WIDTH = 100;
     private static final int BAR_HEIGHT = 7;
@@ -24,10 +26,10 @@ public class HealthBarOverlay implements LayeredDraw.Layer {
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(
                 VanillaGuiLayers.FOOD_LEVEL,
-                ResourceLocation.fromNamespaceAndPath(RpgClassesMod.MOD_ID, "health_bar"),
-                new HealthBarOverlay()
+                ResourceLocation.fromNamespaceAndPath(RpgClassesMod.MOD_ID, "mana_bar"),
+                new ManaBarOverlay()
         );
-        System.out.println("RPG Classes: Health Bar Overlay Registered!");
+        System.out.println("RPG Classes: Mana Bar Overlay Registered!");
     }
 
     @Override
@@ -35,15 +37,17 @@ public class HealthBarOverlay implements LayeredDraw.Layer {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.options.hideGui) return;
 
-        float health = mc.player.getHealth();
-        float maxHealth = mc.player.getMaxHealth();
-        float healthPercent = Math.max(0, Math.min(1, health / maxHealth));
+        PlayerRPGData rpg = mc.player.getData(ModAttachments.PLAYER_RPG);
+        
+        int mana = rpg.getMana();
+        int maxMana = rpg.getMaxMana();
+        float manaPercent = Math.max(0, Math.min(1, (float) mana / maxMana));
 
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
 
-        // Position: Bottom-left area
-        int barX = screenWidth / 2 - BAR_WIDTH - 5;
+        // Position: Bottom-right area
+        int barX = screenWidth / 2 + 5;
         int barY = screenHeight - 50;
 
         RenderSystem.enableBlend();
@@ -59,7 +63,7 @@ public class HealthBarOverlay implements LayeredDraw.Layer {
         int innerHeight = BAR_HEIGHT - (BORDER_WIDTH * 2);
 
         // Dark background with slight gradient
-        graphics.fill(innerX, innerY, innerX + innerWidth, innerY + innerHeight, 0xFF1a0f0f);
+        graphics.fill(innerX, innerY, innerX + innerWidth, innerY + innerHeight, 0xFF0f0f1a);
         
         // Inner shadow (top)
         graphics.fill(innerX, innerY, innerX + innerWidth, innerY + 2, 0x80000000);
@@ -67,35 +71,30 @@ public class HealthBarOverlay implements LayeredDraw.Layer {
         // Inner shadow (left)
         graphics.fill(innerX, innerY, innerX + 2, innerY + innerHeight, 0x60000000);
 
-        // === HEALTH BAR FILL (with gradient) ===
-        int fillWidth = (int) (innerWidth * healthPercent);
+        // === MANA BAR FILL (with gradient) ===
+        int fillWidth = (int) (innerWidth * manaPercent);
         
         if (fillWidth > 0) {
-            // Determine bar color based on health percentage
-            int barColor1, barColor2;
-            if (healthPercent > 0.6f) {
-                // High health - Green
-                barColor1 = 0xFF2eb82e; // Bright green
-                barColor2 = 0xFF1a8a1a; // Dark green
-            } else if (healthPercent > 0.3f) {
-                // Medium health - Yellow/Orange
-                barColor1 = 0xFFe6b800; // Bright yellow
-                barColor2 = 0xFFb38f00; // Dark yellow
-            } else {
-                // Low health - Red
-                barColor1 = 0xFFcc0000; // Bright red
-                barColor2 = 0xFF800000; // Dark red
-            }
+            // Blue/cyan gradient for mana
+            int barColor1 = 0xFF00bfff; // Bright cyan
+            int barColor2 = 0xFF0066cc; // Deep blue
 
             // Draw gradient fill
             drawGradientBar(graphics, innerX, innerY, fillWidth, innerHeight, barColor1, barColor2);
 
             // Glossy highlight on top
-            int highlightColor = (barColor1 & 0x00FFFFFF) | 0x60FFFFFF;
+            int highlightColor = 0x60FFFFFF;
             graphics.fill(innerX, innerY, innerX + fillWidth, innerY + 4, highlightColor);
 
             // Bright edge on left
             graphics.fill(innerX, innerY, innerX + 2, innerY + innerHeight, 0x40FFFFFF);
+
+            // Magic shimmer effect
+            long time = System.currentTimeMillis() / 100;
+            int shimmerOffset = (int) (time % fillWidth);
+            if (shimmerOffset < fillWidth - 4) {
+                graphics.fill(innerX + shimmerOffset, innerY, innerX + shimmerOffset + 4, innerY + innerHeight, 0x30FFFFFF);
+            }
         }
 
         // === NOTCHES (visual segments) ===
@@ -105,33 +104,34 @@ public class HealthBarOverlay implements LayeredDraw.Layer {
             graphics.fill(notchX, innerY, notchX + 1, innerY + innerHeight, 0x40000000);
         }
 
-        // === HEALTH TEXT ===
-        String healthText = String.format("%.0f / %.0f", health, maxHealth);
-        int textWidth = mc.font.width(healthText);
+        // === MANA TEXT ===
+        String manaText = String.format("%d / %d", mana, maxMana);
+        int textWidth = mc.font.width(manaText);
         int textX = barX + (BAR_WIDTH - textWidth) / 2;
         int textY = barY + (BAR_HEIGHT - mc.font.lineHeight) / 2;
 
         // Text shadow (for depth)
-        graphics.drawString(mc.font, healthText, textX + 1, textY + 1, 0xFF000000, false);
+        graphics.drawString(mc.font, manaText, textX + 1, textY + 1, 0xFF000000, false);
         
-        // Main text (white with slight gold tint)
-        graphics.drawString(mc.font, healthText, textX, textY, 0xFFFFFFFF, false);
+        // Main text (white with slight cyan tint)
+        graphics.drawString(mc.font, manaText, textX, textY, 0xFFccffff, false);
 
         // === LABEL ===
-        //String label = "HEALTH";
-        //int labelX = barX + 4;
+        //String label = "MANA";
+        //int labelWidth = mc.font.width(label);
+        //int labelX = barX + BAR_WIDTH - labelWidth - 4;
         //int labelY = barY - 12;
-        //graphics.drawString(mc.font, label, labelX, labelY, 0xFFcc3333, true);
+        //graphics.drawString(mc.font, label, labelX, labelY, 0xFF3399ff, true);
 
-        // === LOW HEALTH PULSE ===
-        if (healthPercent < 0.25f) {
-            long time = System.currentTimeMillis() / 200;
+        // === LOW MANA PULSE ===
+        if (manaPercent < 0.15f) {
+            long time = System.currentTimeMillis() / 250;
             if (time % 2 == 0) {
-                // Pulsing red glow
-                graphics.fill(barX, barY, barX + BAR_WIDTH, barY + 2, 0xFFff0000);
-                graphics.fill(barX, barY + BAR_HEIGHT - 2, barX + BAR_WIDTH - 1, barY + BAR_HEIGHT, 0xFFff0000);
-                graphics.fill(barX, barY, barX + 2, barY + BAR_HEIGHT - 1, 0xFFff0000);
-                graphics.fill(barX + BAR_WIDTH - 2, barY, barX + BAR_WIDTH - 1, barY + BAR_HEIGHT, 0xFFff0000);
+                // Pulsing blue glow
+                graphics.fill(barX, barY, barX + BAR_WIDTH, barY + 2, 0xFF0099ff);
+                graphics.fill(barX, barY + BAR_HEIGHT - 2, barX + BAR_WIDTH - 1, barY + BAR_HEIGHT, 0xFF0099ff);
+                graphics.fill(barX, barY, barX + 2, barY + BAR_HEIGHT - 1, 0xFF0099ff);
+                graphics.fill(barX + BAR_WIDTH - 2, barY, barX + BAR_WIDTH - 1, barY + BAR_HEIGHT, 0xFF0099ff);
             }
         }
 
@@ -140,15 +140,15 @@ public class HealthBarOverlay implements LayeredDraw.Layer {
 
     private void drawOrnateFrame(GuiGraphics graphics, int x, int y, int width, int height) {
         // Outer border (bright decorative edge)
-        int outerColor = 0xFF8b7355; // Bronze/brown
+        int outerColor = 0xFF5577aa; // Blue-silver
         graphics.fill(x - 2, y - 2, x + width + 2, y - 1, outerColor);
         graphics.fill(x - 2, y + height + 1, x + width + 2, y + height + 2, outerColor);
         graphics.fill(x - 2, y - 1, x - 1, y + height + 1, outerColor);
         graphics.fill(x + width + 1, y - 1, x + width + 2, y + height + 1, outerColor);
 
         // Main frame
-        int frameColor1 = 0xFF5c4033; // Dark brown
-        int frameColor2 = 0xFF3d2817; // Darker brown
+        int frameColor1 = 0xFF2d3d5c; // Dark blue-grey
+        int frameColor2 = 0xFF1a2433; // Darker blue-grey
         
         // Top and bottom
         graphics.fill(x, y, x + width, y + BORDER_WIDTH, frameColor1);
@@ -159,12 +159,12 @@ public class HealthBarOverlay implements LayeredDraw.Layer {
         graphics.fill(x + width - BORDER_WIDTH, y, x + width, y + height, frameColor2);
 
         // Inner highlight (beveled edge)
-        int highlightColor = 0x60FFFFFF;
+        int highlightColor = 0x60aaccff;
         graphics.fill(x + BORDER_WIDTH, y + BORDER_WIDTH, x + width - BORDER_WIDTH, y + BORDER_WIDTH + 1, highlightColor);
         graphics.fill(x + BORDER_WIDTH, y + BORDER_WIDTH, x + BORDER_WIDTH + 1, y + height - BORDER_WIDTH, highlightColor);
 
         // Corner decorations
-        int cornerColor = 0xFFd4af37; // Gold
+        int cornerColor = 0xFF66ccff; // Bright cyan
         // Top-left corner
         graphics.fill(x - 1, y - 1, x + 1, y, cornerColor);
         graphics.fill(x - 1, y, x, y + 1, cornerColor);

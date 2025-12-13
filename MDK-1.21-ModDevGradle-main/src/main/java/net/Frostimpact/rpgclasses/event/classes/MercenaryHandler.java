@@ -1,4 +1,4 @@
-package net.Frostimpact.rpgclasses.event;
+package net.Frostimpact.rpgclasses.event.classes;
 
 import net.Frostimpact.rpgclasses.RpgClassesMod;
 import net.Frostimpact.rpgclasses.ability.MERCENARY.CloakAbility;

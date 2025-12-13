@@ -20,7 +20,6 @@ public class TempoCounterOverlay implements LayeredDraw.Layer {
 
     private static final int STACK_SIZE = 10;
     private static final int STACK_SPACING = 18;
-    private static final int FRAME_WIDTH = 1;
 
     @SubscribeEvent
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
@@ -35,22 +34,34 @@ public class TempoCounterOverlay implements LayeredDraw.Layer {
     @Override
     public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui) return;
 
-        PlayerRPGData rpg = mc.player.getData(ModAttachments.PLAYER_RPG);
+        // Add safety checks
+        if (mc.player == null || mc.options.hideGui || mc.level == null) return;
 
-        if (!rpg.getCurrentClass().equals("BLADEDANCER")) return;
+        PlayerRPGData rpg;
+        try {
+            rpg = mc.player.getData(ModAttachments.PLAYER_RPG);
+            if (rpg == null) return;
+        } catch (Exception e) {
+            return;
+        }
+
+        // Check class
+        String currentClass = rpg.getCurrentClass();
+        if (currentClass == null || !currentClass.equals("BLADEDANCER")) return;
 
         int tempoStacks = rpg.getTempoStacks();
         boolean isActive = rpg.isTempoActive();
         boolean isFinalWaltz = rpg.isFinalWaltzActive();
 
-        if (tempoStacks == 0 && !isActive) return;
+        // ALWAYS show if we have stacks OR if active (even if 0 stacks during Final Waltz)
+        if (tempoStacks == 0 && !isActive && !isFinalWaltz) return;
 
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
 
-        int displayStacks = isFinalWaltz ? tempoStacks : Math.min(tempoStacks, 4);
+        // Show minimum 1 stack for display purposes
+        int displayStacks = Math.max(1, isFinalWaltz ? tempoStacks : Math.min(tempoStacks, 4));
         int totalWidth = (displayStacks * STACK_SPACING) - (STACK_SPACING - STACK_SIZE);
 
         int baseX = (screenWidth / 2) - (totalWidth / 2);
@@ -99,17 +110,16 @@ public class TempoCounterOverlay implements LayeredDraw.Layer {
             int strengthColor;
 
             if (isFinalWaltz && tempoStacks >= 6) {
-                strengthText = "II"; // Strength II
+                strengthText = "II";
                 strengthColor = 0xFFFF00FF;
             } else {
-                strengthText = "I"; // Strength I
+                strengthText = "I";
                 strengthColor = 0xFFFFAA00;
             }
 
             int textX = baseX + totalWidth + 6;
             int textY = baseY + (STACK_SIZE / 2) - (mc.font.lineHeight / 2);
 
-            // Ornate strength display
             graphics.fill(textX - 2, textY - 2, textX + mc.font.width(strengthText) + 2, textY + mc.font.lineHeight + 2, 0xFF2d2817);
             graphics.fill(textX - 3, textY - 3, textX + mc.font.width(strengthText) + 3, textY - 2, 0xFF8b7355);
             graphics.fill(textX - 3, textY + mc.font.lineHeight + 2, textX + mc.font.width(strengthText) + 3, textY + mc.font.lineHeight + 3, 0xFF8b7355);
@@ -134,7 +144,6 @@ public class TempoCounterOverlay implements LayeredDraw.Layer {
     }
 
     private void drawOrnateStack(GuiGraphics graphics, int x, int y, int size, int color, boolean glow) {
-        // Glow effect
         if (glow) {
             long time = System.currentTimeMillis() / 200;
             if (time % 2 == 0) {
@@ -143,21 +152,18 @@ public class TempoCounterOverlay implements LayeredDraw.Layer {
             }
         }
 
-        // Outer decorative frame
         int outerColor = darkenColor(color, 0.4f);
         graphics.fill(x - 2, y - 2, x + size + 2, y - 1, outerColor);
         graphics.fill(x - 2, y + size + 1, x + size + 2, y + size + 2, outerColor);
         graphics.fill(x - 2, y - 1, x - 1, y + size + 1, outerColor);
         graphics.fill(x + size + 1, y - 1, x + size + 2, y + size + 1, outerColor);
 
-        // Main frame
         int frameColor = darkenColor(color, 0.6f);
         graphics.fill(x - 1, y - 1, x + size + 1, y, frameColor);
         graphics.fill(x - 1, y + size, x + size + 1, y + size + 1, frameColor);
         graphics.fill(x - 1, y, x, y + size, frameColor);
         graphics.fill(x + size, y, x + size + 1, y + size, frameColor);
 
-        // Diamond shape (filled square rotated)
         int centerX = x + size / 2;
         int centerY = y + size / 2;
         int halfSize = size / 2 - 1;
@@ -166,14 +172,12 @@ public class TempoCounterOverlay implements LayeredDraw.Layer {
             int width = halfSize - Math.abs(dy);
             int lineY = centerY + dy;
 
-            // Gradient from top to bottom
             float gradientRatio = (dy + halfSize) / (float)(halfSize * 2);
             int gradientColor = interpolateColor(color, darkenColor(color, 0.4f), gradientRatio);
 
             graphics.fill(centerX - width, lineY, centerX + width + 1, lineY + 1, gradientColor);
         }
 
-        // Highlight on top half
         for (int dy = -halfSize; dy <= 0; dy++) {
             int width = halfSize - Math.abs(dy);
             int lineY = centerY + dy;
@@ -181,7 +185,6 @@ public class TempoCounterOverlay implements LayeredDraw.Layer {
             graphics.fill(centerX - width, lineY, centerX + width + 1, lineY + 1, highlightColor);
         }
 
-        // Corner decorations
         int cornerColor = lightenColor(color, 1.2f);
         graphics.fill(x - 1, y - 1, x, y, cornerColor);
         graphics.fill(x + size, y - 1, x + size + 1, y, cornerColor);

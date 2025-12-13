@@ -30,22 +30,20 @@ public class PacketSyncCooldowns implements CustomPacketPayload {
     private final int juggernautMaxCharge;
     private final boolean isShieldMode;
     private final int manaforgeArcana;
-
-    private static long lastLogTime = 0;
-    private static int lastLoggedArcana = -1;
-
-    public PacketSyncCooldowns(Map<String, Integer> cooldowns, int mana, int maxMana) {
-        this(cooldowns, mana, maxMana, 0, 100, true, 0);
-    }
-
-    public PacketSyncCooldowns(Map<String, Integer> cooldowns, int mana, int maxMana,
-                               int juggernautCharge, int juggernautMaxCharge, boolean isShieldMode) {
-        this(cooldowns, mana, maxMana, juggernautCharge, juggernautMaxCharge, isShieldMode, 0);
-    }
+    private final int tempoStacks;
+    private final boolean tempoActive;
+    private final int seekerCharges;
 
     public PacketSyncCooldowns(Map<String, Integer> cooldowns, int mana, int maxMana,
                                int juggernautCharge, int juggernautMaxCharge,
                                boolean isShieldMode, int manaforgeArcana) {
+        this(cooldowns, mana, maxMana, juggernautCharge, juggernautMaxCharge, isShieldMode, manaforgeArcana, 0, false, 0);
+    }
+
+    public PacketSyncCooldowns(Map<String, Integer> cooldowns, int mana, int maxMana,
+                               int juggernautCharge, int juggernautMaxCharge,
+                               boolean isShieldMode, int manaforgeArcana,
+                               int tempoStacks, boolean tempoActive, int seekerCharges) {
         this.cooldowns = cooldowns;
         this.mana = mana;
         this.maxMana = maxMana;
@@ -53,6 +51,9 @@ public class PacketSyncCooldowns implements CustomPacketPayload {
         this.juggernautMaxCharge = juggernautMaxCharge;
         this.isShieldMode = isShieldMode;
         this.manaforgeArcana = manaforgeArcana;
+        this.tempoStacks = tempoStacks;
+        this.tempoActive = tempoActive;
+        this.seekerCharges = seekerCharges;
     }
 
     private static void encode(FriendlyByteBuf buf, PacketSyncCooldowns message) {
@@ -62,6 +63,9 @@ public class PacketSyncCooldowns implements CustomPacketPayload {
         buf.writeInt(message.juggernautMaxCharge);
         buf.writeBoolean(message.isShieldMode);
         buf.writeInt(message.manaforgeArcana);
+        buf.writeInt(message.tempoStacks);
+        buf.writeBoolean(message.tempoActive);
+        buf.writeInt(message.seekerCharges);
 
         buf.writeInt(message.cooldowns.size());
         for (Map.Entry<String, Integer> entry : message.cooldowns.entrySet()) {
@@ -77,6 +81,9 @@ public class PacketSyncCooldowns implements CustomPacketPayload {
         int juggernautMaxCharge = buf.readInt();
         boolean isShieldMode = buf.readBoolean();
         int manaforgeArcana = buf.readInt();
+        int tempoStacks = buf.readInt();
+        boolean tempoActive = buf.readBoolean();
+        int seekerCharges = buf.readInt();
 
         int size = buf.readInt();
         Map<String, Integer> cooldowns = new HashMap<>();
@@ -87,7 +94,7 @@ public class PacketSyncCooldowns implements CustomPacketPayload {
         }
 
         return new PacketSyncCooldowns(cooldowns, mana, maxMana, juggernautCharge,
-                juggernautMaxCharge, isShieldMode, manaforgeArcana);
+                juggernautMaxCharge, isShieldMode, manaforgeArcana, tempoStacks, tempoActive, seekerCharges);
     }
 
     @Override
@@ -111,24 +118,20 @@ public class PacketSyncCooldowns implements CustomPacketPayload {
                         rpg.setJuggernautShieldMode(message.isShieldMode);
 
                         // Update manaforge arcana
-                        int oldArcana = rpg.getManaforgeArcana();
                         rpg.setManaforgeArcana(message.manaforgeArcana);
 
-                        // Debug logging - only log when arcana changes or every 5 seconds
-                        long currentTime = System.currentTimeMillis();
-                        if (message.manaforgeArcana != lastLoggedArcana || (currentTime - lastLogTime) > 5000) {
-                            System.out.println("RPG Classes [PACKET]: Received arcana update: " + oldArcana + " -> " + message.manaforgeArcana);
-                            lastLoggedArcana = message.manaforgeArcana;
-                            lastLogTime = currentTime;
-                        }
+                        // Update TEMPO data
+                        rpg.setTempoStacks(message.tempoStacks);
+                        rpg.setTempoActive(message.tempoActive);
+
+                        // Update SEEKER charges
+                        rpg.setMarksmanSeekerCharges(message.seekerCharges);
 
                         // Clear and update all cooldowns
                         rpg.clearAllCooldowns();
                         for (Map.Entry<String, Integer> entry : message.cooldowns.entrySet()) {
                             rpg.setAbilityCooldown(entry.getKey(), entry.getValue());
                         }
-                    } else {
-                        System.err.println("RPG Classes [PACKET]: Player RPG data is null!");
                     }
                 }
             } catch (Exception e) {
