@@ -19,6 +19,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 @EventBusSubscriber(modid = RpgClassesMod.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public class ShortbowHandler {
 
+
     @SubscribeEvent
     public static void onLeftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
         // CLIENT SIDE: Detect left-click in air
@@ -50,6 +51,11 @@ public class ShortbowHandler {
 
     public static void fireShortbowArrow(Player player, ItemStack bowStack) {
         Level level = player.level();
+
+        // Check cooldown (15 ticks = 0.75 seconds)
+        if (player.getCooldowns().isOnCooldown(bowStack.getItem())) {
+            return;
+        }
 
         // Check for arrows in inventory
         ItemStack arrowStack = player.getProjectile(bowStack);

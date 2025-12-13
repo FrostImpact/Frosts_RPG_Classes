@@ -22,7 +22,7 @@ public class ServerEvents {
             PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
 
             // Force set the class and initialize
-            rpg.setCurrentClass("MARKSMAN"); // FIXED: Set to MERCENARY only
+            rpg.setCurrentClass("MANAFORGE"); // FIXED: Set to MERCENARY only
             rpg.setJuggernautShieldMode(true);
             rpg.setJuggernautCharge(0);
 
@@ -30,7 +30,7 @@ public class ServerEvents {
             rpg.setMana(rpg.getMaxMana());
 
             // IMPORTANT: Sync class to client immediately
-            ModMessages.sendToPlayer(new PacketSyncClass("MARKSMAN"), player);
+            ModMessages.sendToPlayer(new PacketSyncClass("MANAFORGE"), player);
 
             // Send confirmation
             player.sendSystemMessage(Component.literal("§a[RPG Classes] Class set to: " + rpg.getCurrentClass()));

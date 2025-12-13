@@ -52,11 +52,32 @@ public class ModMessages {
                 PacketSyncClass::handle
         );
 
-        // 5. PacketFireShortbow (Client -> Server) - NEW
+// 5. PacketFireShortbow (Client -> Server)
         registrar.playToServer(
                 net.Frostimpact.rpgclasses.networking.packet.PacketFireShortbow.TYPE,
                 net.Frostimpact.rpgclasses.networking.packet.PacketFireShortbow.STREAM_CODEC,
                 net.Frostimpact.rpgclasses.networking.packet.PacketFireShortbow::handle
+        );
+
+        // 6. PacketFireStaff (Client -> Server)
+        registrar.playToServer(
+                net.Frostimpact.rpgclasses.networking.packet.PacketFireStaff.TYPE,
+                net.Frostimpact.rpgclasses.networking.packet.PacketFireStaff.STREAM_CODEC,
+                net.Frostimpact.rpgclasses.networking.packet.PacketFireStaff::handle
+        );
+
+        // 7. PacketOpenClassGui (Server -> Client)
+        registrar.playToClient(
+                net.Frostimpact.rpgclasses.networking.packet.PacketOpenClassGui.TYPE,
+                net.Frostimpact.rpgclasses.networking.packet.PacketOpenClassGui.STREAM_CODEC,
+                net.Frostimpact.rpgclasses.networking.packet.PacketOpenClassGui::handle
+        );
+
+        // 8. PacketSelectClass (Client -> Server)
+        registrar.playToServer(
+                net.Frostimpact.rpgclasses.networking.packet.PacketSelectClass.TYPE,
+                net.Frostimpact.rpgclasses.networking.packet.PacketSelectClass.STREAM_CODEC,
+                net.Frostimpact.rpgclasses.networking.packet.PacketSelectClass::handle
         );
 
         System.out.println("RPG Classes: All packets registered!");

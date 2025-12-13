@@ -19,7 +19,7 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 public class ChargeMeterOverlay implements LayeredDraw.Layer {
 
     private static final int BAR_WIDTH = 140;
-    private static final int BAR_HEIGHT = 80;
+    private static final int BAR_HEIGHT = 8;
     private static final int BORDER_WIDTH = 1;
 
     @SubscribeEvent
