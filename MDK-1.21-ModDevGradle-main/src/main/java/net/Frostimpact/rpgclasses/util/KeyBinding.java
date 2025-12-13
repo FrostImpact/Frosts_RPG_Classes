@@ -104,4 +104,37 @@ public class KeyBinding {
             InputConstants.KEY_Z,
             "key.category.rpgclasses"
     );
+
+    // MARKSMAN Keys
+    public static final KeyMapping SEEKERS_KEY = new KeyMapping(
+            "key.rpgclasses.seekers",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_V,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping VAULT_KEY = new KeyMapping(
+            "key.rpgclasses.vault",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_C,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping UPDRAFT_KEY = new KeyMapping(
+            "key.rpgclasses.updraft",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_X,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping ARROW_RAIN_KEY = new KeyMapping(
+            "key.rpgclasses.arrow_rain",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_Z,
+            "key.category.rpgclasses"
+    );
 }

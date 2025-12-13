@@ -54,6 +54,11 @@ public class RpgClassesMod {
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.LEAP_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.SWAP_KEY);
 
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.SEEKERS_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.VAULT_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.UPDRAFT_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.ARROW_RAIN_KEY);
+
         System.out.println("RPG Classes: Keybinds Registered!");
 
         // Register ability database

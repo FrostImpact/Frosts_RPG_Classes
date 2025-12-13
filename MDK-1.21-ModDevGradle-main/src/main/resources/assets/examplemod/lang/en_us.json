@@ -18,5 +18,10 @@
   "key.rpgclasses.magic_missile": "Magic Missile",
   "key.rpgclasses.surge": "Surge",
   "key.rpgclasses.open_rift": "Open Rift",
-  "key.rpgclasses.coalescence": "Coalescence"
+  "key.rpgclasses.coalescence": "Coalescence",
+
+  "key.rpgclasses.seekers": "Seekers",
+  "key.rpgclasses.vault": "Vault",
+  "key.rpgclasses.updraft": "Updraft",
+  "key.rpgclasses.arrow_rain": "Arrow Rain"
 }

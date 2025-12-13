@@ -1,4 +1,5 @@
 package net.Frostimpact.rpgclasses.ability;
+import net.Frostimpact.rpgclasses.ability.MARKSMAN.*;
 
 import net.Frostimpact.rpgclasses.ability.BLADEDANCER.BLADE_DANCE.BladeDanceAbility;
 import net.Frostimpact.rpgclasses.ability.BLADEDANCER.DashAbility;
@@ -38,6 +39,14 @@ public class AbilityRegistry {
         register(new SurgeAbility());
         register(new OpenRiftAbility());
         register(new CoalescenceAbility());
+
+        register(new SeekersAbility());
+        register(new VaultAbility());
+        register(new UpdraftAbility());
+        register(new ArrowRainAbility());
+
+
+
     }
 
     private static void register(Ability ability) {

@@ -26,6 +26,11 @@ public class AbilityDatabase {
         register("surge", new AbilityStats("Surge", 20, 40));
         register("open_rift", new AbilityStats("Open Rift", 15, 35));
         register("coalescence", new AbilityStats("Coalescence", 25, 30));
+
+        register("seekers", new AbilityStats("Seekers", 5, 5)); // Variable mana: 5 per charge
+        register("vault", new AbilityStats("Vault", 8, 15));
+        register("updraft", new AbilityStats("Updraft", 12, 15));
+        register("arrow_rain", new AbilityStats("Arrow Rain", 15, 30));
     }
 
     private static void register(String id, AbilityStats stats) {

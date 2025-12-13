@@ -75,5 +75,23 @@ public class ClientEvents {
                 ModMessages.sendToServer(new PacketUseAbility("coalescence"));
             }
         }
+
+        if (currentClass.equals("MARKSMAN")) {
+            if (KeyBinding.SEEKERS_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("seekers"));
+            }
+
+            if (KeyBinding.VAULT_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("vault"));
+            }
+
+            if (KeyBinding.UPDRAFT_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("updraft"));
+            }
+
+            if (KeyBinding.ARROW_RAIN_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("arrow_rain"));
+            }
+        }
     }
 }

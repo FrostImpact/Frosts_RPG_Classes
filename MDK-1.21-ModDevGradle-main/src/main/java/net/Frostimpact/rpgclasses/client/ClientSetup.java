@@ -7,6 +7,8 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.Frostimpact.rpgclasses.client.renderer.SeekerArrowRenderer;
+import net.Frostimpact.rpgclasses.client.renderer.VaultProjectileRenderer;
 
 @EventBusSubscriber(modid = RpgClassesMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class ClientSetup {
@@ -14,6 +16,11 @@ public class ClientSetup {
     @SubscribeEvent
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.MAGIC_MISSILE.get(), MagicMissileRenderer::new);
-        System.out.println("RPG Classes: Magic Missile Renderer Registered!");
+        event.registerEntityRenderer(ModEntities.SEEKER_ARROW.get(), SeekerArrowRenderer::new);
+        event.registerEntityRenderer(ModEntities.VAULT_PROJECTILE.get(), VaultProjectileRenderer::new);
+        System.out.println("RPG Classes: Entity Renderers Registered!");
     }
+
+
+
 }

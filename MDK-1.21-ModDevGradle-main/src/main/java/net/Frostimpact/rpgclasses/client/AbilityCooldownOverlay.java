@@ -37,6 +37,10 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
         CLASS_ABILITIES.put("MANAFORGE", new String[]{
                 "magic_missile", "surge", "open_rift", "coalescence"
         });
+
+        CLASS_ABILITIES.put("MARKSMAN", new String[]{
+                "seekers", "vault", "updraft", "arrow_rain"
+        });
     }
 
     private static final int ICON_SIZE = 16;
@@ -152,6 +156,19 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
             };
         }
 
+        if (className.equals("MARKSMAN")) {
+            return switch (abilityId) {
+                case "seekers" -> new ItemStack(Items.SPECTRAL_ARROW);
+                case "vault" -> new ItemStack(Items.LEATHER_BOOTS);
+                case "updraft" -> new ItemStack(Items.FEATHER);
+                case "arrow_rain" -> new ItemStack(Items.BOW);
+                default -> new ItemStack(Items.BARRIER);
+            };
+        }
+
         return new ItemStack(Items.BARRIER);
     }
+
+
+
 }

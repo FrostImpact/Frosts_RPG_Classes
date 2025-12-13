@@ -82,6 +82,15 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     private int coalescenceTicks = 0;
     private float coalescenceStoredDamage = 0;
 
+    // MARKSMAN - AERIAL AFFINITY
+    private int marksmanSeekerCharges = 0;
+    private int marksmanAirborneTicks = 0;
+
+    // MARKSMAN - ARROW RAIN
+    private boolean arrowRainActive = false;
+    private int arrowRainTicks = 0;
+    private Vec3 arrowRainPosition = Vec3.ZERO;
+
     //DASH
     public boolean isDashActive() {
         return dashActive;
@@ -170,6 +179,52 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         if (bladeDanceBlades > 0) {
             bladeDanceBlades--;
         }
+    }
+
+    // MARKSMAN - AERIAL AFFINITY
+    public int getMarksmanSeekerCharges() {
+        return marksmanSeekerCharges;
+    }
+
+    public void setMarksmanSeekerCharges(int charges) {
+        this.marksmanSeekerCharges = Math.max(0, Math.min(charges, 5));
+    }
+
+    public void addMarksmanSeekerCharge() {
+        this.marksmanSeekerCharges = Math.min(5, this.marksmanSeekerCharges + 1);
+    }
+
+    public int getMarksmanAirborneTicks() {
+        return marksmanAirborneTicks;
+    }
+
+    public void setMarksmanAirborneTicks(int ticks) {
+        this.marksmanAirborneTicks = ticks;
+    }
+
+    // MARKSMAN - ARROW RAIN
+    public boolean isArrowRainActive() {
+        return arrowRainActive;
+    }
+
+    public void setArrowRainActive(boolean active) {
+        this.arrowRainActive = active;
+    }
+
+    public int getArrowRainTicks() {
+        return arrowRainTicks;
+    }
+
+    public void setArrowRainTicks(int ticks) {
+        this.arrowRainTicks = ticks;
+    }
+
+    public Vec3 getArrowRainPosition() {
+        return arrowRainPosition;
+    }
+
+    public void setArrowRainPosition(Vec3 pos) {
+        this.arrowRainPosition = pos;
     }
 
     //TEMPO
@@ -581,6 +636,16 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         nbt.putInt("coalescence_ticks", coalescenceTicks);
         nbt.putFloat("coalescence_stored", coalescenceStoredDamage);
 
+        nbt.putInt("marksman_charges", marksmanSeekerCharges);
+        nbt.putInt("marksman_airborne", marksmanAirborneTicks);
+
+        nbt.putBoolean("arrow_rain_active", arrowRainActive);
+        nbt.putInt("arrow_rain_ticks", arrowRainTicks);
+        nbt.putDouble("arrow_rain_x", arrowRainPosition.x);
+        nbt.putDouble("arrow_rain_y", arrowRainPosition.y);
+        nbt.putDouble("arrow_rain_z", arrowRainPosition.z);
+
+
         // Save cooldowns
         CompoundTag cooldownsTag = new CompoundTag();
         for (Map.Entry<String, Integer> entry : abilityCooldowns.entrySet()) {
@@ -727,6 +792,26 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         }
         if (nbt.contains("coalescence_stored")) {
             this.coalescenceStoredDamage = nbt.getFloat("coalescence_stored");
+        }
+
+        if (nbt.contains("marksman_charges")) {
+            this.marksmanSeekerCharges = nbt.getInt("marksman_charges");
+        }
+        if (nbt.contains("marksman_airborne")) {
+            this.marksmanAirborneTicks = nbt.getInt("marksman_airborne");
+        }
+
+        if (nbt.contains("arrow_rain_active")) {
+            this.arrowRainActive = nbt.getBoolean("arrow_rain_active");
+        }
+        if (nbt.contains("arrow_rain_ticks")) {
+            this.arrowRainTicks = nbt.getInt("arrow_rain_ticks");
+        }
+        if (nbt.contains("arrow_rain_x")) {
+            double x = nbt.getDouble("arrow_rain_x");
+            double y = nbt.getDouble("arrow_rain_y");
+            double z = nbt.getDouble("arrow_rain_z");
+            this.arrowRainPosition = new Vec3(x, y, z);
         }
 
         // Load cooldowns
