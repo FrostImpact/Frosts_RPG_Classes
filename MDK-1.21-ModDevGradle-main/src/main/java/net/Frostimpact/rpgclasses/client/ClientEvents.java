@@ -93,5 +93,22 @@ public class ClientEvents {
                 ModMessages.sendToServer(new PacketUseAbility("arrow_rain"));
             }
         }
+
+        if (currentClass.equals("MERCENARY")) {
+            // CLOAK is handled passively by shift key, not manually triggered
+
+            if (KeyBinding.STUN_BOLT_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("stun_bolt"));
+            }
+
+            if (KeyBinding.CYCLE_QUIVER_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("cycle_quiver"));
+            }
+
+            if (KeyBinding.HIRED_GUN_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("hired_gun"));
+            }
+        }
+
     }
 }

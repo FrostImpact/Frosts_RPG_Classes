@@ -13,6 +13,10 @@ import net.Frostimpact.rpgclasses.ability.MANAFORGE.MagicMissileAbility;
 import net.Frostimpact.rpgclasses.ability.MANAFORGE.SurgeAbility;
 import net.Frostimpact.rpgclasses.ability.MANAFORGE.OpenRiftAbility;
 import net.Frostimpact.rpgclasses.ability.MANAFORGE.CoalescenceAbility;
+import net.Frostimpact.rpgclasses.ability.MERCENARY.CloakAbility;
+import net.Frostimpact.rpgclasses.ability.MERCENARY.CycleQuiverAbility;
+import net.Frostimpact.rpgclasses.ability.MERCENARY.HiredGunAbility;
+import net.Frostimpact.rpgclasses.ability.MERCENARY.StunBoltAbility;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,12 +44,17 @@ public class AbilityRegistry {
         register(new OpenRiftAbility());
         register(new CoalescenceAbility());
 
+        //MARKSMAN Abilities
         register(new SeekersAbility());
         register(new VaultAbility());
         register(new UpdraftAbility());
         register(new ArrowRainAbility());
 
-
+        // MERCENARY Abilities
+        register(new CloakAbility());
+        register(new StunBoltAbility());
+        register(new CycleQuiverAbility());
+        register(new HiredGunAbility());
 
     }
 

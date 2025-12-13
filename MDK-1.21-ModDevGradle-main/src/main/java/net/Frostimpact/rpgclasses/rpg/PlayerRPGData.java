@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.Frostimpact.rpgclasses.ability.MERCENARY.CycleQuiverAbility; // ASSUMPTION: You need to import this class for the ArrowType enum
 
 import java.util.HashMap;
 import java.util.Map;
@@ -90,6 +91,17 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     private boolean arrowRainActive = false;
     private int arrowRainTicks = 0;
     private Vec3 arrowRainPosition = Vec3.ZERO;
+
+    // ** MERCENARY - CLOAK **
+    private boolean cloakActive = false;
+
+    // ** MERCENARY - CYCLE QUIVER **
+    private String mercenaryArrowType = "QUILL"; // QUILL, PYRE, SPORE
+
+    // ** MERCENARY - HIRED GUN **
+    private boolean hiredGunActive = false;
+    private int hiredGunTicks = 0;
+    private int hiredGunTargetId = -1;
 
     //DASH
     public boolean isDashActive() {
@@ -577,6 +589,56 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         this.coalescenceStoredDamage = damage;
     }
 
+    // === MERCENARY GETTERS/SETTERS ===
+
+    // CLOAK
+    public boolean isCloakActive() {
+        return cloakActive;
+    }
+
+    public void setCloakActive(boolean active) {
+        this.cloakActive = active;
+    }
+
+    // CYCLE QUIVER
+    public CycleQuiverAbility.ArrowType getMercenaryArrowType() {
+        try {
+            return CycleQuiverAbility.ArrowType.valueOf(mercenaryArrowType);
+        } catch (IllegalArgumentException e) {
+            // Handle case where saved value is invalid/missing
+            return CycleQuiverAbility.ArrowType.QUILL;
+        }
+    }
+
+    public void setMercenaryArrowType(CycleQuiverAbility.ArrowType type) {
+        this.mercenaryArrowType = type.name();
+    }
+
+    // HIRED GUN
+    public boolean isHiredGunActive() {
+        return hiredGunActive;
+    }
+
+    public void setHiredGunActive(boolean active) {
+        this.hiredGunActive = active;
+    }
+
+    public int getHiredGunTicks() {
+        return hiredGunTicks;
+    }
+
+    public void setHiredGunTicks(int ticks) {
+        this.hiredGunTicks = ticks;
+    }
+
+    public int getHiredGunTargetId() {
+        return hiredGunTargetId;
+    }
+
+    public void setHiredGunTargetId(int id) {
+        this.hiredGunTargetId = id;
+    }
+
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
 
@@ -644,6 +706,13 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         nbt.putDouble("arrow_rain_x", arrowRainPosition.x);
         nbt.putDouble("arrow_rain_y", arrowRainPosition.y);
         nbt.putDouble("arrow_rain_z", arrowRainPosition.z);
+
+        // ** NBT ADDITIONS (MERCENARY) **
+        nbt.putBoolean("cloak_active", cloakActive);
+        nbt.putString("mercenary_arrow_type", mercenaryArrowType);
+        nbt.putBoolean("hired_gun_active", hiredGunActive);
+        nbt.putInt("hired_gun_ticks", hiredGunTicks);
+        nbt.putInt("hired_gun_target_id", hiredGunTargetId);
 
 
         // Save cooldowns
@@ -812,6 +881,23 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
             double y = nbt.getDouble("arrow_rain_y");
             double z = nbt.getDouble("arrow_rain_z");
             this.arrowRainPosition = new Vec3(x, y, z);
+        }
+
+        // ** NBT ADDITIONS (MERCENARY) **
+        if (nbt.contains("cloak_active")) {
+            this.cloakActive = nbt.getBoolean("cloak_active");
+        }
+        if (nbt.contains("mercenary_arrow_type")) {
+            this.mercenaryArrowType = nbt.getString("mercenary_arrow_type");
+        }
+        if (nbt.contains("hired_gun_active")) {
+            this.hiredGunActive = nbt.getBoolean("hired_gun_active");
+        }
+        if (nbt.contains("hired_gun_ticks")) {
+            this.hiredGunTicks = nbt.getInt("hired_gun_ticks");
+        }
+        if (nbt.contains("hired_gun_target_id")) {
+            this.hiredGunTargetId = nbt.getInt("hired_gun_target_id");
         }
 
         // Load cooldowns

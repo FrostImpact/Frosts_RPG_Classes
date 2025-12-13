@@ -137,4 +137,36 @@ public class KeyBinding {
             InputConstants.KEY_Z,
             "key.category.rpgclasses"
     );
+
+    public static final KeyMapping CLOAK_KEY = new KeyMapping(
+            "key.rpgclasses.cloak",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_LSHIFT, // Bound to shift by default
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping STUN_BOLT_KEY = new KeyMapping(
+            "key.rpgclasses.stun_bolt",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_V,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping CYCLE_QUIVER_KEY = new KeyMapping(
+            "key.rpgclasses.cycle_quiver",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_C,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping HIRED_GUN_KEY = new KeyMapping(
+            "key.rpgclasses.hired_gun",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_Z,
+            "key.category.rpgclasses"
+    );
 }

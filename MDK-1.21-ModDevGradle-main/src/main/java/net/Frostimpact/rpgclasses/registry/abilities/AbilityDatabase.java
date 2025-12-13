@@ -27,10 +27,18 @@ public class AbilityDatabase {
         register("open_rift", new AbilityStats("Open Rift", 15, 35));
         register("coalescence", new AbilityStats("Coalescence", 25, 30));
 
+        // MARKSMAN
         register("seekers", new AbilityStats("Seekers", 5, 5)); // Variable mana: 5 per charge
         register("vault", new AbilityStats("Vault", 8, 15));
         register("updraft", new AbilityStats("Updraft", 12, 15));
         register("arrow_rain", new AbilityStats("Arrow Rain", 15, 30));
+
+
+        // MERCENARY
+        register("cloak", new AbilityStats("Cloak", 7, 10));
+        register("stun_bolt", new AbilityStats("Stun Bolt", 6, 15));
+        register("cycle_quiver", new AbilityStats("Cycle Quiver", 2, 0));
+        register("hired_gun", new AbilityStats("Hired Gun", 40, 40));
     }
 
     private static void register(String id, AbilityStats stats) {

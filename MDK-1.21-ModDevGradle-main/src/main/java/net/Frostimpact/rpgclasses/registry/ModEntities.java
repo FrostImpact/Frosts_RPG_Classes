@@ -3,6 +3,7 @@ package net.Frostimpact.rpgclasses.registry;
 import net.Frostimpact.rpgclasses.RpgClassesMod;
 import net.Frostimpact.rpgclasses.entity.projectile.MagicMissileEntity;
 import net.Frostimpact.rpgclasses.entity.projectile.SeekerArrowEntity;
+import net.Frostimpact.rpgclasses.entity.projectile.StunBoltEntity;
 import net.Frostimpact.rpgclasses.entity.projectile.VaultProjectileEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
@@ -43,4 +44,12 @@ public class ModEntities {
                     .clientTrackingRange(4)
                     .updateInterval(10)
                     .build("vault_projectile"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<StunBoltEntity>> STUN_BOLT =
+            ENTITY_TYPES.register("stun_bolt", () -> EntityType.Builder
+                    .<StunBoltEntity>of(StunBoltEntity::new, MobCategory.MISC)
+                    .sized(0.25f, 0.25f)
+                    .clientTrackingRange(4)
+                    .updateInterval(10)
+                    .build("stun_bolt"));
 }

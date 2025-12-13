@@ -1,27 +1,23 @@
 {
-  "itemGroup.examplemod": "Example Mod Tab",
-  "block.examplemod.example_block": "Example Block",
-  "item.examplemod.example_item": "Example Item",
-
   "key.category.rpgclasses": "RPG Classes",
-
   "key.rpgclasses.dash": "Dash Ability",
   "key.rpgclasses.blade_dance": "Blade Dance Ability",
   "key.rpgclasses.parry": "Parry Ability",
   "key.rpgclasses.blade_waltz": "Final Waltz Ability",
-
   "key.rpgclasses.swap": "Swap Mode",
   "key.rpgclasses.crush": "Crush",
   "key.rpgclasses.fortify": "Fortify",
   "key.rpgclasses.leap": "Leap",
-
   "key.rpgclasses.magic_missile": "Magic Missile",
   "key.rpgclasses.surge": "Surge",
   "key.rpgclasses.open_rift": "Open Rift",
   "key.rpgclasses.coalescence": "Coalescence",
-
   "key.rpgclasses.seekers": "Seekers",
   "key.rpgclasses.vault": "Vault",
   "key.rpgclasses.updraft": "Updraft",
-  "key.rpgclasses.arrow_rain": "Arrow Rain"
+  "key.rpgclasses.arrow_rain": "Arrow Rain",
+  "key.rpgclasses.cloak": "Cloak (Sneak)",
+  "key.rpgclasses.stun_bolt": "Stun Bolt",
+  "key.rpgclasses.cycle_quiver": "Cycle Quiver",
+  "key.rpgclasses.hired_gun": "Hired Gun"
 }

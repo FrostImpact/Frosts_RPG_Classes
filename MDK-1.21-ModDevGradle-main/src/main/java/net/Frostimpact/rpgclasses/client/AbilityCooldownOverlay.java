@@ -41,6 +41,10 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
         CLASS_ABILITIES.put("MARKSMAN", new String[]{
                 "seekers", "vault", "updraft", "arrow_rain"
         });
+
+        CLASS_ABILITIES.put("MERCENARY", new String[]{
+                "cloak", "stun_bolt", "cycle_quiver", "hired_gun"
+        });
     }
 
     private static final int ICON_SIZE = 16;
@@ -162,6 +166,16 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
                 case "vault" -> new ItemStack(Items.LEATHER_BOOTS);
                 case "updraft" -> new ItemStack(Items.FEATHER);
                 case "arrow_rain" -> new ItemStack(Items.BOW);
+                default -> new ItemStack(Items.BARRIER);
+            };
+        }
+
+        if (className.equals("MERCENARY")) {
+            return switch (abilityId) {
+                case "cloak" -> new ItemStack(Items.GLASS);
+                case "stun_bolt" -> new ItemStack(Items.LIGHTNING_ROD);
+                case "cycle_quiver" -> new ItemStack(Items.ARROW);
+                case "hired_gun" -> new ItemStack(Items.CROSSBOW);
                 default -> new ItemStack(Items.BARRIER);
             };
         }
