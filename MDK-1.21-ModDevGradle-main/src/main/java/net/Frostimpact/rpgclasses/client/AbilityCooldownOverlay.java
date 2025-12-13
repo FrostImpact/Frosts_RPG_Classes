@@ -37,19 +37,18 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
         CLASS_ABILITIES.put("MANAFORGE", new String[]{
                 "magic_missile", "surge", "open_rift", "coalescence"
         });
-
         CLASS_ABILITIES.put("MARKSMAN", new String[]{
                 "seekers", "vault", "updraft", "arrow_rain"
         });
-
         CLASS_ABILITIES.put("MERCENARY", new String[]{
                 "cloak", "stun_bolt", "cycle_quiver", "hired_gun"
         });
     }
 
     private static final int ICON_SIZE = 16;
-    private static final int SLOT_SIZE = 18;
-    private static final int SLOT_SPACING = 22;
+    private static final int SLOT_SIZE = 22;
+    private static final int SLOT_SPACING = 24;
+    private static final int FRAME_WIDTH = 2;
 
     @SubscribeEvent
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
@@ -75,8 +74,12 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
 
-        int startX = (screenWidth / 2) + 95;
-        int startY = screenHeight - 22;
+        // Position: Above hotbar, right side
+        int startX = (screenWidth / 2) + 100;
+        int startY = screenHeight - 30;
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
 
         for (int i = 0; i < trackedAbilities.length; i++) {
             String abilityId = trackedAbilities[i];
@@ -86,31 +89,47 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
             int slotX = startX + (i * SLOT_SPACING);
             int slotY = startY;
 
-            int iconX = slotX + 1;
-            int iconY = slotY + 1;
-
             int cooldownTicks = rpg.getAbilityCooldown(abilityId);
             int maxCooldown = ability.getCooldownTicks();
             int manaCost = ability.getManaCost();
             int currentMana = rpg.getMana();
 
-            // Draw Slot Background
-            graphics.fill(slotX, slotY, slotX + SLOT_SIZE, slotY + SLOT_SIZE, 0x90000000);
-            graphics.renderOutline(slotX, slotY, SLOT_SIZE, SLOT_SIZE, 0xFF333333);
+            boolean onCooldown = cooldownTicks > 0;
+            boolean notEnoughMana = currentMana < manaCost;
+            boolean canUse = !onCooldown && !notEnoughMana;
 
-            // Render Icon
+            // === ORNATE FRAME ===
+            drawOrnateSlotFrame(graphics, slotX, slotY, SLOT_SIZE, canUse, onCooldown, notEnoughMana);
+
+            // === SLOT BACKGROUND ===
+            int innerX = slotX + FRAME_WIDTH;
+            int innerY = slotY + FRAME_WIDTH;
+            int innerSize = SLOT_SIZE - (FRAME_WIDTH * 2);
+
+            // Consistent grey background for all slots
+            int bgColor = 0xFF1a1a1a;
+            graphics.fill(innerX, innerY, innerX + innerSize, innerY + innerSize, bgColor);
+
+            // Inner shadow for depth
+            graphics.fill(innerX, innerY, innerX + innerSize, innerY + 1, 0x80000000);
+            graphics.fill(innerX, innerY, innerX + 1, innerY + innerSize, 0x60000000);
+
+            // === RENDER ICON ===
+            int iconX = slotX + (SLOT_SIZE - ICON_SIZE) / 2;
+            int iconY = slotY + (SLOT_SIZE - ICON_SIZE) / 2;
+
             ItemStack icon = getAbilityIcon(currentClass, abilityId);
             graphics.renderItem(icon, iconX, iconY);
 
-            // Render Mana Check
-            if (currentMana < manaCost) {
+            // === MANA CHECK OVERLAY ===
+            if (notEnoughMana) {
                 RenderSystem.disableDepthTest();
-                graphics.fill(iconX, iconY, iconX + ICON_SIZE, iconY + ICON_SIZE, 0x600000AA);
+                graphics.fill(iconX, iconY, iconX + ICON_SIZE, iconY + ICON_SIZE, 0x800000AA);
                 RenderSystem.enableDepthTest();
             }
 
-            // Render Cooldown
-            if (cooldownTicks > 0 && maxCooldown > 0) {
+            // === COOLDOWN OVERLAY ===
+            if (onCooldown && maxCooldown > 0) {
                 RenderSystem.disableDepthTest();
 
                 float progress = (float) cooldownTicks / (float) maxCooldown;
@@ -122,11 +141,57 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
                 int boxTop = iconY + (ICON_SIZE - boxHeight);
                 int boxBottom = iconY + ICON_SIZE;
 
-                graphics.fill(iconX, boxTop, iconX + ICON_SIZE, boxBottom, 0x80FFFFFF);
+                // Dark overlay showing remaining cooldown
+                graphics.fill(iconX, boxTop, iconX + ICON_SIZE, boxBottom, 0xC0000000);
 
                 RenderSystem.enableDepthTest();
+
+                // Cooldown number
+                int secondsLeft = (cooldownTicks + 19) / 20;
+                String cdText = String.valueOf(secondsLeft);
+                int cdTextWidth = mc.font.width(cdText);
+                int cdX = slotX + (SLOT_SIZE - cdTextWidth) / 2;
+                int cdY = slotY + (SLOT_SIZE - mc.font.lineHeight) / 2;
+
+                graphics.drawString(mc.font, cdText, cdX + 1, cdY + 1, 0xFF000000, false);
+                graphics.drawString(mc.font, cdText, cdX, cdY, 0xFFFFFFFF, false);
             }
+
+            // === READY GLOW === (removed - keeping consistent appearance)
         }
+
+        RenderSystem.disableBlend();
+    }
+
+    private void drawOrnateSlotFrame(GuiGraphics graphics, int x, int y, int size, boolean ready, boolean onCooldown, boolean noMana) {
+        // Consistent ornate grey/bronze frame for all states
+        int outerColor = 0xFF8b7355; // Bronze
+        int frameColor1 = 0xFF5c4033; // Dark brown
+        int frameColor2 = 0xFF3d2817; // Darker brown
+        int cornerColor = 0xFFd4af37; // Gold
+
+        // Outer border
+        graphics.fill(x - 1, y - 1, x + size + 1, y, outerColor);
+        graphics.fill(x - 1, y + size, x + size + 1, y + size + 1, outerColor);
+        graphics.fill(x - 1, y, x, y + size, outerColor);
+        graphics.fill(x + size, y, x + size + 1, y + size, outerColor);
+
+        // Main frame
+        graphics.fill(x, y, x + size, y + FRAME_WIDTH, frameColor1);
+        graphics.fill(x, y + size - FRAME_WIDTH, x + size, y + size, frameColor2);
+        graphics.fill(x, y, x + FRAME_WIDTH, y + size, frameColor1);
+        graphics.fill(x + size - FRAME_WIDTH, y, x + size, y + size, frameColor2);
+
+        // Inner highlight (subtle for all slots)
+        int highlightColor = 0x40FFFFFF;
+        graphics.fill(x + FRAME_WIDTH, y + FRAME_WIDTH, x + size - FRAME_WIDTH, y + FRAME_WIDTH + 1, highlightColor);
+        graphics.fill(x + FRAME_WIDTH, y + FRAME_WIDTH, x + FRAME_WIDTH + 1, y + size - FRAME_WIDTH, highlightColor);
+
+        // Corner decorations (gold accents)
+        graphics.fill(x - 1, y - 1, x, y, cornerColor);
+        graphics.fill(x + size, y - 1, x + size + 1, y, cornerColor);
+        graphics.fill(x - 1, y + size, x, y + size + 1, cornerColor);
+        graphics.fill(x + size, y + size, x + size + 1, y + size + 1, cornerColor);
     }
 
     private ItemStack getAbilityIcon(String className, String abilityId) {
@@ -182,7 +247,4 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
 
         return new ItemStack(Items.BARRIER);
     }
-
-
-
 }

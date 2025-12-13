@@ -22,7 +22,7 @@ public class ServerEvents {
             PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
 
             // Force set the class and initialize
-            rpg.setCurrentClass("MERCENARY"); // FIXED: Set to MERCENARY only
+            rpg.setCurrentClass("MARKSMAN"); // FIXED: Set to MERCENARY only
             rpg.setJuggernautShieldMode(true);
             rpg.setJuggernautCharge(0);
 
@@ -30,10 +30,10 @@ public class ServerEvents {
             rpg.setMana(rpg.getMaxMana());
 
             // IMPORTANT: Sync class to client immediately
-            ModMessages.sendToPlayer(new PacketSyncClass("MERCENARY"), player);
+            ModMessages.sendToPlayer(new PacketSyncClass("MARKSMAN"), player);
 
             // Send confirmation
-            player.sendSystemMessage(Component.literal("§a[RPG Classes] Class set to: §6MERCENARY"));
+            player.sendSystemMessage(Component.literal("§a[RPG Classes] Class set to: " + rpg.getCurrentClass()));
 
             System.out.println("[SERVER] Player " + player.getName().getString() + " logged in. Class: " + rpg.getCurrentClass());
         }
@@ -221,12 +221,12 @@ public class ServerEvents {
                     int currentMana = rpg.getMana();
                     int maxMana = rpg.getMaxMana();
 
-                    String status = String.format("§bMANA: §f%d / %d §7| §cHP: §f%d / %d §7| §6CLASS: §f%s",
-                            currentMana, maxMana,
-                            (int)player.getHealth(), (int)player.getMaxHealth(),
-                            rpg.getCurrentClass());
+                    //String status = String.format("§bMANA: §f%d / %d §7| §cHP: §f%d / %d §7| §6CLASS: §f%s",
+                            //currentMana, maxMana,
+                            //(int)player.getHealth(), (int)player.getMaxHealth(),
+                            rpg.getCurrentClass();
 
-                    ModMessages.sendToPlayer(new PacketSyncMana(status), player);
+                    //ModMessages.sendToPlayer(new PacketSyncMana(status), player);
 
                     // NEW: Include arcana in the sync packet
                     ModMessages.sendToPlayer(new net.Frostimpact.rpgclasses.networking.packet.PacketSyncCooldowns(
