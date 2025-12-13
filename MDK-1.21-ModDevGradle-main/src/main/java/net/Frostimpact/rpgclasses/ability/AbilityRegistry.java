@@ -1,6 +1,5 @@
 package net.Frostimpact.rpgclasses.ability;
 import net.Frostimpact.rpgclasses.ability.MARKSMAN.*;
-
 import net.Frostimpact.rpgclasses.ability.BLADEDANCER.BLADE_DANCE.BladeDanceAbility;
 import net.Frostimpact.rpgclasses.ability.BLADEDANCER.DashAbility;
 import net.Frostimpact.rpgclasses.ability.BLADEDANCER.ParryAbility;
@@ -17,6 +16,10 @@ import net.Frostimpact.rpgclasses.ability.MERCENARY.CloakAbility;
 import net.Frostimpact.rpgclasses.ability.MERCENARY.CycleQuiverAbility;
 import net.Frostimpact.rpgclasses.ability.MERCENARY.HiredGunAbility;
 import net.Frostimpact.rpgclasses.ability.MERCENARY.StunBoltAbility;
+import net.Frostimpact.rpgclasses.ability.RULER.CallToArmsAbility;
+import net.Frostimpact.rpgclasses.ability.RULER.InvigorateAbility;
+import net.Frostimpact.rpgclasses.ability.RULER.RegroupAbility;
+import net.Frostimpact.rpgclasses.ability.RULER.RallyAbility;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +59,11 @@ public class AbilityRegistry {
         register(new CycleQuiverAbility());
         register(new HiredGunAbility());
 
+        // RULER Abilities
+        register(new CallToArmsAbility());
+        register(new InvigorateAbility());
+        register(new RegroupAbility());
+        register(new RallyAbility());
     }
 
     private static void register(Ability ability) {

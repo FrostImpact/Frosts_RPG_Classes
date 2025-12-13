@@ -5,6 +5,8 @@ import net.Frostimpact.rpgclasses.entity.projectile.MagicMissileEntity;
 import net.Frostimpact.rpgclasses.entity.projectile.SeekerArrowEntity;
 import net.Frostimpact.rpgclasses.entity.projectile.StunBoltEntity;
 import net.Frostimpact.rpgclasses.entity.projectile.VaultProjectileEntity;
+import net.Frostimpact.rpgclasses.entity.summon.KnightSummonEntity;
+import net.Frostimpact.rpgclasses.entity.summon.ArcherSummonEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -24,10 +26,6 @@ public class ModEntities {
                     .clientTrackingRange(4)
                     .updateInterval(10)
                     .build("magic_missile"));
-
-    public static void register(IEventBus eventBus) {
-        ENTITY_TYPES.register(eventBus);
-    }
 
     public static final DeferredHolder<EntityType<?>, EntityType<SeekerArrowEntity>> SEEKER_ARROW =
             ENTITY_TYPES.register("seeker_arrow", () -> EntityType.Builder
@@ -52,4 +50,25 @@ public class ModEntities {
                     .clientTrackingRange(4)
                     .updateInterval(10)
                     .build("stun_bolt"));
+
+    // === RULER SUMMONS ===
+    public static final DeferredHolder<EntityType<?>, EntityType<KnightSummonEntity>> KNIGHT_SUMMON =
+            ENTITY_TYPES.register("knight_summon", () -> EntityType.Builder
+                    .<KnightSummonEntity>of(KnightSummonEntity::new, MobCategory.CREATURE)
+                    .sized(0.6f, 1.8f)
+                    .clientTrackingRange(8)
+                    .updateInterval(10)
+                    .build("knight_summon"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<ArcherSummonEntity>> ARCHER_SUMMON =
+            ENTITY_TYPES.register("archer_summon", () -> EntityType.Builder
+                    .<ArcherSummonEntity>of(ArcherSummonEntity::new, MobCategory.CREATURE)
+                    .sized(0.6f, 1.8f)
+                    .clientTrackingRange(8)
+                    .updateInterval(10)
+                    .build("archer_summon"));
+
+    public static void register(IEventBus eventBus) {
+        ENTITY_TYPES.register(eventBus);
+    }
 }

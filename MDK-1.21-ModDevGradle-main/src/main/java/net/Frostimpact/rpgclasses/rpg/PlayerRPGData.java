@@ -103,6 +103,11 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     private int hiredGunTicks = 0;
     private int hiredGunTargetId = -1;
 
+    // ** RULER - KING's RULER **
+    private Vec3 rulerBannerPosition = Vec3.ZERO;
+    private boolean rulerRallyActive = false;
+    private int rulerRallyTicks = 0;
+
     //DASH
     public boolean isDashActive() {
         return dashActive;
@@ -639,6 +644,31 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         this.hiredGunTargetId = id;
     }
 
+    // RULER - KING'S BANNER
+    public Vec3 getRulerBannerPosition() {
+        return rulerBannerPosition;
+    }
+
+    public void setRulerBannerPosition(Vec3 pos) {
+        this.rulerBannerPosition = pos;
+    }
+
+    public boolean isRulerRallyActive() {
+        return rulerRallyActive;
+    }
+
+    public void setRulerRallyActive(boolean active) {
+        this.rulerRallyActive = active;
+    }
+
+    public int getRulerRallyTicks() {
+        return rulerRallyTicks;
+    }
+
+    public void setRulerRallyTicks(int ticks) {
+        this.rulerRallyTicks = ticks;
+    }
+
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
 
@@ -713,6 +743,13 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         nbt.putBoolean("hired_gun_active", hiredGunActive);
         nbt.putInt("hired_gun_ticks", hiredGunTicks);
         nbt.putInt("hired_gun_target_id", hiredGunTargetId);
+
+        // ** RULER **
+        nbt.putDouble("ruler_banner_x", rulerBannerPosition.x);
+        nbt.putDouble("ruler_banner_y", rulerBannerPosition.y);
+        nbt.putDouble("ruler_banner_z", rulerBannerPosition.z);
+        nbt.putBoolean("ruler_rally_active", rulerRallyActive);
+        nbt.putInt("ruler_rally_ticks", rulerRallyTicks);
 
 
         // Save cooldowns
@@ -898,6 +935,19 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         }
         if (nbt.contains("hired_gun_target_id")) {
             this.hiredGunTargetId = nbt.getInt("hired_gun_target_id");
+        }
+
+        if (nbt.contains("ruler_banner_x")) {
+            double x = nbt.getDouble("ruler_banner_x");
+            double y = nbt.getDouble("ruler_banner_y");
+            double z = nbt.getDouble("ruler_banner_z");
+            this.rulerBannerPosition = new Vec3(x, y, z);
+        }
+        if (nbt.contains("ruler_rally_active")) {
+            this.rulerRallyActive = nbt.getBoolean("ruler_rally_active");
+        }
+        if (nbt.contains("ruler_rally_ticks")) {
+            this.rulerRallyTicks = nbt.getInt("ruler_rally_ticks");
         }
 
         // Load cooldowns

@@ -486,6 +486,20 @@ public class ClassSelectionScreen extends Screen {
                                         new Ability("Coming Soon", ""),
                                         new Ability("Coming Soon", "")
                                 })
+                }),
+
+        SUMMON("Summon", "👑", 0xFFD700, "Command armies and control the battlefield",
+                new ClassSpec[]{
+                        new ClassSpec("RULER", "Ruler", "Any",
+                                "Generic summoner. Summons troops while staying in combat to utilize kit.",
+                                "KING'S BANNER + DEMORALIZE",
+                                "Banner spawns on user creating golden circle. Summons outside circle become DEMORALIZED and die after 10s. GLORY prevents DEMORALIZE.",
+                                new Ability[]{
+                                        new Ability("CALL TO ARMS", "Summon 2 knights (max 4). Shift: summon 2 archers (max 4). 12s CD / 20 MP"),
+                                        new Ability("INVIGORATE", "Grant GLORY to summons in banner radius for 10s. GLORY: +20% Speed, +4 hearts, prevents DEMORALIZE. 20s CD / 40 MP"),
+                                        new Ability("REGROUP", "All summons move to banner, pausing death timers. Heal 50% HP on arrival. 15s CD / 30 MP"),
+                                        new Ability("RALLY", "Place banner for 12s. Reactivate to recall. 25s CD / 10 MP")
+                                })
                 });
 
 

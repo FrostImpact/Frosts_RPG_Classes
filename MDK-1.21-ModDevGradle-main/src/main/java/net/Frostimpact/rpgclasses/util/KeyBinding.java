@@ -138,11 +138,12 @@ public class KeyBinding {
             "key.category.rpgclasses"
     );
 
+    // MERCENARY Keys
     public static final KeyMapping CLOAK_KEY = new KeyMapping(
             "key.rpgclasses.cloak",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
-            InputConstants.KEY_LSHIFT, // Bound to shift by default
+            InputConstants.KEY_LSHIFT,
             "key.category.rpgclasses"
     );
 
@@ -164,6 +165,39 @@ public class KeyBinding {
 
     public static final KeyMapping HIRED_GUN_KEY = new KeyMapping(
             "key.rpgclasses.hired_gun",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_Z,
+            "key.category.rpgclasses"
+    );
+
+    // RULER Keys
+    public static final KeyMapping CALL_TO_ARMS_KEY = new KeyMapping(
+            "key.rpgclasses.call_to_arms",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_V,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping INVIGORATE_KEY = new KeyMapping(
+            "key.rpgclasses.invigorate",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_C,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping REGROUP_KEY = new KeyMapping(
+            "key.rpgclasses.regroup",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_X,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping RALLY_KEY = new KeyMapping(
+            "key.rpgclasses.rally",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
             InputConstants.KEY_Z,

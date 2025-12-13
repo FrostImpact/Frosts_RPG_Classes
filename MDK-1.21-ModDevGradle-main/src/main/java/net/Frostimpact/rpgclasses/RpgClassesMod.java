@@ -57,15 +57,29 @@ public class RpgClassesMod {
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.LEAP_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.SWAP_KEY);
 
+        // MANAFORGE Keys
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.MAGIC_MISSILE_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.SURGE_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.OPEN_RIFT_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.COALESCENCE_KEY);
+
+        // MARKSMAN Keys
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.SEEKERS_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.VAULT_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.UPDRAFT_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.ARROW_RAIN_KEY);
 
+        // MERCENARY Keys
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.CLOAK_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.STUN_BOLT_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.CYCLE_QUIVER_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.HIRED_GUN_KEY);
+
+        // RULER Keys
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.CALL_TO_ARMS_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.INVIGORATE_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.REGROUP_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.RALLY_KEY);
 
         System.out.println("RPG Classes: Keybinds Registered!");
 

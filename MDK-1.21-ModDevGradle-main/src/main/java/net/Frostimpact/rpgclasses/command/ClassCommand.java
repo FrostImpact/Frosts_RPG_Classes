@@ -24,7 +24,8 @@ public class ClassCommand {
             "BASTION", "JUGGERNAUT",
             "MARKSMAN", "MERCENARY",
             "MANAFORGE", "REFRACTION",
-            "BATTLE_PRIEST", "ALCHEMIST"
+            "BATTLE_PRIEST", "ALCHEMIST",
+            "RULER", "ARTIFICER"
     );
 
     private static final SuggestionProvider<CommandSourceStack> CLASS_SUGGESTIONS = (context, builder) ->
@@ -88,7 +89,9 @@ public class ClassCommand {
                         "§7- §dREFRACTION §7(Mobile mage)\n\n" +
                         "§6§lSUPPORT:\n" +
                         "§7- §eBATTLE_PRIEST §7(Offensive healer)\n" +
-                        "§7- §2ALCHEMIST §7(Potion specialist)"), false);
+                        "§7- §2ALCHEMIST §7(Potion specialist)\n\n" +
+                        "§e§lSUMMON:\n" +
+                        "§7- §6RULER §7(Army commander)"), false);
         return 1;
     }
 
@@ -154,9 +157,16 @@ public class ClassCommand {
             case "ALCHEMIST":
                 // Support classes - reset when implemented
                 break;
+
+            case "RULER":  // ADD THIS CASE
+                rpg.setRulerRallyActive(false);
+                rpg.setRulerRallyTicks(0);
+                rpg.setRulerBannerPosition(player.position());
+                break;
         }
 
         // Remove all potion effects
         player.removeAllEffects();
     }
+
 }
