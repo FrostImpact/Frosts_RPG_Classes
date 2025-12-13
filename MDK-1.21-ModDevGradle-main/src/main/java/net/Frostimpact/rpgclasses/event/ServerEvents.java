@@ -22,7 +22,7 @@ public class ServerEvents {
             PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
 
             // Force set the class and initialize
-            rpg.setCurrentClass("MARKSMAN");
+            rpg.setCurrentClass("MERCENARY"); // FIXED: Set to MERCENARY only
             rpg.setJuggernautShieldMode(true);
             rpg.setJuggernautCharge(0);
 

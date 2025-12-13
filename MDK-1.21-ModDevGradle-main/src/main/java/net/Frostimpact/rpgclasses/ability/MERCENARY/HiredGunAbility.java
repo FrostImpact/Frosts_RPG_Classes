@@ -43,7 +43,7 @@ public class HiredGunAbility extends Ability {
 
         // Visual effects
         ServerLevel level = player.serverLevel();
-        
+
         // Targeting beam effect
         Vec3 start = player.getEyePosition();
         Vec3 end = target.position().add(0, target.getBbHeight() / 2, 0);
@@ -100,12 +100,26 @@ public class HiredGunAbility extends Ability {
         for (LivingEntity entity : entities) {
             Vec3 toEntity = entity.position().add(0, entity.getBbHeight() / 2, 0).subtract(eyePos);
             double dist = toEntity.length();
-            
+
             // Check if entity is roughly in look direction
             if (toEntity.normalize().dot(lookVec) > 0.95) {
-                if (dist < closestDist) {
-                    closestDist = dist;
-                    closest = entity;
+                // NEW: Check for blocks blocking line of sight
+                net.minecraft.world.level.ClipContext clipContext = new net.minecraft.world.level.ClipContext(
+                        eyePos,
+                        entity.position().add(0, entity.getBbHeight() / 2, 0),
+                        net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                        net.minecraft.world.level.ClipContext.Fluid.NONE,
+                        player
+                );
+
+                net.minecraft.world.phys.BlockHitResult blockHit = player.level().clip(clipContext);
+
+                // Only consider entity if no blocks are in the way
+                if (blockHit.getType() == net.minecraft.world.phys.HitResult.Type.MISS) {
+                    if (dist < closestDist) {
+                        closestDist = dist;
+                        closest = entity;
+                    }
                 }
             }
         }
@@ -150,4 +164,6 @@ public class HiredGunAbility extends Ability {
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                 "§6✦ BOUNTY COMPLETE! §aAll abilities refreshed! §b+Speed III"));
     }
+
+
 }
