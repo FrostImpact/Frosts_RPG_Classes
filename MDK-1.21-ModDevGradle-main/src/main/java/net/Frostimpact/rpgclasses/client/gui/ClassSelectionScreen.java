@@ -499,7 +499,17 @@ public class ClassSelectionScreen extends Screen {
                                         new Ability("INVIGORATE", "Grant GLORY to summons in banner radius for 10s. GLORY: +20% Speed, +4 hearts, prevents DEMORALIZE. 20s CD / 40 MP"),
                                         new Ability("REGROUP", "All summons move to banner, pausing death timers. Heal 50% HP on arrival. 15s CD / 30 MP"),
                                         new Ability("RALLY", "Place banner for 12s. Reactivate to recall. 25s CD / 10 MP")
+                                }),
+                        new ClassSpec("ARTIFICER", "Artificer", "Any",
+                                "Summons stationary turrets and other useful spawns",
+                                "Coming Soon", "Passive not yet implemented",
+                                new Ability[]{
+                                        new Ability("Coming Soon", ""),
+                                        new Ability("Coming Soon", ""),
+                                        new Ability("Coming Soon", ""),
+                                        new Ability("Coming Soon", "")
                                 })
+
                 });
 
 

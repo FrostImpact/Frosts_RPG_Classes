@@ -1,27 +1,30 @@
 package net.Frostimpact.rpgclasses.entity.summon;
 
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
+import java.util.EnumSet; // Required for Goal Flags
 
-public class ArcherSummonEntity extends Mob {
+public class ArcherSummonEntity extends PathfinderMob implements RangedAttackMob {
 
     private Player owner;
     private int shootCooldown = 0;
-    private static final int SHOOT_INTERVAL = 40; // 2 seconds
+    private static final int SHOOT_INTERVAL = 40;
 
-    public ArcherSummonEntity(EntityType<? extends Mob> type, Level level) {
+    public ArcherSummonEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
         this.setCustomNameVisible(true);
     }
@@ -38,8 +41,12 @@ public class ArcherSummonEntity extends Mob {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
-        this.goalSelector.addGoal(2, new RangedAttackGoal(this));
-        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 0.8, 15.0f, 8.0f));
+        this.goalSelector.addGoal(2, new RangedAttackGoal(this, 1.0, 40, 16.0f));
+
+        // Priority 3: Follow Owner.
+        // Note: min distance increased to 5.0 to give it space to breathe
+        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0, 20.0f, 5.0f));
+
         this.goalSelector.addGoal(4, new RandomStrollGoal(this, 0.6));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 8.0f));
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
@@ -48,16 +55,16 @@ public class ArcherSummonEntity extends Mob {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return PathfinderMob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 15.0)
-                .add(Attributes.MOVEMENT_SPEED, 0.25)
-                .add(Attributes.FOLLOW_RANGE, 32.0);
+                .add(Attributes.MOVEMENT_SPEED, 0.3)
+                .add(Attributes.FOLLOW_RANGE, 32.0)
+                .add(Attributes.STEP_HEIGHT, 1.0); // Ensures it doesn't get stuck on carpet/snow
     }
 
     @Override
     public void tick() {
         super.tick();
-        
         if (shootCooldown > 0) {
             shootCooldown--;
         }
@@ -71,15 +78,15 @@ public class ArcherSummonEntity extends Mob {
         return super.hurt(source, amount);
     }
 
-    public void performRangedAttack() {
+    @Override
+    public void performRangedAttack(net.minecraft.world.entity.LivingEntity target, float velocity) {
         if (shootCooldown > 0) return;
-        if (this.getTarget() == null) return;
+        if (target == null) return;
 
-        // Shoot arrow
-        Arrow arrow = new Arrow(this.level(), this, null);
-        double dx = this.getTarget().getX() - this.getX();
-        double dy = this.getTarget().getY(0.3333333333333333) - arrow.getY();
-        double dz = this.getTarget().getZ() - this.getZ();
+        Arrow arrow = new Arrow(this.level(), this, new ItemStack(Items.ARROW), null);
+        double dx = target.getX() - this.getX();
+        double dy = target.getY(0.3333333333333333) - arrow.getY();
+        double dz = target.getZ() - this.getZ();
         double dist = Math.sqrt(dx * dx + dz * dz);
 
         arrow.shoot(dx, dy + dist * 0.2, dz, 1.6f, 14.0f);
@@ -108,76 +115,66 @@ public class ArcherSummonEntity extends Mob {
         }
     }
 
-    // Custom ranged attack goal
-    private static class RangedAttackGoal extends Goal {
-        private final ArcherSummonEntity archer;
-
-        public RangedAttackGoal(ArcherSummonEntity archer) {
-            this.archer = archer;
-        }
-
-        @Override
-        public boolean canUse() {
-            return archer.getTarget() != null && archer.shootCooldown == 0;
-        }
-
-        @Override
-        public void tick() {
-            if (archer.getTarget() != null) {
-                archer.getLookControl().setLookAt(archer.getTarget(), 30.0f, 30.0f);
-                
-                double dist = archer.distanceTo(archer.getTarget());
-                if (dist < 16.0 && archer.shootCooldown == 0) {
-                    archer.performRangedAttack();
-                } else if (dist > 8.0) {
-                    archer.getNavigation().moveTo(archer.getTarget(), 0.8);
-                }
-            }
-        }
-    }
-
-    // Follow owner goal
+    // --- FIXED GOAL ---
     private static class FollowOwnerGoal extends Goal {
-        private final ArcherSummonEntity archer;
+        private final ArcherSummonEntity mob;
         private final double speedModifier;
         private final float maxDist;
         private final float minDist;
+        private int timeToRecalcPath;
 
-        public FollowOwnerGoal(ArcherSummonEntity archer, double speed, float maxDist, float minDist) {
-            this.archer = archer;
+        public FollowOwnerGoal(ArcherSummonEntity mob, double speed, float maxDist, float minDist) {
+            this.mob = mob;
             this.speedModifier = speed;
             this.maxDist = maxDist;
             this.minDist = minDist;
+
+            // THIS IS THE FIX:
+            // Locking MOVE and LOOK ensures RandomStroll and LookAtPlayer don't run
+            // at the same time as this goal.
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
         }
 
         @Override
         public boolean canUse() {
-            Player owner = archer.getOwner();
+            Player owner = mob.getOwner();
             if (owner == null) return false;
-            if (archer.distanceTo(owner) < minDist) return false;
-            return archer.distanceTo(owner) > maxDist;
+            if (mob.distanceTo(owner) < minDist) return false; // Too close, don't move
+            return mob.distanceTo(owner) > maxDist; // Too far, start moving
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            Player owner = mob.getOwner();
+            if (owner == null) return false;
+
+            // Determine navigation status
+            if (mob.getNavigation().isDone()) return false;
+
+            // Keep running until we are fairly close (minDist), not just within maxDist
+            return mob.distanceTo(owner) > minDist;
         }
 
         @Override
         public void start() {
-            Player owner = archer.getOwner();
-            if (owner != null) {
-                archer.getNavigation().moveTo(owner, speedModifier);
-            }
+            this.timeToRecalcPath = 0;
         }
 
         @Override
         public void stop() {
-            archer.getNavigation().stop();
+            mob.getNavigation().stop();
         }
 
         @Override
         public void tick() {
-            Player owner = archer.getOwner();
+            Player owner = mob.getOwner();
             if (owner != null) {
-                archer.getLookControl().setLookAt(owner, 10.0f, archer.getMaxHeadXRot());
-                if (archer.distanceTo(owner) > maxDist * 0.75) {
-                    archer.getNavigation().moveTo(owner, speedModifier);
+                // Force Mob to look at owner while following
+                mob.getLookControl().setLookAt(owner, 10.0f, mob.getMaxHeadXRot());
+
+                if (--this.timeToRecalcPath <= 0) {
+                    this.timeToRecalcPath = 10; // Update path every 0.5 seconds
+                    mob.getNavigation().moveTo(owner, speedModifier);
                 }
             }
         }

@@ -49,9 +49,9 @@ public class RulerPassiveHandler {
                     // Rally ended - move banner back to player
                     rpg.setRulerRallyActive(false);
                     rpg.setRulerBannerPosition(player.position());
-                    
+
                     player.sendSystemMessage(Component.literal("§6⚔ RALLY ended! Banner returns."));
-                    
+
                     level.playSound(null, player.blockPosition(),
                             SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.0f, 1.2f);
                 }
@@ -86,7 +86,7 @@ public class RulerPassiveHandler {
 
     private static void handleDemoralizeForSummon(LivingEntity summon, boolean inRange, ServerLevel level) {
         // Check if summon has GLORY buff
-        boolean hasGlory = summon.hasEffect(MobEffects.MOVEMENT_SPEED) && 
+        boolean hasGlory = summon.hasEffect(MobEffects.MOVEMENT_SPEED) &&
                           summon.hasEffect(MobEffects.ABSORPTION);
 
         if (hasGlory) {

@@ -2,6 +2,8 @@ package net.Frostimpact.rpgclasses;
 
 import net.Frostimpact.rpgclasses.ability.AbilityRegistry;
 import net.Frostimpact.rpgclasses.client.ClientEvents;
+import net.Frostimpact.rpgclasses.entity.summon.ArcherSummonEntity;
+import net.Frostimpact.rpgclasses.entity.summon.KnightSummonEntity;
 import net.Frostimpact.rpgclasses.event.ServerEvents;
 import net.Frostimpact.rpgclasses.networking.ModMessages;
 import net.Frostimpact.rpgclasses.registry.ModEntities;
@@ -9,10 +11,12 @@ import net.Frostimpact.rpgclasses.registry.abilities.AbilityDatabase;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 
 @Mod(RpgClassesMod.MOD_ID)
 public class RpgClassesMod {
@@ -91,4 +95,5 @@ public class RpgClassesMod {
         AbilityRegistry.registerAll();
         System.out.println("RPG Classes: Abilities Registered!");
     }
+
 }

@@ -26,15 +26,15 @@ public class CallToArmsAbility extends Ability {
         ServerLevel level = player.serverLevel();
         boolean shiftPressed = player.isShiftKeyDown();
 
-        // Count existing summons
+        // Count existing summons using LivingEntity
         List<LivingEntity> knights = level.getEntitiesOfClass(
-                KnightSummonEntity.class,
+                LivingEntity.class,
                 player.getBoundingBox().inflate(100),
                 entity -> entity instanceof KnightSummonEntity
         );
 
         List<LivingEntity> archers = level.getEntitiesOfClass(
-                ArcherSummonEntity.class,
+                LivingEntity.class,
                 player.getBoundingBox().inflate(100),
                 entity -> entity instanceof ArcherSummonEntity
         );
@@ -49,7 +49,7 @@ public class CallToArmsAbility extends Ability {
 
             // Spawn 2 archers (or less if approaching limit)
             int toSpawn = Math.min(2, 4 - archers.size());
-            
+
             for (int i = 0; i < toSpawn; i++) {
                 spawnArcher(player, level, i);
             }
@@ -67,7 +67,7 @@ public class CallToArmsAbility extends Ability {
 
             // Spawn 2 knights (or less if approaching limit)
             int toSpawn = Math.min(2, 4 - knights.size());
-            
+
             for (int i = 0; i < toSpawn; i++) {
                 spawnKnight(player, level, i);
             }

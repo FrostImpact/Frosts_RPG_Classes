@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
@@ -46,7 +47,9 @@ public class RegroupAbility extends Ability {
             }
 
             // Move to banner
-            summon.getNavigation().moveTo(bannerPos.x, bannerPos.y, bannerPos.z, 1.2);
+            if (summon instanceof Mob mob) {
+                mob.getNavigation().moveTo(bannerPos.x, bannerPos.y, bannerPos.z, 1.2);
+            }
 
             // Particle trail
             level.sendParticles(
