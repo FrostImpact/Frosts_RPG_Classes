@@ -5,11 +5,13 @@ import net.Frostimpact.rpgclasses.client.renderer.MagicMissileRenderer;
 import net.Frostimpact.rpgclasses.client.renderer.SeekerArrowRenderer;
 import net.Frostimpact.rpgclasses.client.renderer.VaultProjectileRenderer;
 import net.Frostimpact.rpgclasses.client.renderer.StunBoltRenderer;
+import net.Frostimpact.rpgclasses.client.renderer.AfterimageRenderer;
 import net.Frostimpact.rpgclasses.entity.summon.ArcherSummonEntity;
 import net.Frostimpact.rpgclasses.entity.summon.KnightSummonEntity;
 import net.Frostimpact.rpgclasses.entity.summon.TurretSummonEntity;
 import net.Frostimpact.rpgclasses.entity.summon.ShockTowerEntity;
 import net.Frostimpact.rpgclasses.entity.summon.WindTowerEntity;
+import net.Frostimpact.rpgclasses.entity.summon.AfterimageEntity;
 import net.Frostimpact.rpgclasses.registry.ModEntities;
 import net.minecraft.client.model.HumanoidModel; // CHANGED: Import HumanoidModel
 import net.minecraft.client.model.geom.ModelLayers;
@@ -39,6 +41,9 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.TURRET_SUMMON.get(), TurretRenderer::new);
         event.registerEntityRenderer(ModEntities.SHOCK_TOWER.get(), ShockTowerRenderer::new);
         event.registerEntityRenderer(ModEntities.WIND_TOWER.get(), WindTowerRenderer::new);
+
+        // MIRAGE summon entities
+        event.registerEntityRenderer(ModEntities.AFTERIMAGE.get(), AfterimageRenderer::new);
 
         System.out.println("RPG Classes: Entity Renderers Registered!");
     }
