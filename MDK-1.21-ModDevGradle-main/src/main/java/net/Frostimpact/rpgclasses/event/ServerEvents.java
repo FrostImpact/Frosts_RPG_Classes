@@ -5,6 +5,7 @@ import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
 import net.Frostimpact.rpgclasses.networking.ModMessages;
 import net.Frostimpact.rpgclasses.networking.packet.PacketSyncMana;
 import net.Frostimpact.rpgclasses.networking.packet.PacketSyncClass;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -13,6 +14,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import org.joml.Vector3f;
 
 public class ServerEvents {
 
@@ -281,40 +283,70 @@ public class ServerEvents {
                                 afterimage.getPersistentData().putInt("fracture_timer", timer);
 
                                 if (timer <= 0) {
-                                    // Explode with enhanced visual effects (optimized particle count)
+                                    // Explode with flashy and impactful visual effects
                                     net.minecraft.world.phys.Vec3 pos = afterimage.position();
                                     
-                                    // Spawn dramatic explosion particles
+                                    // Spawn dramatic explosion particles with velocity and spread
                                     if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-                                        // Soul fire flame explosion
+                                        // Create light blue dust explosion particles with velocity
+                                        net.minecraft.core.particles.DustParticleOptions lightBlueDust = 
+                                            new net.minecraft.core.particles.DustParticleOptions(
+                                                new org.joml.Vector3f(0.39f, 0.78f, 1.0f), 2.0f
+                                            );
                                         serverLevel.sendParticles(
-                                            net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME,
+                                            lightBlueDust,
                                             pos.x, pos.y + 1, pos.z,
-                                            50, 1.0, 1.2, 1.0, 0.3
+                                            80, 1.5, 1.5, 1.5, 0.3
                                         );
-                                        // End rod burst
+                                        
+                                        // White/cyan flash particles for impact
+                                        net.minecraft.core.particles.DustParticleOptions whiteDust = 
+                                            new net.minecraft.core.particles.DustParticleOptions(
+                                                new org.joml.Vector3f(0.9f, 0.95f, 1.0f), 2.5f
+                                            );
+                                        serverLevel.sendParticles(
+                                            whiteDust,
+                                            pos.x, pos.y + 1, pos.z,
+                                            60, 1.2, 1.2, 1.2, 0.25
+                                        );
+                                        
+                                        // Explosion particles for flashy effect
+                                        serverLevel.sendParticles(
+                                            net.minecraft.core.particles.ParticleTypes.EXPLOSION,
+                                            pos.x, pos.y + 1, pos.z,
+                                            15, 0.5, 0.5, 0.5, 0.0
+                                        );
+                                        
+                                        // Flash particles for bright burst
+                                        serverLevel.sendParticles(
+                                            net.minecraft.core.particles.ParticleTypes.FLASH,
+                                            pos.x, pos.y + 1, pos.z,
+                                            3, 0.1, 0.1, 0.1, 0.0
+                                        );
+                                        
+                                        // End rod particles with velocity for dynamic effect
                                         serverLevel.sendParticles(
                                             net.minecraft.core.particles.ParticleTypes.END_ROD,
                                             pos.x, pos.y + 1, pos.z,
-                                            40, 0.8, 1.0, 0.8, 0.25
+                                            50, 1.5, 1.5, 1.5, 0.4
                                         );
-                                        // Witch particles
+                                        
+                                        // Cyan dust cloud spreading outward
+                                        net.minecraft.core.particles.DustParticleOptions cyanDust = 
+                                            new net.minecraft.core.particles.DustParticleOptions(
+                                                new org.joml.Vector3f(0.0f, 0.8f, 0.9f), 1.5f
+                                            );
                                         serverLevel.sendParticles(
-                                            net.minecraft.core.particles.ParticleTypes.WITCH,
+                                            cyanDust,
                                             pos.x, pos.y + 1, pos.z,
-                                            30, 0.7, 0.9, 0.7, 0.2
+                                            70, 2.0, 2.0, 2.0, 0.35
                                         );
-                                        // Dragon breath for dramatic effect
+                                        
+                                        // Glow particles for lingering effect
                                         serverLevel.sendParticles(
-                                            net.minecraft.core.particles.ParticleTypes.DRAGON_BREATH,
+                                            net.minecraft.core.particles.ParticleTypes.GLOW,
                                             pos.x, pos.y + 1, pos.z,
-                                            25, 0.9, 1.1, 0.9, 0.15
-                                        );
-                                        // Portal particles for mystical effect
-                                        serverLevel.sendParticles(
-                                            net.minecraft.core.particles.ParticleTypes.PORTAL,
-                                            pos.x, pos.y + 1, pos.z,
-                                            35, 1.0, 1.0, 1.0, 1.0
+                                            40, 1.0, 1.0, 1.0, 0.2
                                         );
                                     }
                                     

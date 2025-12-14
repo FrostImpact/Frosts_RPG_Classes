@@ -41,6 +41,12 @@ public class ShadowstepAbility extends Ability {
             player.sendSystemMessage(Component.literal("§cNo afterimage in line of sight!"));
             return false;
         }
+        
+        // Check if already teleported to this afterimage
+        if (closestAfterimage.getPersistentData().getBoolean("teleported_to")) {
+            player.sendSystemMessage(Component.literal("§cAlready teleported to this afterimage!"));
+            return false;
+        }
 
         // Store origin position for particles
         Vec3 originPos = player.position();
@@ -48,6 +54,9 @@ public class ShadowstepAbility extends Ability {
         // Teleport to afterimage
         Vec3 targetPos = closestAfterimage.position();
         player.teleportTo(targetPos.x, targetPos.y, targetPos.z);
+        
+        // Mark this afterimage as used
+        closestAfterimage.getPersistentData().putBoolean("teleported_to", true);
 
         // Spawn particles at origin
         if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {

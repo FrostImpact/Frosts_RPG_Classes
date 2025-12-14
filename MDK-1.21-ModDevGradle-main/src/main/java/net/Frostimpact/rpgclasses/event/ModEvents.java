@@ -276,14 +276,21 @@ public class ModEvents {
                                     // Deal damage
                                     living.hurt(player.damageSources().playerAttack(player), afterimageDamage);
                                     
-                                    // Visual feedback with swing particles
+                                    // Visual feedback with slash particles at impact location
+                                    ((net.minecraft.server.level.ServerLevel) player.level()).sendParticles(
+                                            net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,
+                                            living.getX(), living.getY() + living.getBbHeight() / 2, living.getZ(),
+                                            1, 0.0, 0.0, 0.0, 0.0
+                                    );
+                                    
+                                    // Additional crit particles
                                     ((net.minecraft.server.level.ServerLevel) player.level()).sendParticles(
                                             net.minecraft.core.particles.ParticleTypes.CRIT,
                                             living.getX(), living.getY() + living.getBbHeight() / 2, living.getZ(),
                                             5, 0.3, 0.3, 0.3, 0.1
                                     );
                                     
-                                    // Additional soul particles during swing
+                                    // Soul particles during swing at afterimage location
                                     ((net.minecraft.server.level.ServerLevel) player.level()).sendParticles(
                                             net.minecraft.core.particles.ParticleTypes.SOUL,
                                             afterimagePos.x, afterimagePos.y + 1, afterimagePos.z,

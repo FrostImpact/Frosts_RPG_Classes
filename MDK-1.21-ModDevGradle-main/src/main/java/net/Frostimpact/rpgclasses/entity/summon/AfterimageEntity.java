@@ -10,7 +10,11 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectInstance;
+import org.joml.Vector3f;
 
 public class AfterimageEntity extends PathfinderMob {
 
@@ -126,6 +130,18 @@ public class AfterimageEntity extends PathfinderMob {
         super.tick();
 
         if (!this.level().isClientSide) {
+            // Apply permanent invisibility effect without particles
+            if (!this.hasEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY)) {
+                this.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                    net.minecraft.world.effect.MobEffects.INVISIBILITY,
+                    20, // 1 second duration, will be reapplied constantly
+                    0,
+                    false, // Not ambient
+                    false, // No particles
+                    false  // No icon
+                ));
+            }
+            
             // Check if owner is too far away
             if (owner != null && !owner.isRemoved()) {
                 double distanceToOwner = this.distanceTo(owner);
@@ -190,63 +206,76 @@ public class AfterimageEntity extends PathfinderMob {
     }
     
     private void spawnParticleOutline(ServerLevel serverLevel) {
-        // Create an enhanced humanoid particle outline using soul fire particles
+        // Create a blocky humanoid particle outline using dust particles
         double x = this.getX();
         double y = this.getY();
         double z = this.getZ();
         
-        // Body particles (torso) - more particles for better definition
-        for (int i = 0; i < 5; i++) {
-            double offsetY = 0.5 + i * 0.2;
-            spawnCircleParticles(serverLevel, x, y + offsetY, z, OUTLINE_TORSO_RADIUS, 6);
+        // Determine particle color based on teleport status
+        boolean hasTeleportedTo = this.getPersistentData().getBoolean("teleported_to");
+        // Light blue color (RGB: 100, 200, 255) or red if teleported to
+        float red = hasTeleportedTo ? 1.0f : 0.39f;
+        float green = hasTeleportedTo ? 0.0f : 0.78f;
+        float blue = hasTeleportedTo ? 0.0f : 1.0f;
+        net.minecraft.core.particles.DustParticleOptions dustColor = 
+            new net.minecraft.core.particles.DustParticleOptions(
+                new org.joml.Vector3f(red, green, blue), 1.0f
+            );
+        
+        // Body blocks (torso) - cubic/volumetric structure
+        for (int i = 0; i < 6; i++) {
+            double offsetY = 0.5 + i * 0.15;
+            spawnBlockParticles(serverLevel, x, y + offsetY, z, OUTLINE_TORSO_RADIUS, OUTLINE_TORSO_RADIUS * 0.5, dustColor);
         }
         
-        // Head particles - more detailed
-        spawnCircleParticles(serverLevel, x, y + OUTLINE_HEAD_HEIGHT, z, OUTLINE_HEAD_RADIUS, 8);
-        spawnCircleParticles(serverLevel, x, y + OUTLINE_HEAD_HEIGHT - 0.1, z, OUTLINE_HEAD_RADIUS, 6);
-        spawnCircleParticles(serverLevel, x, y + OUTLINE_HEAD_HEIGHT - 0.2, z, OUTLINE_HEAD_RADIUS - 0.05, 6);
+        // Head block - cubic structure
+        spawnBlockParticles(serverLevel, x, y + OUTLINE_HEAD_HEIGHT, z, OUTLINE_HEAD_RADIUS, OUTLINE_HEAD_RADIUS, dustColor);
+        spawnBlockParticles(serverLevel, x, y + OUTLINE_HEAD_HEIGHT - 0.15, z, OUTLINE_HEAD_RADIUS, OUTLINE_HEAD_RADIUS, dustColor);
         
-        // Shoulders
-        spawnCircleParticles(serverLevel, x - OUTLINE_ARM_WIDTH, y + OUTLINE_SHOULDER_HEIGHT, z, 0.1, 3);
-        spawnCircleParticles(serverLevel, x + OUTLINE_ARM_WIDTH, y + OUTLINE_SHOULDER_HEIGHT, z, 0.1, 3);
+        // Arms blocks - volumetric cubic structure instead of lines
+        // Left arm
+        for (int i = 0; i <= 3; i++) {
+            double t = i / 3.0;
+            double armX = x - OUTLINE_ARM_WIDTH - (OUTLINE_ARM_EXTEND - OUTLINE_ARM_WIDTH) * t;
+            double armY = y + OUTLINE_SHOULDER_HEIGHT - (OUTLINE_SHOULDER_HEIGHT - 0.6) * t;
+            spawnBlockParticles(serverLevel, armX, armY, z, 0.1, 0.1, dustColor);
+        }
+        // Right arm
+        for (int i = 0; i <= 3; i++) {
+            double t = i / 3.0;
+            double armX = x + OUTLINE_ARM_WIDTH + (OUTLINE_ARM_EXTEND - OUTLINE_ARM_WIDTH) * t;
+            double armY = y + OUTLINE_SHOULDER_HEIGHT - (OUTLINE_SHOULDER_HEIGHT - 0.6) * t;
+            spawnBlockParticles(serverLevel, armX, armY, z, 0.1, 0.1, dustColor);
+        }
         
-        // Arms particles - more detailed
-        spawnLineParticles(serverLevel, x - OUTLINE_ARM_WIDTH, y + OUTLINE_SHOULDER_HEIGHT, z, x - OUTLINE_ARM_EXTEND, y + 0.6, z, 4);
-        spawnLineParticles(serverLevel, x + OUTLINE_ARM_WIDTH, y + OUTLINE_SHOULDER_HEIGHT, z, x + OUTLINE_ARM_EXTEND, y + 0.6, z, 4);
-        
-        // Legs particles - more detailed for better visibility
-        spawnLineParticles(serverLevel, x - OUTLINE_LEG_WIDTH, y + 0.5, z, x - OUTLINE_LEG_WIDTH, y, z, 4);
-        spawnLineParticles(serverLevel, x + OUTLINE_LEG_WIDTH, y + 0.5, z, x + OUTLINE_LEG_WIDTH, y, z, 4);
-        
-        // Feet
-        spawnCircleParticles(serverLevel, x - OUTLINE_LEG_WIDTH, y, z, 0.1, 3);
-        spawnCircleParticles(serverLevel, x + OUTLINE_LEG_WIDTH, y, z, 0.1, 3);
-    }
-    
-    private void spawnCircleParticles(ServerLevel serverLevel, double x, double y, double z, double radius, int count) {
-        for (int i = 0; i < count; i++) {
-            double angle = (2 * Math.PI * i) / count;
-            double offsetX = radius * Math.cos(angle);
-            double offsetZ = radius * Math.sin(angle);
-            serverLevel.sendParticles(
-                ParticleTypes.SOUL_FIRE_FLAME,
-                x + offsetX, y, z + offsetZ,
-                1, 0.0, 0.0, 0.0, 0.0
-            );
+        // Legs blocks - volumetric cubic structure instead of lines
+        // Left leg
+        for (int i = 0; i <= 3; i++) {
+            double legY = y + 0.5 - i * 0.15;
+            spawnBlockParticles(serverLevel, x - OUTLINE_LEG_WIDTH, legY, z, 0.1, 0.1, dustColor);
+        }
+        // Right leg
+        for (int i = 0; i <= 3; i++) {
+            double legY = y + 0.5 - i * 0.15;
+            spawnBlockParticles(serverLevel, x + OUTLINE_LEG_WIDTH, legY, z, 0.1, 0.1, dustColor);
         }
     }
     
-    private void spawnLineParticles(ServerLevel serverLevel, double x1, double y1, double z1, double x2, double y2, double z2, int count) {
-        for (int i = 0; i <= count; i++) {
-            double t = (double) i / count;
-            double x = x1 + (x2 - x1) * t;
-            double y = y1 + (y2 - y1) * t;
-            double z = z1 + (z2 - z1) * t;
-            serverLevel.sendParticles(
-                ParticleTypes.SOUL_FIRE_FLAME,
-                x, y, z,
-                1, 0.0, 0.0, 0.0, 0.0
-            );
+    private void spawnBlockParticles(ServerLevel serverLevel, double centerX, double centerY, double centerZ, 
+                                     double radiusX, double radiusZ, net.minecraft.core.particles.DustParticleOptions dustColor) {
+        // Create a filled cubic/block structure with dust particles
+        int particlesPerAxis = 3;
+        for (int i = 0; i < particlesPerAxis; i++) {
+            for (int j = 0; j < particlesPerAxis; j++) {
+                // Create particles on the XZ plane to form a block
+                double offsetX = (i - 1) * radiusX / 2;
+                double offsetZ = (j - 1) * radiusZ / 2;
+                serverLevel.sendParticles(
+                    dustColor,
+                    centerX + offsetX, centerY, centerZ + offsetZ,
+                    1, 0.0, 0.0, 0.0, 0.0
+                );
+            }
         }
     }
 
