@@ -35,7 +35,7 @@ public class AfterimageEntity extends PathfinderMob {
     private static final double OUTLINE_SHOULDER_HEIGHT = 1.2;
     
     // Particle colors for afterimage outline (normalized RGB values 0-1)
-    private static final Vector3f LIGHT_BLUE_COLOR = new Vector3f(0.39f, 0.78f, 1.0f); // Approx RGB: 100, 199, 255
+    private static final Vector3f LIGHT_BLUE_COLOR = new Vector3f(0.39f, 0.78f, 1.0f); // Approx RGB: 99, 199, 255
     private static final Vector3f RED_COLOR = new Vector3f(1.0f, 0.0f, 0.0f); // RGB: 255, 0, 0
 
     private Player owner;
@@ -261,9 +261,9 @@ public class AfterimageEntity extends PathfinderMob {
     }
     
     private void spawnBlockParticles(ServerLevel serverLevel, double centerX, double centerY, double centerZ, 
-                                     double radiusX, double radiusZ, net.minecraft.core.particles.DustParticleOptions dustColor) {
+                                     double radiusX, double radiusZ, DustParticleOptions dustColor) {
         // Create a filled cubic/block structure with dust particles
-        // Use 2x2 grid instead of 3x3 to reduce particle count (4 particles instead of 9)
+        // Use 2x2 grid for balanced visual quality and performance (4 particles per block)
         int particlesPerAxis = 2;
         for (int i = 0; i < particlesPerAxis; i++) {
             for (int j = 0; j < particlesPerAxis; j++) {
