@@ -114,6 +114,17 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     private String artificerConstructionType = "";
     private Vec3 artificerConstructionPos = Vec3.ZERO;
 
+    // ** MIRAGE **
+    private java.util.List<Integer> mirageAfterimageIds = new java.util.ArrayList<>();
+    private boolean mirageShadowstepActive = false;
+    private int mirageShadowstepTicks = 0;
+    private boolean mirageRecallActive = false;
+    private Vec3 mirageRecallPosition = Vec3.ZERO;
+    private boolean mirageFractureLineActive = false;
+    private boolean mirageFractureLineCharging = false;
+    private int mirageFractureLineTicks = 0;
+    private Vec3 mirageFractureLineDirection = Vec3.ZERO;
+
     //DASH
     public boolean isDashActive() {
         return dashActive;
@@ -708,6 +719,87 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         this.artificerConstructionPos = pos;
     }
 
+    // MIRAGE - AFTERIMAGES
+    public java.util.List<Integer> getMirageAfterimageIds() {
+        return mirageAfterimageIds;
+    }
+
+    public void setMirageAfterimageIds(java.util.List<Integer> ids) {
+        this.mirageAfterimageIds = ids;
+    }
+
+    public void addMirageAfterimageId(int entityId) {
+        this.mirageAfterimageIds.add(entityId);
+    }
+
+    public void clearMirageAfterimages() {
+        this.mirageAfterimageIds.clear();
+    }
+
+    public boolean isMirageShadowstepActive() {
+        return mirageShadowstepActive;
+    }
+
+    public void setMirageShadowstepActive(boolean active) {
+        this.mirageShadowstepActive = active;
+    }
+
+    public int getMirageShadowstepTicks() {
+        return mirageShadowstepTicks;
+    }
+
+    public void setMirageShadowstepTicks(int ticks) {
+        this.mirageShadowstepTicks = ticks;
+    }
+
+    public boolean isMirageRecallActive() {
+        return mirageRecallActive;
+    }
+
+    public void setMirageRecallActive(boolean active) {
+        this.mirageRecallActive = active;
+    }
+
+    public Vec3 getMirageRecallPosition() {
+        return mirageRecallPosition;
+    }
+
+    public void setMirageRecallPosition(Vec3 pos) {
+        this.mirageRecallPosition = pos;
+    }
+
+    public boolean isMirageFractureLineActive() {
+        return mirageFractureLineActive;
+    }
+
+    public void setMirageFractureLineActive(boolean active) {
+        this.mirageFractureLineActive = active;
+    }
+
+    public boolean isMirageFractureLineCharging() {
+        return mirageFractureLineCharging;
+    }
+
+    public void setMirageFractureLineCharging(boolean charging) {
+        this.mirageFractureLineCharging = charging;
+    }
+
+    public int getMirageFractureLineTicks() {
+        return mirageFractureLineTicks;
+    }
+
+    public void setMirageFractureLineTicks(int ticks) {
+        this.mirageFractureLineTicks = ticks;
+    }
+
+    public Vec3 getMirageFractureLineDirection() {
+        return mirageFractureLineDirection;
+    }
+
+    public void setMirageFractureLineDirection(Vec3 direction) {
+        this.mirageFractureLineDirection = direction;
+    }
+
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
 
@@ -797,6 +889,24 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         nbt.putDouble("artificer_construction_x", artificerConstructionPos.x);
         nbt.putDouble("artificer_construction_y", artificerConstructionPos.y);
         nbt.putDouble("artificer_construction_z", artificerConstructionPos.z);
+
+        // ** MIRAGE **
+        nbt.putInt("mirage_afterimage_count", mirageAfterimageIds.size());
+        for (int i = 0; i < mirageAfterimageIds.size(); i++) {
+            nbt.putInt("mirage_afterimage_" + i, mirageAfterimageIds.get(i));
+        }
+        nbt.putBoolean("mirage_shadowstep_active", mirageShadowstepActive);
+        nbt.putInt("mirage_shadowstep_ticks", mirageShadowstepTicks);
+        nbt.putBoolean("mirage_recall_active", mirageRecallActive);
+        nbt.putDouble("mirage_recall_x", mirageRecallPosition.x);
+        nbt.putDouble("mirage_recall_y", mirageRecallPosition.y);
+        nbt.putDouble("mirage_recall_z", mirageRecallPosition.z);
+        nbt.putBoolean("mirage_fracture_active", mirageFractureLineActive);
+        nbt.putBoolean("mirage_fracture_charging", mirageFractureLineCharging);
+        nbt.putInt("mirage_fracture_ticks", mirageFractureLineTicks);
+        nbt.putDouble("mirage_fracture_dir_x", mirageFractureLineDirection.x);
+        nbt.putDouble("mirage_fracture_dir_y", mirageFractureLineDirection.y);
+        nbt.putDouble("mirage_fracture_dir_z", mirageFractureLineDirection.z);
 
         // Save cooldowns
         CompoundTag cooldownsTag = new CompoundTag();
@@ -1011,6 +1121,47 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
             double y = nbt.getDouble("artificer_construction_y");
             double z = nbt.getDouble("artificer_construction_z");
             this.artificerConstructionPos = new Vec3(x, y, z);
+        }
+
+        // ** MIRAGE **
+        if (nbt.contains("mirage_afterimage_count")) {
+            int count = nbt.getInt("mirage_afterimage_count");
+            this.mirageAfterimageIds.clear();
+            for (int i = 0; i < count; i++) {
+                if (nbt.contains("mirage_afterimage_" + i)) {
+                    this.mirageAfterimageIds.add(nbt.getInt("mirage_afterimage_" + i));
+                }
+            }
+        }
+        if (nbt.contains("mirage_shadowstep_active")) {
+            this.mirageShadowstepActive = nbt.getBoolean("mirage_shadowstep_active");
+        }
+        if (nbt.contains("mirage_shadowstep_ticks")) {
+            this.mirageShadowstepTicks = nbt.getInt("mirage_shadowstep_ticks");
+        }
+        if (nbt.contains("mirage_recall_active")) {
+            this.mirageRecallActive = nbt.getBoolean("mirage_recall_active");
+        }
+        if (nbt.contains("mirage_recall_x")) {
+            double x = nbt.getDouble("mirage_recall_x");
+            double y = nbt.getDouble("mirage_recall_y");
+            double z = nbt.getDouble("mirage_recall_z");
+            this.mirageRecallPosition = new Vec3(x, y, z);
+        }
+        if (nbt.contains("mirage_fracture_active")) {
+            this.mirageFractureLineActive = nbt.getBoolean("mirage_fracture_active");
+        }
+        if (nbt.contains("mirage_fracture_charging")) {
+            this.mirageFractureLineCharging = nbt.getBoolean("mirage_fracture_charging");
+        }
+        if (nbt.contains("mirage_fracture_ticks")) {
+            this.mirageFractureLineTicks = nbt.getInt("mirage_fracture_ticks");
+        }
+        if (nbt.contains("mirage_fracture_dir_x")) {
+            double x = nbt.getDouble("mirage_fracture_dir_x");
+            double y = nbt.getDouble("mirage_fracture_dir_y");
+            double z = nbt.getDouble("mirage_fracture_dir_z");
+            this.mirageFractureLineDirection = new Vec3(x, y, z);
         }
 
         // Load cooldowns

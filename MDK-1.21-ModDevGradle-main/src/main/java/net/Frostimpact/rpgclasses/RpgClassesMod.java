@@ -91,6 +91,12 @@ public class RpgClassesMod {
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.REPOSITION_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.SELF_DESTRUCT_KEY);
 
+        // MIRAGE Keys
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.REFLECTIONS_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.SHADOWSTEP_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.RECALL_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.FRACTURE_LINE_KEY);
+
         System.out.println("RPG Classes: Keybinds Registered!");
 
         // Register ability database

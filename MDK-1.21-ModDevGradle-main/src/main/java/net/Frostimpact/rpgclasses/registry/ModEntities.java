@@ -7,6 +7,7 @@ import net.Frostimpact.rpgclasses.entity.projectile.StunBoltEntity;
 import net.Frostimpact.rpgclasses.entity.projectile.VaultProjectileEntity;
 import net.Frostimpact.rpgclasses.entity.summon.KnightSummonEntity;
 import net.Frostimpact.rpgclasses.entity.summon.ArcherSummonEntity;
+import net.Frostimpact.rpgclasses.entity.summon.AfterimageEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -92,6 +93,15 @@ public class ModEntities {
                     .clientTrackingRange(8)
                     .updateInterval(10)
                     .build("wind_tower"));
+
+    // === MIRAGE SUMMONS ===
+    public static final DeferredHolder<EntityType<?>, EntityType<AfterimageEntity>> AFTERIMAGE =
+            ENTITY_TYPES.register("afterimage", () -> EntityType.Builder
+                    .<AfterimageEntity>of(AfterimageEntity::new, MobCategory.CREATURE)
+                    .sized(0.6f, 1.8f)
+                    .clientTrackingRange(8)
+                    .updateInterval(10)
+                    .build("afterimage"));
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);

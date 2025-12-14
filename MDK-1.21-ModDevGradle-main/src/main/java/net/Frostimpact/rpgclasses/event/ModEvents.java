@@ -3,6 +3,7 @@ package net.Frostimpact.rpgclasses.event;
 import net.Frostimpact.rpgclasses.RpgClassesMod;
 import net.Frostimpact.rpgclasses.entity.summon.ArcherSummonEntity;
 import net.Frostimpact.rpgclasses.entity.summon.KnightSummonEntity;
+import net.Frostimpact.rpgclasses.entity.summon.AfterimageEntity;
 import net.Frostimpact.rpgclasses.registry.ModEntities;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
@@ -251,6 +252,9 @@ public class ModEvents {
             event.put(ModEntities.TURRET_SUMMON.get(), net.Frostimpact.rpgclasses.entity.summon.TurretSummonEntity.createAttributes().build());
             event.put(ModEntities.SHOCK_TOWER.get(), net.Frostimpact.rpgclasses.entity.summon.ShockTowerEntity.createAttributes().build());
             event.put(ModEntities.WIND_TOWER.get(), net.Frostimpact.rpgclasses.entity.summon.WindTowerEntity.createAttributes().build());
+
+            // Link the Mirage entities
+            event.put(ModEntities.AFTERIMAGE.get(), AfterimageEntity.createAttributes().build());
 
             System.out.println("RPG Classes: Entity Attributes Registered!");
         }

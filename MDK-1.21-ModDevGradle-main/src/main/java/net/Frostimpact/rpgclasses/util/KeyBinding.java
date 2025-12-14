@@ -236,4 +236,37 @@ public class KeyBinding {
             InputConstants.KEY_Z,
             "key.category.rpgclasses"
     );
+
+    // MIRAGE Keys
+    public static final KeyMapping REFLECTIONS_KEY = new KeyMapping(
+            "key.rpgclasses.reflections",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_V,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping SHADOWSTEP_KEY = new KeyMapping(
+            "key.rpgclasses.shadowstep",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_C,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping RECALL_KEY = new KeyMapping(
+            "key.rpgclasses.recall",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_X,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping FRACTURE_LINE_KEY = new KeyMapping(
+            "key.rpgclasses.fracture_line",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_Z,
+            "key.category.rpgclasses"
+    );
 }

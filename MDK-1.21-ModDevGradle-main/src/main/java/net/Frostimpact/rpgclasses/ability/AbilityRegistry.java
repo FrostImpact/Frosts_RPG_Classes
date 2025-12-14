@@ -20,6 +20,10 @@ import net.Frostimpact.rpgclasses.ability.RULER.CallToArmsAbility;
 import net.Frostimpact.rpgclasses.ability.RULER.InvigorateAbility;
 import net.Frostimpact.rpgclasses.ability.RULER.RegroupAbility;
 import net.Frostimpact.rpgclasses.ability.RULER.RallyAbility;
+import net.Frostimpact.rpgclasses.ability.MIRAGE.ReflectionsAbility;
+import net.Frostimpact.rpgclasses.ability.MIRAGE.ShadowstepAbility;
+import net.Frostimpact.rpgclasses.ability.MIRAGE.RecallAbility;
+import net.Frostimpact.rpgclasses.ability.MIRAGE.FractureLineAbility;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -70,6 +74,12 @@ public class AbilityRegistry {
         register(new net.Frostimpact.rpgclasses.ability.ARTIFICER.TowerAbility());
         register(new net.Frostimpact.rpgclasses.ability.ARTIFICER.RepositionAbility());
         register(new net.Frostimpact.rpgclasses.ability.ARTIFICER.SelfDestructAbility());
+
+        // MIRAGE Abilities
+        register(new ReflectionsAbility());
+        register(new ShadowstepAbility());
+        register(new RecallAbility());
+        register(new FractureLineAbility());
     }
 
     private static void register(Ability ability) {

@@ -443,6 +443,15 @@ public class ClassSelectionScreen extends Screen {
                                         new Ability("CYCLE QUIVER", "Switch between QUILL, PYRE, SPORE arrows. Special arrows: 15 MP/shot. 2s CD / 0 MP"),
                                         new Ability("HIRED GUN", "Target enemy, kill in 20s to reset all CDs + Speed III. 40s CD / 40 MP"),
                                         new Ability("PRECISION SHOT", "Charge slow piercing projectile. Damage increases with range. 12s CD / 30 MP")
+                                }),
+                        new ClassSpec("MIRAGE", "Mirage", "Swords, Bows",
+                                "Clone-based repositioning and safe engagement using AFTERIMAGES.",
+                                "ESSENCE OF CREATION", "All AFTERIMAGES mimic your direction and attacks. Deals 30% damage.",
+                                new Ability[]{
+                                        new Ability("REFLECTIONS", "Spawn AFTERIMAGE that glides forward (max 10 blocks). Max 3. 4s CD / 15 MP"),
+                                        new Ability("SHADOWSTEP", "Teleport to closest AFTERIMAGE in line of sight. 4s reactivation window. 12s CD / 10 MP"),
+                                        new Ability("RECALL", "All AFTERIMAGES glide to your cast position. 8s CD / 20 MP"),
+                                        new Ability("FRACTURE LINE", "Charge and dash forward. AFTERIMAGES in path explode after 1.5s. 20s CD / 40 MP")
                                 })
                 }),
         BURST("Burst/Control", "✨", 0xAA00FF, "High burst damage and crowd control",
