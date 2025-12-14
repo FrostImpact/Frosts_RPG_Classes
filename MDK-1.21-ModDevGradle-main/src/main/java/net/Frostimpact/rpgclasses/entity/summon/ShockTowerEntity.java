@@ -21,6 +21,7 @@ import java.util.List;
 public class ShockTowerEntity extends PathfinderMob {
 
     private Player owner;
+    private double baseDamage = 3.0; // Stores owner's damage multiplier at spawn
     private int pulseCooldown = 0;
     private static final int PULSE_INTERVAL = 60; // Pulse every 3 seconds
     private static final double PULSE_RADIUS = 8.0;
@@ -28,6 +29,7 @@ public class ShockTowerEntity extends PathfinderMob {
     private static final int DECAY_START = 600; // 30 seconds
     private static final int DECAY_DAMAGE = 1;
     private int decayDamageCooldown = 0;
+    private int idleParticleTicks = 0;
 
     public ShockTowerEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -41,6 +43,10 @@ public class ShockTowerEntity extends PathfinderMob {
 
     public Player getOwner() {
         return owner;
+    }
+
+    public void setBaseDamage(double damage) {
+        this.baseDamage = damage;
     }
 
     @Override
@@ -67,6 +73,21 @@ public class ShockTowerEntity extends PathfinderMob {
         
         if (pulseCooldown > 0) {
             pulseCooldown--;
+        }
+        
+        // Idle electric arc particles
+        idleParticleTicks++;
+        if (!this.level().isClientSide && idleParticleTicks % 15 == 0) {
+            if (this.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                // Random electric sparks
+                serverLevel.sendParticles(
+                        net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
+                        this.getX() + (random.nextDouble() - 0.5) * 0.5,
+                        this.getY() + 0.5 + random.nextDouble() * 0.5,
+                        this.getZ() + (random.nextDouble() - 0.5) * 0.5,
+                        1, 0, 0, 0, 0
+                );
+            }
         }
         
         // Handle decay
@@ -103,7 +124,7 @@ public class ShockTowerEntity extends PathfinderMob {
                 entity -> entity.isAlive()
         );
         
-        // Apply slowness
+        // Apply slowness and damage
         for (Monster monster : monsters) {
             monster.addEffect(new MobEffectInstance(
                     MobEffects.MOVEMENT_SLOWDOWN,
@@ -113,11 +134,31 @@ public class ShockTowerEntity extends PathfinderMob {
                     false,
                     true
             ));
+            
+            // Apply scaled damage
+            monster.hurt(this.damageSources().mobAttack(this), (float) baseDamage);
         }
         
         if (!monsters.isEmpty()) {
-            // Visual and audio effects
+            // Enhanced visual and audio effects
             if (this.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                // Electric arcs to each target
+                for (Monster monster : monsters) {
+                    Vec3 direction = monster.position().subtract(this.position()).normalize();
+                    double distance = this.position().distanceTo(monster.position());
+                    int arcParticles = (int) (distance * 3);
+                    
+                    for (int i = 0; i < arcParticles; i++) {
+                        double t = (double) i / arcParticles;
+                        Vec3 pos = this.position().add(direction.scale(distance * t));
+                        serverLevel.sendParticles(
+                                net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
+                                pos.x, pos.y + 0.5, pos.z,
+                                1, 0.1, 0.1, 0.1, 0
+                        );
+                    }
+                }
+                
                 // Ring particles
                 for (int i = 0; i < 40; i++) {
                     double angle = (2 * Math.PI * i) / 40;
@@ -127,15 +168,21 @@ public class ShockTowerEntity extends PathfinderMob {
                     serverLevel.sendParticles(
                             net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
                             x, this.getY() + 0.5, z,
-                            1, 0, 0, 0, 0
+                            2, 0, 0.3, 0, 0.05
                     );
                 }
                 
-                // Central burst
+                // Central burst with lingering sparks
                 serverLevel.sendParticles(
                         net.minecraft.core.particles.ParticleTypes.SONIC_BOOM,
                         this.getX(), this.getY() + 0.5, this.getZ(),
                         1, 0, 0, 0, 0
+                );
+                
+                serverLevel.sendParticles(
+                        net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
+                        this.getX(), this.getY() + 0.5, this.getZ(),
+                        15, 0.3, 0.3, 0.3, 0.1
                 );
             }
             
@@ -159,6 +206,7 @@ public class ShockTowerEntity extends PathfinderMob {
         }
         tag.putInt("pulseCooldown", pulseCooldown);
         tag.putInt("decayTicks", decayTicks);
+        tag.putDouble("baseDamage", baseDamage);
     }
 
     @Override
@@ -169,6 +217,9 @@ public class ShockTowerEntity extends PathfinderMob {
         }
         if (tag.contains("decayTicks")) {
             decayTicks = tag.getInt("decayTicks");
+        }
+        if (tag.contains("baseDamage")) {
+            baseDamage = tag.getDouble("baseDamage");
         }
     }
 }

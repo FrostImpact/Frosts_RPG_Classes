@@ -19,16 +19,23 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 
 public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob {
 
     private Player owner;
+    private double baseDamage = 4.0; // Stores owner's damage multiplier at spawn
     private int shootCooldown = 0;
     private static final int SHOOT_INTERVAL = 30; // Shoots every 1.5 seconds
     private int decayTicks = 0;
     private static final int DECAY_START = 600; // 30 seconds
     private static final int DECAY_DAMAGE = 1; // 1 HP every 2 seconds
     private int decayDamageCooldown = 0;
+    private int idleParticleTicks = 0;
 
     public TurretSummonEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -38,6 +45,10 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
     public void setOwner(Player owner) {
         this.owner = owner;
         this.setCustomName(net.minecraft.network.chat.Component.literal("§7Turret"));
+    }
+
+    public void setBaseDamage(double damage) {
+        this.baseDamage = damage;
     }
 
     public Player getOwner() {
@@ -72,6 +83,22 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
             shootCooldown--;
         }
         
+        // Idle rotation particles
+        idleParticleTicks++;
+        if (!this.level().isClientSide && idleParticleTicks % 10 == 0) {
+            if (this.level() instanceof ServerLevel serverLevel) {
+                double angle = (idleParticleTicks * 0.1) % (2 * Math.PI);
+                double radius = 0.5;
+                double x = this.getX() + Math.cos(angle) * radius;
+                double z = this.getZ() + Math.sin(angle) * radius;
+                serverLevel.sendParticles(
+                        ParticleTypes.CRIT,
+                        x, this.getY() + 0.8, z,
+                        1, 0, 0, 0, 0
+                );
+            }
+        }
+        
         // Handle decay after 30 seconds
         decayTicks++;
         if (decayTicks >= DECAY_START) {
@@ -80,9 +107,9 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
                 decayDamageCooldown = 40; // Damage every 2 seconds
                 
                 // Decay particles
-                if (this.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                if (this.level() instanceof ServerLevel serverLevel) {
                     serverLevel.sendParticles(
-                            net.minecraft.core.particles.ParticleTypes.SMOKE,
+                            ParticleTypes.SMOKE,
                             this.getX(), this.getY() + 0.5, this.getZ(),
                             3, 0.2, 0.2, 0.2, 0.01
                     );
@@ -112,31 +139,66 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
     public void performRangedAttack(net.minecraft.world.entity.LivingEntity target, float velocity) {
         if (shootCooldown > 0) return;
         if (target == null) return;
+        if (!(this.level() instanceof ServerLevel serverLevel)) return;
 
-        // Calculate direction
-        double dx = target.getX() - this.getX();
-        double dy = target.getY(0.5) - (this.getY() + 0.5); // Target body center
-        double dz = target.getZ() - this.getZ();
+        // Muzzle flash at turret position
+        serverLevel.sendParticles(
+                ParticleTypes.FLAME,
+                this.getX(), this.getY() + 0.8, this.getZ(),
+                5, 0.1, 0.1, 0.1, 0.05
+        );
 
-        // Create the "Pellet" (Modified Arrow)
-        Arrow pellet = new Arrow(this.level(), this, new ItemStack(Items.ARROW), null);
-        pellet.setPos(this.getX(), this.getY() + 0.5, this.getZ());
+        // Energy buildup effect
+        serverLevel.sendParticles(
+                ParticleTypes.ELECTRIC_SPARK,
+                this.getX(), this.getY() + 0.8, this.getZ(),
+                3, 0.05, 0.05, 0.05, 0.02
+        );
 
-        // Shoot: velocity 1.6f, inaccuracy 0.5f
-        pellet.shoot(dx, dy, dz, 1.6f, 0.5f);
+        // Calculate direction from turret to target
+        Vec3 start = new Vec3(this.getX(), this.getY() + 0.8, this.getZ());
+        Vec3 targetPos = new Vec3(target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ());
+        Vec3 direction = targetPos.subtract(start).normalize();
+        double maxDistance = start.distanceTo(targetPos);
 
-        // Pellet Properties
-        pellet.setNoGravity(true);                   // Flies straight like a fireball
-        pellet.setBaseDamage(4.0);                   // Adjust damage (2.0 = 1 heart)
-        pellet.pickup = AbstractArrow.Pickup.DISALLOWED; // Players can't pick it up
+        // Raycast to find hit point
+        Vec3 end = start.add(direction.scale(maxDistance));
+        
+        // Check if we hit the target or something in between
+        boolean hitTarget = false;
+        AABB targetBox = target.getBoundingBox();
+        
+        // Simple raycast check - does our line intersect target's bounding box?
+        if (targetBox.clip(start, end).isPresent()) {
+            hitTarget = true;
+        }
 
-        // Visuals: Invisible entity + Critical Particles = "Particle Pellet"
-        pellet.setInvisible(true);
-        pellet.setCritArrow(true);                   // Forces the magical particle trail
+        // Spawn particle trail along the beam
+        int particleCount = (int) (maxDistance * 2); // 2 particles per block
+        for (int i = 0; i <= particleCount; i++) {
+            double t = (double) i / particleCount;
+            Vec3 particlePos = start.add(direction.scale(maxDistance * t));
+            
+            serverLevel.sendParticles(
+                    ParticleTypes.CRIT,
+                    particlePos.x, particlePos.y, particlePos.z,
+                    1, 0, 0, 0, 0
+            );
+        }
 
-        this.level().addFreshEntity(pellet);
+        // Apply damage if we hit the target
+        if (hitTarget) {
+            target.hurt(this.damageSources().mobProjectile(this, this), (float) baseDamage);
+            
+            // Impact particles
+            serverLevel.sendParticles(
+                    ParticleTypes.CRIT_HIT,
+                    targetPos.x, targetPos.y, targetPos.z,
+                    8, 0.2, 0.2, 0.2, 0.1
+            );
+        }
 
-        // Changed sound to something lighter/magical
+        // Sound effect
         this.playSound(SoundEvents.SNOWBALL_THROW, 1.0f, 1.5f);
 
         shootCooldown = SHOOT_INTERVAL;
@@ -150,6 +212,7 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
         }
         tag.putInt("shootCooldown", shootCooldown);
         tag.putInt("decayTicks", decayTicks);
+        tag.putDouble("baseDamage", baseDamage);
     }
 
     @Override
@@ -160,6 +223,9 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
         }
         if (tag.contains("decayTicks")) {
             decayTicks = tag.getInt("decayTicks");
+        }
+        if (tag.contains("baseDamage")) {
+            baseDamage = tag.getDouble("baseDamage");
         }
     }
 }

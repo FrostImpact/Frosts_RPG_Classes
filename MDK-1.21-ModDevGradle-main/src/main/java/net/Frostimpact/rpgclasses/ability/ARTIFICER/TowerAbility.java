@@ -5,6 +5,8 @@ import net.Frostimpact.rpgclasses.entity.summon.ShockTowerEntity;
 import net.Frostimpact.rpgclasses.entity.summon.WindTowerEntity;
 import net.Frostimpact.rpgclasses.registry.ModEntities;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
+import net.Frostimpact.rpgclasses.rpg.PlayerStats;
+import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,12 +49,25 @@ public class TowerAbility extends Ability {
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                 "§7⚙ Constructing " + towerType + " TOWER... (5s)"));
 
-        // Construction start effect
+        // Enhanced construction start effect - rising particles and energy convergence
         level.sendParticles(
                 shiftPressed ? ParticleTypes.CLOUD : ParticleTypes.ELECTRIC_SPARK,
                 player.getX(), player.getY() + 1, player.getZ(),
-                30, 0.5, 0.5, 0.5, 0.1
+                40, 0.5, 0.5, 0.5, 0.1
         );
+        
+        // Energy convergence particles
+        for (int i = 0; i < 12; i++) {
+            double angle = (2 * Math.PI * i) / 12;
+            double distance = 2.5;
+            double x = player.getX() + Math.cos(angle) * distance;
+            double z = player.getZ() + Math.sin(angle) * distance;
+            level.sendParticles(
+                    shiftPressed ? ParticleTypes.CLOUD : ParticleTypes.ELECTRIC_SPARK,
+                    x, player.getY() + 0.5, z,
+                    2, 0, 0.3, 0, 0.05
+            );
+        }
 
         level.playSound(null, player.blockPosition(),
                 SoundEvents.ANVIL_USE, SoundSource.PLAYERS, 0.5f, 1.0f);
@@ -124,10 +139,16 @@ public class TowerAbility extends Ability {
                 rpgData.getArtificerConstructionPos().z
         );
         
+        // Set tower damage based on player's damage multiplier
+        PlayerStats stats = player.getData(ModAttachments.PLAYER_STATS);
+        double playerDamageMultiplier = (stats != null) ? stats.getDamageMultiplier() : 1.0;
+        
         if (tower instanceof ShockTowerEntity shock) {
             shock.setOwner(player);
+            shock.setBaseDamage(3.0 * playerDamageMultiplier);
         } else if (tower instanceof WindTowerEntity wind) {
             wind.setOwner(player);
+            wind.setBaseDamage(2.0 * playerDamageMultiplier);
         }
         
         level.addFreshEntity(tower);

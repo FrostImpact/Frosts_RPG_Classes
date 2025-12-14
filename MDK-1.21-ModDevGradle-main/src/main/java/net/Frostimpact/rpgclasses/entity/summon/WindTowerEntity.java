@@ -19,6 +19,7 @@ import java.util.List;
 public class WindTowerEntity extends PathfinderMob {
 
     private Player owner;
+    private double baseDamage = 2.0; // Stores owner's damage multiplier at spawn
     private int pulseCooldown = 0;
     private static final int PULSE_INTERVAL = 60; // Pulse every 3 seconds
     private static final double PULSE_RADIUS = 8.0;
@@ -27,6 +28,7 @@ public class WindTowerEntity extends PathfinderMob {
     private static final int DECAY_START = 600; // 30 seconds
     private static final int DECAY_DAMAGE = 1;
     private int decayDamageCooldown = 0;
+    private int idleParticleTicks = 0;
 
     public WindTowerEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -40,6 +42,10 @@ public class WindTowerEntity extends PathfinderMob {
 
     public Player getOwner() {
         return owner;
+    }
+
+    public void setBaseDamage(double damage) {
+        this.baseDamage = damage;
     }
 
     @Override
@@ -66,6 +72,23 @@ public class WindTowerEntity extends PathfinderMob {
         
         if (pulseCooldown > 0) {
             pulseCooldown--;
+        }
+        
+        // Idle swirling wind particles
+        idleParticleTicks++;
+        if (!this.level().isClientSide && idleParticleTicks % 10 == 0) {
+            if (this.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                // Swirling particles
+                double angle = (idleParticleTicks * 0.15) % (2 * Math.PI);
+                double radius = 0.7;
+                double x = this.getX() + Math.cos(angle) * radius;
+                double z = this.getZ() + Math.sin(angle) * radius;
+                serverLevel.sendParticles(
+                        net.minecraft.core.particles.ParticleTypes.CLOUD,
+                        x, this.getY() + 0.5, z,
+                        1, 0, 0.1, 0, 0.02
+                );
+            }
         }
         
         // Handle decay
@@ -102,39 +125,51 @@ public class WindTowerEntity extends PathfinderMob {
                 entity -> entity.isAlive()
         );
         
-        // Apply knockback
+        // Apply knockback and damage
         for (Monster monster : monsters) {
             Vec3 direction = monster.position().subtract(this.position()).normalize();
             Vec3 knockback = direction.multiply(KNOCKBACK_STRENGTH, 0.5, KNOCKBACK_STRENGTH);
             monster.setDeltaMovement(monster.getDeltaMovement().add(knockback));
             monster.hurtMarked = true;
+            
+            // Apply scaled damage
+            monster.hurt(this.damageSources().mobAttack(this), (float) baseDamage);
         }
         
         if (!monsters.isEmpty()) {
-            // Visual and audio effects
+            // Enhanced visual and audio effects
             if (this.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-                // Ring particles
-                for (int i = 0; i < 40; i++) {
-                    double angle = (2 * Math.PI * i) / 40;
-                    double x = this.getX() + Math.cos(angle) * PULSE_RADIUS;
-                    double z = this.getZ() + Math.sin(angle) * PULSE_RADIUS;
-                    
-                    serverLevel.sendParticles(
-                            net.minecraft.core.particles.ParticleTypes.CLOUD,
-                            x, this.getY() + 0.5, z,
-                            2, 0, 0, 0, 0.1
-                    );
+                // Expanding ring particles - multiple rings
+                for (int ring = 0; ring < 3; ring++) {
+                    double ringRadius = PULSE_RADIUS * (ring + 1) / 3.0;
+                    for (int i = 0; i < 40; i++) {
+                        double angle = (2 * Math.PI * i) / 40;
+                        double x = this.getX() + Math.cos(angle) * ringRadius;
+                        double z = this.getZ() + Math.sin(angle) * ringRadius;
+                        
+                        serverLevel.sendParticles(
+                                net.minecraft.core.particles.ParticleTypes.CLOUD,
+                                x, this.getY() + 0.5, z,
+                                2, 0, 0.2, 0, 0.1
+                        );
+                    }
                 }
                 
-                // Central burst
+                // Central burst with swirling particles
                 serverLevel.sendParticles(
                         net.minecraft.core.particles.ParticleTypes.GUST,
                         this.getX(), this.getY() + 0.5, this.getZ(),
                         10, 0.5, 0.5, 0.5, 0.1
                 );
+                
+                serverLevel.sendParticles(
+                        net.minecraft.core.particles.ParticleTypes.CLOUD,
+                        this.getX(), this.getY() + 0.5, this.getZ(),
+                        20, 1.0, 0.5, 1.0, 0.15
+                );
             }
             
-            //this.playSound(SoundEvents.BREEZE_WIND_BURST, 0.5f, 1.2f);
+            this.playSound(SoundEvents.ENDER_DRAGON_FLAP, 0.5f, 1.2f);
         }
     }
 
@@ -154,6 +189,7 @@ public class WindTowerEntity extends PathfinderMob {
         }
         tag.putInt("pulseCooldown", pulseCooldown);
         tag.putInt("decayTicks", decayTicks);
+        tag.putDouble("baseDamage", baseDamage);
     }
 
     @Override
@@ -164,6 +200,9 @@ public class WindTowerEntity extends PathfinderMob {
         }
         if (tag.contains("decayTicks")) {
             decayTicks = tag.getInt("decayTicks");
+        }
+        if (tag.contains("baseDamage")) {
+            baseDamage = tag.getDouble("baseDamage");
         }
     }
 }
