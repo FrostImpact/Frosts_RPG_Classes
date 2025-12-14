@@ -146,7 +146,7 @@ public class ShockTowerEntity extends PathfinderMob {
                 for (Monster monster : monsters) {
                     Vec3 direction = monster.position().subtract(this.position()).normalize();
                     double distance = this.position().distanceTo(monster.position());
-                    int arcParticles = (int) (distance * 3);
+                    int arcParticles = Math.min((int) (distance * 3), 20); // Cap at 20 particles for performance
                     
                     for (int i = 0; i < arcParticles; i++) {
                         double t = (double) i / arcParticles;

@@ -9,11 +9,6 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Arrow;
-import net.minecraft.world.entity.projectile.SmallFireball;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.damagesource.DamageSource;
@@ -192,7 +187,7 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
         }
 
         // Spawn particle trail along the beam (only to hit point)
-        int particleCount = (int) (hitDistance * 2); // 2 particles per block
+        int particleCount = Math.min((int) (hitDistance * 2), 30); // Cap at 30 particles for performance
         for (int i = 0; i <= particleCount; i++) {
             double t = (double) i / particleCount;
             Vec3 particlePos = start.add(direction.scale(hitDistance * t));

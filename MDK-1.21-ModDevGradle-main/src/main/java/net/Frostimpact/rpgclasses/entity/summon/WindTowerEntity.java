@@ -169,7 +169,8 @@ public class WindTowerEntity extends PathfinderMob {
                 );
             }
             
-            this.playSound(SoundEvents.ENDER_DRAGON_FLAP, 0.5f, 1.2f);
+            // Use elytra flying sound for wind effect
+            this.playSound(SoundEvents.ITEM_ELYTRA_FLYING, 0.5f, 1.2f);
         }
     }
 
