@@ -114,16 +114,16 @@ public class ShadowstepAbility extends Ability {
                 SoundEvents.ENDERMAN_TELEPORT, player.getSoundSource(), 1f, 1f);
 
         if (firstActivation) {
-            // Start reactivation window (4 seconds = 80 ticks)
+            // Start reactivation window (6 seconds = 120 ticks)
             rpgData.setMirageShadowstepActive(true);
-            rpgData.setMirageShadowstepTicks(80);
+            rpgData.setMirageShadowstepTicks(120);
 
             // Don't start cooldown yet
-            player.sendSystemMessage(Component.literal("§9Shadowstep active! §7(4s window)"));
+            player.sendSystemMessage(Component.literal("§9Shadowstep active! §7(6s window)"));
         } else {
             // Reactivation - reset timer to allow continuous chaining
-            rpgData.setMirageShadowstepTicks(80); // Reset to full duration
-            player.sendSystemMessage(Component.literal("§9Shadowstep chained! §7(4s window reset)"));
+            rpgData.setMirageShadowstepTicks(120); // Reset to full duration
+            player.sendSystemMessage(Component.literal("§9Shadowstep chained! §7(6s window reset)"));
         }
 
         // Use mana
