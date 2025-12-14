@@ -1,10 +1,7 @@
 package net.Frostimpact.rpgclasses.networking;
 
 import net.Frostimpact.rpgclasses.RpgClassesMod;
-import net.Frostimpact.rpgclasses.networking.packet.PacketUseAbility;
-import net.Frostimpact.rpgclasses.networking.packet.PacketSyncMana;
-import net.Frostimpact.rpgclasses.networking.packet.PacketSyncCooldowns;
-import net.Frostimpact.rpgclasses.networking.packet.PacketSyncClass;
+import net.Frostimpact.rpgclasses.networking.packet.*;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
@@ -50,6 +47,12 @@ public class ModMessages {
                 PacketSyncClass.TYPE,
                 PacketSyncClass.STREAM_CODEC,
                 PacketSyncClass::handle
+        );
+
+        registrar.playToClient(
+                SyncMirageDataPacket.TYPE,
+                SyncMirageDataPacket.STREAM_CODEC,
+                SyncMirageDataPacket::handle
         );
 
 // 5. PacketFireShortbow (Client -> Server)

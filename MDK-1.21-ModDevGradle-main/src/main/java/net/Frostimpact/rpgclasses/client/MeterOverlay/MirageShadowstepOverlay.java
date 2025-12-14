@@ -24,127 +24,108 @@ public class MirageShadowstepOverlay implements LayeredDraw.Layer {
     private static final int MAX_TICKS = 120; // 6 seconds
     private static final int WARNING_THRESHOLD_TICKS = 60; // 3 seconds
 
+    // Keep a static instance to ensure we aren't creating new ones constantly
+    private static final MirageShadowstepOverlay INSTANCE = new MirageShadowstepOverlay();
+
     @SubscribeEvent
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(
                 VanillaGuiLayers.HOTBAR,
                 ResourceLocation.fromNamespaceAndPath(RpgClassesMod.MOD_ID, "shadowstep_meter"),
-                new MirageShadowstepOverlay()
+                INSTANCE
         );
+        // Only print this once during startup, not every frame
         System.out.println("RPG Classes: Shadowstep Meter Overlay Registered!");
     }
+
+// ... imports ...
 
     @Override
     public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
         Minecraft mc = Minecraft.getInstance();
-
         if (mc.player == null || mc.options.hideGui || mc.level == null) return;
 
         PlayerRPGData rpg;
         try {
             rpg = mc.player.getData(ModAttachments.PLAYER_RPG);
-            if (rpg == null) return;
-        } catch (Exception e) {
-            return;
-        }
+        } catch (Exception e) { return; }
 
-        String currentClass = rpg.getCurrentClass();
-        if (currentClass == null || !currentClass.equals("MIRAGE")) return;
-
-        // Only display when shadowstep reactivation window is active
+        if (rpg == null || !rpg.getCurrentClass().equals("MIRAGE")) return;
         if (!rpg.isMirageShadowstepActive()) return;
 
         int remainingTicks = rpg.getMirageShadowstepTicks();
-        
-        int screenWidth = mc.getWindow().getGuiScaledWidth();
-        int screenHeight = mc.getWindow().getGuiScaledHeight();
 
-        // Position: Above hotbar, centered
-        int barX = (screenWidth / 2) - (BAR_WIDTH / 2);
-        int barY = screenHeight - 70;
+        // --- SAFEGUARD: Prevent crash/freeze if data is bad ---
+        if (remainingTicks < 0) remainingTicks = 0;
+        if (remainingTicks > MAX_TICKS) remainingTicks = MAX_TICKS;
+
+        int screenWidth = graphics.guiWidth();
+        int screenHeight = graphics.guiHeight();
+        int barX = (screenWidth - BAR_WIDTH) / 2;
+        int barY = screenHeight - 68;
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
-        // === ORNATE FRAME ===
+        // 1. Frame
         drawOrnateFrame(graphics, barX, barY, BAR_WIDTH, BAR_HEIGHT);
 
-        // === BAR BACKGROUND ===
+        // 2. Background
         int innerX = barX + BORDER_WIDTH;
         int innerY = barY + BORDER_WIDTH;
         int innerWidth = BAR_WIDTH - (BORDER_WIDTH * 2);
         int innerHeight = BAR_HEIGHT - (BORDER_WIDTH * 2);
 
-        int bgColor = 0xFF0a0a1a; // Dark purple/blue background
-        graphics.fill(innerX, innerY, innerX + innerWidth, innerY + innerHeight, bgColor);
-        graphics.fill(innerX, innerY, innerX + innerWidth, innerY + 2, 0x80000000);
-        graphics.fill(innerX, innerY, innerX + 2, innerY + innerHeight, 0x60000000);
+        graphics.fill(innerX, innerY, innerX + innerWidth, innerY + innerHeight, 0xFF0a0a1a);
 
-        // === WARNING GLOW (Last 3 seconds) ===
+        // 3. Warning Glow (Fixed Math)
         if (remainingTicks <= WARNING_THRESHOLD_TICKS) {
-            long time = System.currentTimeMillis();
-            float pulse = (float) (Math.sin(time / 100.0) * 0.5 + 0.5);
+            // Slower, safer pulse math
+            long time = mc.level.getGameTime(); // Use game time instead of system millis for stability
+            float pulse = (float) (Math.sin(time * 0.2) * 0.5 + 0.5);
             int glowAlpha = (int) (pulse * 100);
+
+            // Ensure alpha is valid (0-255)
+            glowAlpha = Math.max(0, Math.min(255, glowAlpha));
+
             int warningGlow = (glowAlpha << 24) | 0xFF4400;
+
+            // Draw glow over the background
             graphics.fill(innerX, innerY, innerX + innerWidth, innerY + innerHeight, warningGlow);
         }
 
-        // === SHADOWSTEP BAR FILL ===
+        // 4. Bar Fill
         float progress = (float) remainingTicks / (float) MAX_TICKS;
         int fillWidth = (int) (innerWidth * progress);
 
         if (fillWidth > 0) {
-            int topColor = 0xFF00d4ff; // Bright cyan
-            int bottomColor = 0xFF9400ff; // Purple
+            drawGradientBar(graphics, innerX, innerY, fillWidth, innerHeight, 0xFF00d4ff, 0xFF9400ff);
 
-            drawGradientBar(graphics, innerX, innerY, fillWidth, innerHeight, topColor, bottomColor);
+            // Shimmer
+            long time = mc.level.getGameTime();
+            int shimmerOffset = (int) ((time * 2) % Math.max(1, innerWidth)); // Loop over full width
 
-            // Glossy highlight
-            graphics.fill(innerX, innerY, innerX + fillWidth, innerY + 3, 0x60FFFFFF);
-            graphics.fill(innerX, innerY, innerX + 2, innerY + innerHeight, 0x40FFFFFF);
-
-            // Shadow energy shimmer
-            long time = System.currentTimeMillis() / 150;
-            int shimmerOffset = (int) (time % fillWidth);
+            // Only draw shimmer if it's inside the filled area
             if (shimmerOffset < fillWidth - 6) {
                 graphics.fill(innerX + shimmerOffset, innerY, innerX + shimmerOffset + 6, innerY + innerHeight, 0x4000d4ff);
             }
         }
 
-        // === TIME TEXT ===
-        float secondsLeft = remainingTicks / 20.0f;
-        String timeText = String.format("%.1fs", secondsLeft);
-        int textWidth = mc.font.width(timeText);
-        int textX = barX + (BAR_WIDTH - textWidth) / 2;
+        // 5. Text & Label (Same as before)
+        String timeText = String.format("%.1fs", remainingTicks / 20.0f);
+        int textX = barX + (BAR_WIDTH - mc.font.width(timeText)) / 2;
         int textY = barY + (BAR_HEIGHT - mc.font.lineHeight) / 2 + 1;
-
         graphics.drawString(mc.font, timeText, textX + 1, textY + 1, 0xFF000000, false);
         graphics.drawString(mc.font, timeText, textX, textY, 0xFFccbbff, false);
 
-        // === LABEL ===
-        String labelText = "SHADOWSTEP";
-        int labelColor = 0xFF00d4ff; // Cyan
-        int labelX = barX + 4;
-        int labelY = barY - 11;
-        graphics.drawString(mc.font, labelText, labelX, labelY, labelColor, true);
-
-        // === WARNING GLOW FRAME (Last 3 seconds) ===
-        if (remainingTicks <= WARNING_THRESHOLD_TICKS) {
-            long pulseTime = System.currentTimeMillis() / 300;
-            if (pulseTime % 2 == 0) {
-                int glowColor = 0x80FF4400;
-                graphics.fill(barX - 1, barY - 1, barX + BAR_WIDTH + 1, barY, glowColor);
-                graphics.fill(barX - 1, barY + BAR_HEIGHT, barX + BAR_WIDTH + 1, barY + BAR_HEIGHT + 1, glowColor);
-                graphics.fill(barX - 1, barY, barX, barY + BAR_HEIGHT, glowColor);
-                graphics.fill(barX + BAR_WIDTH, barY, barX + BAR_WIDTH + 1, barY + BAR_HEIGHT, glowColor);
-            }
-        }
+        graphics.drawString(mc.font, "SHADOWSTEP", barX + 4, barY - 10, 0xFF00d4ff, true);
 
         RenderSystem.disableBlend();
     }
+// ... keep helper methods ...
 
     private void drawOrnateFrame(GuiGraphics graphics, int x, int y, int width, int height) {
-        int outerColor = 0xFF5500aa; // Deep purple border
+        int outerColor = 0xFF5500aa;
         graphics.fill(x - 2, y - 2, x + width + 2, y - 1, outerColor);
         graphics.fill(x - 2, y + height + 1, x + width + 2, y + height + 2, outerColor);
         graphics.fill(x - 2, y - 1, x - 1, y + height + 1, outerColor);
@@ -158,12 +139,12 @@ public class MirageShadowstepOverlay implements LayeredDraw.Layer {
         graphics.fill(x, y, x + BORDER_WIDTH, y + height, frameColor1);
         graphics.fill(x + width - BORDER_WIDTH, y, x + width, y + height, frameColor2);
 
-        int accentColor = 0xFF00d4ff; // Cyan accents
+        int accentColor = 0xFF00d4ff;
         int highlightColor = (0x60 << 24) | (accentColor & 0x00FFFFFF);
         graphics.fill(x + BORDER_WIDTH, y + BORDER_WIDTH, x + width - BORDER_WIDTH, y + BORDER_WIDTH + 1, highlightColor);
         graphics.fill(x + BORDER_WIDTH, y + BORDER_WIDTH, x + BORDER_WIDTH + 1, y + height - BORDER_WIDTH, highlightColor);
 
-        int cornerColor = 0xFF9400ff; // Purple corners
+        int cornerColor = 0xFF9400ff;
         graphics.fill(x - 1, y - 1, x + 1, y, cornerColor);
         graphics.fill(x - 1, y, x, y + 1, cornerColor);
         graphics.fill(x + width - 1, y - 1, x + width + 1, y, cornerColor);
