@@ -252,6 +252,7 @@ public class ServerEvents {
 
                     // Handle afterimage explosions from Fracture Line
                     java.util.List<Integer> afterimageIds = new java.util.ArrayList<>(rpg.getMirageAfterimageIds());
+                    java.util.List<Integer> idsToRemove = new java.util.ArrayList<>();
                     for (Integer id : afterimageIds) {
                         if (player.level().getEntity(id) instanceof net.Frostimpact.rpgclasses.entity.summon.AfterimageEntity afterimage) {
                             if (afterimage.getPersistentData().getBoolean("fracture_explode")) {
@@ -269,18 +270,27 @@ public class ServerEvents {
                                             net.minecraft.world.level.Level.ExplosionInteraction.NONE
                                     );
                                     afterimage.discard();
-                                    rpg.getMirageAfterimageIds().remove((Integer) afterimage.getId());
+                                    idsToRemove.add(afterimage.getId());
                                 }
                             }
                         }
                     }
+                    // Remove exploded afterimages
+                    for (Integer id : idsToRemove) {
+                        rpg.getMirageAfterimageIds().remove(id);
+                    }
 
                     // Clean up dead afterimages from the list
+                    idsToRemove.clear();
                     afterimageIds = new java.util.ArrayList<>(rpg.getMirageAfterimageIds());
                     for (Integer id : afterimageIds) {
                         if (player.level().getEntity(id) == null) {
-                            rpg.getMirageAfterimageIds().remove(id);
+                            idsToRemove.add(id);
                         }
+                    }
+                    // Remove dead afterimages
+                    for (Integer id : idsToRemove) {
+                        rpg.getMirageAfterimageIds().remove(id);
                     }
 
                     // Handle recall - stop afterimages when they reach the recall position

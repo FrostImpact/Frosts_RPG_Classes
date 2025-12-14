@@ -16,6 +16,7 @@ public class FractureLineAbility extends Ability {
     private static final int CHARGE_TIME = 20; // 1 second charge time
     private static final double DASH_DISTANCE = 15.0;
     private static final double DASH_SPEED = 1.5;
+    private static final double AFTERIMAGE_COLLECT_RADIUS = 3.0;
 
     public FractureLineAbility() {
         super("fracture_line");
@@ -67,9 +68,9 @@ public class FractureLineAbility extends Ability {
         List<Integer> afterimageIds = new ArrayList<>(rpgData.getMirageAfterimageIds());
         for (Integer id : afterimageIds) {
             if (player.level().getEntity(id) instanceof AfterimageEntity afterimage) {
-                // Check if afterimage is in the dash path (within 2 blocks of player path)
+                // Check if afterimage is in the dash path
                 double distance = player.distanceTo(afterimage);
-                if (distance < 3.0) {
+                if (distance < AFTERIMAGE_COLLECT_RADIUS) {
                     // Mark this afterimage for explosion by setting a tag
                     afterimage.getPersistentData().putBoolean("fracture_explode", true);
                     afterimage.getPersistentData().putInt("fracture_timer", 30); // 1.5 seconds

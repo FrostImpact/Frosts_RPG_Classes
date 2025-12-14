@@ -156,6 +156,14 @@ public class AfterimageEntity extends PathfinderMob {
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        if (tag.contains("owner")) {
+            java.util.UUID ownerUUID = tag.getUUID("owner");
+            if (!this.level().isClientSide) {
+                // Find the owner player by UUID
+                net.minecraft.server.level.ServerLevel serverLevel = (net.minecraft.server.level.ServerLevel) this.level();
+                this.owner = serverLevel.getPlayerByUUID(ownerUUID);
+            }
+        }
         if (tag.contains("isGliding")) {
             this.isGliding = tag.getBoolean("isGliding");
         }
