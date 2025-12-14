@@ -134,7 +134,7 @@ public class AfterimageEntity extends PathfinderMob {
             if (!this.hasEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY)) {
                 this.addEffect(new net.minecraft.world.effect.MobEffectInstance(
                     net.minecraft.world.effect.MobEffects.INVISIBILITY,
-                    20, // 1 second duration, will be reapplied constantly
+                    200, // 10 seconds duration to reduce reapplication frequency
                     0,
                     false, // Not ambient
                     false, // No particles
@@ -264,12 +264,13 @@ public class AfterimageEntity extends PathfinderMob {
     private void spawnBlockParticles(ServerLevel serverLevel, double centerX, double centerY, double centerZ, 
                                      double radiusX, double radiusZ, net.minecraft.core.particles.DustParticleOptions dustColor) {
         // Create a filled cubic/block structure with dust particles
-        int particlesPerAxis = 3;
+        // Use 2x2 grid instead of 3x3 to reduce particle count (4 particles instead of 9)
+        int particlesPerAxis = 2;
         for (int i = 0; i < particlesPerAxis; i++) {
             for (int j = 0; j < particlesPerAxis; j++) {
                 // Create particles on the XZ plane to form a block
-                double offsetX = (i - 1) * radiusX / 2;
-                double offsetZ = (j - 1) * radiusZ / 2;
+                double offsetX = (i - 0.5) * radiusX;
+                double offsetZ = (j - 0.5) * radiusZ;
                 serverLevel.sendParticles(
                     dustColor,
                     centerX + offsetX, centerY, centerZ + offsetZ,
