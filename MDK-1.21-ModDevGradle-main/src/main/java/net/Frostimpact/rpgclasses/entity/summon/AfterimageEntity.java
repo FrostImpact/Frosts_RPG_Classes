@@ -17,7 +17,6 @@ public class AfterimageEntity extends PathfinderMob {
     private static final int LIFETIME_AFTER_TELEPORT_TICKS = 80; // 4 seconds
     private static final double MAX_DISTANCE_FROM_OWNER = 20.0;
     private static final double DEFAULT_MAX_GLIDE_DISTANCE = 10.0;
-    private static final double MOVEMENT_LERP_FACTOR = 0.8; // Increased for smoother movement
     private static final double GLIDE_SPEED = 0.15; // Reduced for more natural walking speed
     private static final int PARTICLE_SPAWN_INTERVAL = 1; // Spawn particles every tick for better outline
     

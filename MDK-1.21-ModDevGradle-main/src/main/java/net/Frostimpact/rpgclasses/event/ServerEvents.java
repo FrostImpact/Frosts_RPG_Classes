@@ -281,7 +281,7 @@ public class ServerEvents {
                                 afterimage.getPersistentData().putInt("fracture_timer", timer);
 
                                 if (timer <= 0) {
-                                    // Explode with enhanced visual effects
+                                    // Explode with enhanced visual effects (optimized particle count)
                                     net.minecraft.world.phys.Vec3 pos = afterimage.position();
                                     
                                     // Spawn dramatic explosion particles
@@ -290,31 +290,31 @@ public class ServerEvents {
                                         serverLevel.sendParticles(
                                             net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME,
                                             pos.x, pos.y + 1, pos.z,
-                                            100, 1.0, 1.2, 1.0, 0.3
+                                            50, 1.0, 1.2, 1.0, 0.3
                                         );
                                         // End rod burst
                                         serverLevel.sendParticles(
                                             net.minecraft.core.particles.ParticleTypes.END_ROD,
                                             pos.x, pos.y + 1, pos.z,
-                                            80, 0.8, 1.0, 0.8, 0.25
+                                            40, 0.8, 1.0, 0.8, 0.25
                                         );
                                         // Witch particles
                                         serverLevel.sendParticles(
                                             net.minecraft.core.particles.ParticleTypes.WITCH,
                                             pos.x, pos.y + 1, pos.z,
-                                            60, 0.7, 0.9, 0.7, 0.2
+                                            30, 0.7, 0.9, 0.7, 0.2
                                         );
                                         // Dragon breath for dramatic effect
                                         serverLevel.sendParticles(
                                             net.minecraft.core.particles.ParticleTypes.DRAGON_BREATH,
                                             pos.x, pos.y + 1, pos.z,
-                                            50, 0.9, 1.1, 0.9, 0.15
+                                            25, 0.9, 1.1, 0.9, 0.15
                                         );
                                         // Portal particles for mystical effect
                                         serverLevel.sendParticles(
                                             net.minecraft.core.particles.ParticleTypes.PORTAL,
                                             pos.x, pos.y + 1, pos.z,
-                                            70, 1.0, 1.0, 1.0, 1.0
+                                            35, 1.0, 1.0, 1.0, 1.0
                                         );
                                     }
                                     

@@ -41,17 +41,17 @@ public class FractureLineAbility extends Ability {
         Vec3 dashDirection = new Vec3(lookVec.x, 0, lookVec.z).normalize(); // Y set to 0 for horizontal only
         rpgData.setMirageFractureLineDirection(dashDirection);
 
-        // Spawn enhanced charging particles
+        // Spawn enhanced charging particles (optimized)
         if (player.level() instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(
                 ParticleTypes.WITCH,
                 player.getX(), player.getY() + 1, player.getZ(),
-                50, 0.5, 0.8, 0.5, 0.1
+                30, 0.5, 0.8, 0.5, 0.1
             );
             serverLevel.sendParticles(
                 ParticleTypes.SOUL_FIRE_FLAME,
                 player.getX(), player.getY() + 1, player.getZ(),
-                30, 0.4, 0.6, 0.4, 0.08
+                20, 0.4, 0.6, 0.4, 0.08
             );
         }
 
@@ -80,28 +80,28 @@ public class FractureLineAbility extends Ability {
         player.hurtMarked = true;
         player.hasImpulse = true;
 
-        // Spawn dramatic dash start particles
+        // Spawn dramatic dash start particles (optimized for performance)
         if (player.level() instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(
                 ParticleTypes.SOUL_FIRE_FLAME,
                 player.getX(), player.getY() + 1, player.getZ(),
-                80, 0.5, 0.8, 0.5, 0.3
+                50, 0.5, 0.8, 0.5, 0.3
             );
             serverLevel.sendParticles(
                 ParticleTypes.END_ROD,
                 player.getX(), player.getY() + 1, player.getZ(),
-                60, 0.4, 0.6, 0.4, 0.2
+                40, 0.4, 0.6, 0.4, 0.2
             );
             serverLevel.sendParticles(
                 ParticleTypes.WITCH,
                 player.getX(), player.getY() + 1, player.getZ(),
-                50, 0.3, 0.5, 0.3, 0.15
+                30, 0.3, 0.5, 0.3, 0.15
             );
             // Add explosion-like effect at start
             serverLevel.sendParticles(
                 ParticleTypes.DRAGON_BREATH,
                 player.getX(), player.getY() + 1, player.getZ(),
-                40, 0.6, 0.8, 0.6, 0.1
+                25, 0.6, 0.8, 0.6, 0.1
             );
         }
 
