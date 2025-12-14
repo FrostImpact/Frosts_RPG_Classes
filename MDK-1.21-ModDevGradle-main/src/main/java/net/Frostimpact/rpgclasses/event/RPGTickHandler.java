@@ -38,5 +38,37 @@ public class RPGTickHandler {
                 }
             }
         }
+
+        // --- ALCHEMIST CONCOCTION LOGIC ---
+        if (rpgData.isAlchemistConcoction()) {
+            int currentTicks = rpgData.getAlchemistConcoctionTicks();
+
+            if (currentTicks > 0) {
+                // Decrement the timer
+                rpgData.setAlchemistConcoctionTicks(currentTicks - 1);
+            } else {
+                // Time is up - automatically put flask on cooldown
+                rpgData.setAlchemistConcoction(false);
+                rpgData.setAlchemistClickPattern("");
+                
+                if (!player.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
+                    serverPlayer.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                            "§c⚗ CONCOCTION expired! FLASK on cooldown."));
+                    
+                    // Put flask ability on cooldown
+                    rpgData.setAbilityCooldown("flask", 180); // 9s
+                }
+            }
+        }
+
+        // --- ALCHEMIST INJECTION MOVEMENT LOCK ---
+        if (rpgData.isAlchemistInjectionActive()) {
+            // Prevent movement while in injection mode
+            if (!player.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
+                // Apply slowness to simulate movement lock
+                serverPlayer.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                        net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 2, 9, false, false));
+            }
+        }
     }
 }

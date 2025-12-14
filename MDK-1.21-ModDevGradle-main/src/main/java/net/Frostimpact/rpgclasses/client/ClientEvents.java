@@ -143,5 +143,21 @@ public class ClientEvents {
                 ModMessages.sendToServer(new PacketUseAbility("fracture_line"));
             }
         }
+
+        // ALCHEMIST Keys
+        if (currentClass.equals("ALCHEMIST")) {
+            if (KeyBinding.FLASK_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("flask"));
+            }
+            if (KeyBinding.VOLATILE_MIX_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("volatile_mix"));
+            }
+            if (KeyBinding.DISTILL_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("distill"));
+            }
+            if (KeyBinding.INJECTION_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("injection"));
+            }
+        }
     }
 }

@@ -101,6 +101,12 @@ public class RpgClassesMod {
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.RECALL_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.FRACTURE_LINE_KEY);
 
+        // ALCHEMIST Keys
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.FLASK_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.VOLATILE_MIX_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.DISTILL_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.INJECTION_KEY);
+
         System.out.println("RPG Classes: Keybinds Registered!");
 
         // Register ability database

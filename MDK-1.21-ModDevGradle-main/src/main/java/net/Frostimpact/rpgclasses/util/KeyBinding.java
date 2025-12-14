@@ -269,4 +269,37 @@ public class KeyBinding {
             InputConstants.KEY_Z,
             "key.category.rpgclasses"
     );
+
+    // ALCHEMIST Keys
+    public static final KeyMapping FLASK_KEY = new KeyMapping(
+            "key.rpgclasses.flask",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_V,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping VOLATILE_MIX_KEY = new KeyMapping(
+            "key.rpgclasses.volatile_mix",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_C,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping DISTILL_KEY = new KeyMapping(
+            "key.rpgclasses.distill",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_X,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping INJECTION_KEY = new KeyMapping(
+            "key.rpgclasses.injection",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_Z,
+            "key.category.rpgclasses"
+    );
 }
