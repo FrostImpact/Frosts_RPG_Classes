@@ -27,6 +27,8 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
     private double baseDamage = 4.0; // Stores owner's damage multiplier at spawn
     private int shootCooldown = 0;
     private static final int SHOOT_INTERVAL = 30; // Shoots every 1.5 seconds
+    private static final int PARTICLES_PER_UNIT_DISTANCE = 2; // Particle density for beam trail
+    private static final int MAX_BEAM_PARTICLES = 30; // Performance cap for particle trails
     private int decayTicks = 0;
     private static final int DECAY_START = 600; // 30 seconds
     private static final int DECAY_DAMAGE = 1; // 1 HP every 2 seconds
@@ -180,14 +182,17 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
 
         // Check if we can hit the target (not blocked by walls)
         boolean hitTarget = false;
-        AABB targetBox = target.getBoundingBox();
         
-        if (!blockedByWall && targetBox.clip(start, end).isPresent()) {
-            hitTarget = true;
+        if (!blockedByWall) {
+            // More robust check: verify target is within shooting distance
+            double distanceToTarget = start.distanceTo(targetPos);
+            if (distanceToTarget <= hitDistance + 0.5) { // Small tolerance for floating point
+                hitTarget = true;
+            }
         }
 
         // Spawn particle trail along the beam (only to hit point)
-        int particleCount = Math.min((int) (hitDistance * 2), 30); // Cap at 30 particles for performance
+        int particleCount = Math.min((int) (hitDistance * PARTICLES_PER_UNIT_DISTANCE), MAX_BEAM_PARTICLES);
         for (int i = 0; i <= particleCount; i++) {
             double t = (double) i / particleCount;
             Vec3 particlePos = start.add(direction.scale(hitDistance * t));
