@@ -84,17 +84,17 @@ public class ClientSetup {
         }
     }
 
-    // Shock Tower renderer - uses BLAZE model for distinct electric-themed appearance
+    // Shock Tower renderer - scaled differently with blue-themed texture
     private static class ShockTowerRenderer extends MobRenderer<ShockTowerEntity, HumanoidModel<ShockTowerEntity>> {
         public ShockTowerRenderer(EntityRendererProvider.Context context) {
-            // Use BLAZE model layer for a more dynamic, electric appearance
-            super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.BLAZE)), 0.5f);
+            // Use ARMOR_STAND model with different scale for distinct appearance
+            super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ARMOR_STAND)), 0.5f);
         }
 
         @Override
         public ResourceLocation getTextureLocation(ShockTowerEntity entity) {
-            // Use blaze texture for blue/electric themed appearance
-            return ResourceLocation.withDefaultNamespace("textures/entity/blaze.png");
+            // Use wither skeleton texture for dark/electric themed appearance
+            return ResourceLocation.withDefaultNamespace("textures/entity/skeleton/wither_skeleton.png");
         }
     }
 

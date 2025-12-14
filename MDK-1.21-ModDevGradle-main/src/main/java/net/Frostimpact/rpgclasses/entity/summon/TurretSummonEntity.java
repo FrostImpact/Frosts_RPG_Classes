@@ -15,6 +15,7 @@ import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
@@ -160,24 +161,41 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
         Vec3 targetPos = new Vec3(target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ());
         Vec3 direction = targetPos.subtract(start).normalize();
         double maxDistance = start.distanceTo(targetPos);
-
-        // Raycast to find hit point
         Vec3 end = start.add(direction.scale(maxDistance));
-        
-        // Check if we hit the target or something in between
+
+        // Check for block collisions using proper raycast
+        BlockHitResult blockHit = this.level().clip(new ClipContext(
+                start,
+                end,
+                ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE,
+                this
+        ));
+
+        // Determine actual hit distance
+        double hitDistance = maxDistance;
+        boolean blockedByWall = false;
+        if (blockHit.getType() != HitResult.Type.MISS) {
+            double blockDistance = start.distanceTo(blockHit.getLocation());
+            if (blockDistance < maxDistance) {
+                hitDistance = blockDistance;
+                blockedByWall = true;
+            }
+        }
+
+        // Check if we can hit the target (not blocked by walls)
         boolean hitTarget = false;
         AABB targetBox = target.getBoundingBox();
         
-        // Simple raycast check - does our line intersect target's bounding box?
-        if (targetBox.clip(start, end).isPresent()) {
+        if (!blockedByWall && targetBox.clip(start, end).isPresent()) {
             hitTarget = true;
         }
 
-        // Spawn particle trail along the beam
-        int particleCount = (int) (maxDistance * 2); // 2 particles per block
+        // Spawn particle trail along the beam (only to hit point)
+        int particleCount = (int) (hitDistance * 2); // 2 particles per block
         for (int i = 0; i <= particleCount; i++) {
             double t = (double) i / particleCount;
-            Vec3 particlePos = start.add(direction.scale(maxDistance * t));
+            Vec3 particlePos = start.add(direction.scale(hitDistance * t));
             
             serverLevel.sendParticles(
                     ParticleTypes.CRIT,
@@ -195,6 +213,14 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
                     ParticleTypes.CRIT_HIT,
                     targetPos.x, targetPos.y, targetPos.z,
                     8, 0.2, 0.2, 0.2, 0.1
+            );
+        } else if (blockedByWall) {
+            // Wall impact particles
+            Vec3 wallHitPos = blockHit.getLocation();
+            serverLevel.sendParticles(
+                    ParticleTypes.SMOKE,
+                    wallHitPos.x, wallHitPos.y, wallHitPos.z,
+                    5, 0.1, 0.1, 0.1, 0.02
             );
         }
 
