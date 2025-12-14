@@ -11,7 +11,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
@@ -26,17 +25,19 @@ public class CallToArmsAbility extends Ability {
         ServerLevel level = player.serverLevel();
         boolean shiftPressed = player.isShiftKeyDown();
 
-        // Count existing summons using LivingEntity
-        List<LivingEntity> knights = level.getEntitiesOfClass(
-                LivingEntity.class,
-                player.getBoundingBox().inflate(100),
-                entity -> entity instanceof KnightSummonEntity
+        double range = 100.0;
+
+        // Count existing summons
+        List<KnightSummonEntity> knights = level.getEntitiesOfClass(
+                KnightSummonEntity.class,
+                player.getBoundingBox().inflate(range),
+                entity -> entity.getOwner() == player // Optional: Filter by owner right here if you want
         );
 
-        List<LivingEntity> archers = level.getEntitiesOfClass(
-                LivingEntity.class,
-                player.getBoundingBox().inflate(100),
-                entity -> entity instanceof ArcherSummonEntity
+        List<ArcherSummonEntity> archers = level.getEntitiesOfClass(
+                ArcherSummonEntity.class,
+                player.getBoundingBox().inflate(range),
+                entity -> entity.getOwner() == player
         );
 
         if (shiftPressed) {
@@ -47,8 +48,10 @@ public class CallToArmsAbility extends Ability {
                 return false;
             }
 
-            // Spawn 2 archers (or less if approaching limit)
             int toSpawn = Math.min(2, 4 - archers.size());
+
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "§a⚔ Summoning " + toSpawn + " Archers...")); // DEBUG
 
             for (int i = 0; i < toSpawn; i++) {
                 spawnArcher(player, level, i);
@@ -65,8 +68,10 @@ public class CallToArmsAbility extends Ability {
                 return false;
             }
 
-            // Spawn 2 knights (or less if approaching limit)
             int toSpawn = Math.min(2, 4 - knights.size());
+
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "§6⚔ Summoning " + toSpawn + " Knights...")); // DEBUG
 
             for (int i = 0; i < toSpawn; i++) {
                 spawnKnight(player, level, i);
@@ -76,16 +81,37 @@ public class CallToArmsAbility extends Ability {
                     "§6⚔ Summoned " + toSpawn + " Knights! §7[" + (knights.size() + toSpawn) + "/4]"));
         }
 
+        // Enhanced visual effects
+        level.sendParticles(
+                ParticleTypes.TOTEM_OF_UNDYING,
+                player.getX(), player.getY() + 1, player.getZ(),
+                50, 1.5, 1.5, 1.5, 0.2
+        );
+
+        // Summoning circle effect
+        for (int ring = 0; ring < 3; ring++) {
+            int particleCount = 20 * (ring + 1);
+            double radius = 2.0 + (ring * 0.5);
+
+            for (int i = 0; i < particleCount; i++) {
+                double angle = (2 * Math.PI * i) / particleCount;
+                double x = player.getX() + Math.cos(angle) * radius;
+                double z = player.getZ() + Math.sin(angle) * radius;
+
+                level.sendParticles(
+                        ParticleTypes.ENCHANT,
+                        x, player.getY() + 0.1, z,
+                        1, 0, 0, 0, 0
+                );
+            }
+        }
+
         // Sound effect
         level.playSound(null, player.blockPosition(),
                 SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 1.0f, 1.5f);
 
-        // Particle burst
-        level.sendParticles(
-                ParticleTypes.TOTEM_OF_UNDYING,
-                player.getX(), player.getY() + 1, player.getZ(),
-                30, 1.0, 1.0, 1.0, 0.1
-        );
+        level.playSound(null, player.blockPosition(),
+                SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.0f, 1.2f);
 
         // Consume resources
         rpgData.setAbilityCooldown(id, getCooldownTicks());
@@ -99,21 +125,28 @@ public class CallToArmsAbility extends Ability {
         double angle = (2 * Math.PI * index) / 2;
         double x = player.getX() + Math.cos(angle) * 2;
         double z = player.getZ() + Math.sin(angle) * 2;
+        double y = player.getY(); // Use player's Y position
 
         KnightSummonEntity knight = new KnightSummonEntity(
                 ModEntities.KNIGHT_SUMMON.get(),
                 level
         );
 
-        knight.setPos(x, player.getY(), z);
+        knight.setPos(x, y, z);
         knight.setOwner(player);
         level.addFreshEntity(knight);
 
-        // Spawn particles
+        // Epic spawn particles
         level.sendParticles(
                 ParticleTypes.FLAME,
-                x, player.getY() + 1, z,
-                20, 0.5, 0.5, 0.5, 0.05
+                x, y + 1, z,
+                30, 0.3, 0.5, 0.3, 0.1
+        );
+
+        level.sendParticles(
+                ParticleTypes.SMOKE,
+                x, y, z,
+                20, 0.3, 0.1, 0.3, 0.05
         );
     }
 
@@ -122,21 +155,28 @@ public class CallToArmsAbility extends Ability {
         double angle = (2 * Math.PI * index) / 2;
         double x = player.getX() + Math.cos(angle) * 2;
         double z = player.getZ() + Math.sin(angle) * 2;
+        double y = player.getY(); // Use player's Y position
 
         ArcherSummonEntity archer = new ArcherSummonEntity(
                 ModEntities.ARCHER_SUMMON.get(),
                 level
         );
 
-        archer.setPos(x, player.getY(), z);
+        archer.setPos(x, y, z);
         archer.setOwner(player);
         level.addFreshEntity(archer);
 
-        // Spawn particles
+        // Epic spawn particles
         level.sendParticles(
                 ParticleTypes.GLOW,
-                x, player.getY() + 1, z,
-                20, 0.5, 0.5, 0.5, 0.05
+                x, y + 1, z,
+                30, 0.3, 0.5, 0.3, 0.1
+        );
+
+        level.sendParticles(
+                ParticleTypes.END_ROD,
+                x, y, z,
+                20, 0.3, 0.1, 0.3, 0.05
         );
     }
 }

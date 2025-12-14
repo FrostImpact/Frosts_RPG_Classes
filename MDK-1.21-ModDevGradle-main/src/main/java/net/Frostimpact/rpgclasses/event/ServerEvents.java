@@ -22,15 +22,20 @@ public class ServerEvents {
             PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
 
             // Force set the class and initialize
-            rpg.setCurrentClass("MANAFORGE"); // FIXED: Set to MERCENARY only
+            rpg.setCurrentClass("RULER"); // Set to RULER for testing
             rpg.setJuggernautShieldMode(true);
             rpg.setJuggernautCharge(0);
+
+            // IMPORTANT: Initialize banner position at player's feet + 1 block
+            rpg.setRulerBannerPosition(player.position().add(0, 1, 0));
+            rpg.setRulerRallyActive(false);
+            rpg.setRulerRallyTicks(0);
 
             // Set mana to max
             rpg.setMana(rpg.getMaxMana());
 
             // IMPORTANT: Sync class to client immediately
-            ModMessages.sendToPlayer(new PacketSyncClass("MANAFORGE"), player);
+            ModMessages.sendToPlayer(new PacketSyncClass("RULER"), player);
 
             // Send confirmation
             player.sendSystemMessage(Component.literal("§a[RPG Classes] Class set to: " + rpg.getCurrentClass()));
@@ -43,6 +48,13 @@ public class ServerEvents {
     public void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (!event.getEntity().level().isClientSide && event.getEntity() instanceof ServerPlayer player) {
             PlayerRPGData rpg = player.getData(ModAttachments.PLAYER_RPG);
+
+            // Re-initialize banner position after respawn
+            if (rpg.getCurrentClass().equals("RULER")) {
+                rpg.setRulerBannerPosition(player.position().add(0, 1, 0));
+                rpg.setRulerRallyActive(false);
+                rpg.setRulerRallyTicks(0);
+            }
 
             // Re-sync class after respawn
             ModMessages.sendToPlayer(new PacketSyncClass(rpg.getCurrentClass()), player);
@@ -216,19 +228,11 @@ public class ServerEvents {
                     }
                 }
 
-                // Sync every 5 ticks - NOW INCLUDING ARCANA
+                // Sync every 5 ticks
                 if (player.level().getGameTime() % 5 == 0) {
                     int currentMana = rpg.getMana();
                     int maxMana = rpg.getMaxMana();
 
-                    //String status = String.format("§bMANA: §f%d / %d §7| §cHP: §f%d / %d §7| §6CLASS: §f%s",
-                            //currentMana, maxMana,
-                            //(int)player.getHealth(), (int)player.getMaxHealth(),
-                            rpg.getCurrentClass();
-
-                    //ModMessages.sendToPlayer(new PacketSyncMana(status), player);
-
-                    // NEW: Include arcana in the sync packet
                     ModMessages.sendToPlayer(new net.Frostimpact.rpgclasses.networking.packet.PacketSyncCooldowns(
                             rpg.getAllCooldowns(),
                             currentMana,
@@ -236,7 +240,10 @@ public class ServerEvents {
                             rpg.getJuggernautCharge(),
                             rpg.getJuggernautMaxCharge(),
                             rpg.isJuggernautShieldMode(),
-                            rpg.getManaforgeArcana() // NEW: Pass arcana value
+                            rpg.getManaforgeArcana(),
+                            rpg.getTempoStacks(),
+                            rpg.isTempoActive(),
+                            rpg.getMarksmanSeekerCharges()
                     ), player);
                 }
             }

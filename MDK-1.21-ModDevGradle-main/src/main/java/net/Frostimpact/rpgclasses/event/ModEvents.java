@@ -1,6 +1,9 @@
 package net.Frostimpact.rpgclasses.event;
 
 import net.Frostimpact.rpgclasses.RpgClassesMod;
+import net.Frostimpact.rpgclasses.entity.summon.ArcherSummonEntity;
+import net.Frostimpact.rpgclasses.entity.summon.KnightSummonEntity;
+import net.Frostimpact.rpgclasses.registry.ModEntities;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
 import net.minecraft.network.chat.Component;
@@ -11,6 +14,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -230,6 +234,20 @@ public class ModEvents {
                     }
                 }
             }
+        }
+    }
+    @EventBusSubscriber(modid = RpgClassesMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+    public class ModEventBusEvents {
+
+        @SubscribeEvent
+        public static void registerAttributes(EntityAttributeCreationEvent event) {
+            // Link the Knight entity to the Knight attributes
+            event.put(ModEntities.KNIGHT_SUMMON.get(), KnightSummonEntity.createAttributes().build());
+
+            // Link the Archer entity to the Archer attributes
+            event.put(ModEntities.ARCHER_SUMMON.get(), ArcherSummonEntity.createAttributes().build());
+
+            System.out.println("RPG Classes: Entity Attributes Registered!");
         }
     }
 
