@@ -242,9 +242,29 @@ public class ServerEvents {
                         }
                     }
 
-                    // Fracture Line dash
+                    // Fracture Line dash with enhanced particle trail
                     if (rpg.isMirageFractureLineActive()) {
                         rpg.setMirageFractureLineTicks(rpg.getMirageFractureLineTicks() - 1);
+                        
+                        // Spawn dramatic particles along the dash path
+                        if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                            serverLevel.sendParticles(
+                                net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME,
+                                player.getX(), player.getY() + 1, player.getZ(),
+                                15, 0.3, 0.5, 0.3, 0.05
+                            );
+                            serverLevel.sendParticles(
+                                net.minecraft.core.particles.ParticleTypes.END_ROD,
+                                player.getX(), player.getY() + 1, player.getZ(),
+                                10, 0.2, 0.4, 0.2, 0.02
+                            );
+                            serverLevel.sendParticles(
+                                net.minecraft.core.particles.ParticleTypes.WITCH,
+                                player.getX(), player.getY() + 0.5, player.getZ(),
+                                8, 0.3, 0.3, 0.3, 0.03
+                            );
+                        }
+                        
                         if (rpg.getMirageFractureLineTicks() <= 0) {
                             rpg.setMirageFractureLineActive(false);
                         }
@@ -261,12 +281,47 @@ public class ServerEvents {
                                 afterimage.getPersistentData().putInt("fracture_timer", timer);
 
                                 if (timer <= 0) {
-                                    // Explode
+                                    // Explode with enhanced visual effects
                                     net.minecraft.world.phys.Vec3 pos = afterimage.position();
+                                    
+                                    // Spawn dramatic explosion particles
+                                    if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                                        // Soul fire flame explosion
+                                        serverLevel.sendParticles(
+                                            net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME,
+                                            pos.x, pos.y + 1, pos.z,
+                                            100, 1.0, 1.2, 1.0, 0.3
+                                        );
+                                        // End rod burst
+                                        serverLevel.sendParticles(
+                                            net.minecraft.core.particles.ParticleTypes.END_ROD,
+                                            pos.x, pos.y + 1, pos.z,
+                                            80, 0.8, 1.0, 0.8, 0.25
+                                        );
+                                        // Witch particles
+                                        serverLevel.sendParticles(
+                                            net.minecraft.core.particles.ParticleTypes.WITCH,
+                                            pos.x, pos.y + 1, pos.z,
+                                            60, 0.7, 0.9, 0.7, 0.2
+                                        );
+                                        // Dragon breath for dramatic effect
+                                        serverLevel.sendParticles(
+                                            net.minecraft.core.particles.ParticleTypes.DRAGON_BREATH,
+                                            pos.x, pos.y + 1, pos.z,
+                                            50, 0.9, 1.1, 0.9, 0.15
+                                        );
+                                        // Portal particles for mystical effect
+                                        serverLevel.sendParticles(
+                                            net.minecraft.core.particles.ParticleTypes.PORTAL,
+                                            pos.x, pos.y + 1, pos.z,
+                                            70, 1.0, 1.0, 1.0, 1.0
+                                        );
+                                    }
+                                    
                                     player.level().explode(
                                             afterimage,
                                             pos.x, pos.y, pos.z,
-                                            2.0f,
+                                            2.5f, // Slightly larger explosion
                                             net.minecraft.world.level.Level.ExplosionInteraction.NONE
                                     );
                                     afterimage.discard();

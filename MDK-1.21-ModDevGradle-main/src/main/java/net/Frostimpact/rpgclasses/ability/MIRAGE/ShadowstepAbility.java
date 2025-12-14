@@ -100,11 +100,9 @@ public class ShadowstepAbility extends Ability {
             // Don't start cooldown yet
             player.sendSystemMessage(Component.literal("§9Shadowstep active! §7(4s window)"));
         } else {
-            // Second activation - end window and start cooldown
-            rpgData.setMirageShadowstepActive(false);
-            rpgData.setMirageShadowstepTicks(0);
-            rpgData.setAbilityCooldown(id, getCooldownTicks());
-            player.sendSystemMessage(Component.literal("§9Shadowstep §7cooldown started"));
+            // Reactivation - reset timer to allow continuous chaining
+            rpgData.setMirageShadowstepTicks(80); // Reset to full duration
+            player.sendSystemMessage(Component.literal("§9Shadowstep chained! §7(4s window reset)"));
         }
 
         // Use mana
