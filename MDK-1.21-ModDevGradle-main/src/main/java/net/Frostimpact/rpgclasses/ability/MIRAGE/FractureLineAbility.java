@@ -17,6 +17,7 @@ public class FractureLineAbility extends Ability {
     private static final double DASH_DISTANCE = 15.0;
     private static final double DASH_SPEED = 1.5;
     private static final double AFTERIMAGE_COLLECT_RADIUS = 3.0;
+    private static final int FRACTURE_EXPLOSION_DELAY_TICKS = 30; // 1.5 seconds
 
     public FractureLineAbility() {
         super("fracture_line");
@@ -73,7 +74,7 @@ public class FractureLineAbility extends Ability {
                 if (distance < AFTERIMAGE_COLLECT_RADIUS) {
                     // Mark this afterimage for explosion by setting a tag
                     afterimage.getPersistentData().putBoolean("fracture_explode", true);
-                    afterimage.getPersistentData().putInt("fracture_timer", 30); // 1.5 seconds
+                    afterimage.getPersistentData().putInt("fracture_timer", FRACTURE_EXPLOSION_DELAY_TICKS);
                 }
             }
         }

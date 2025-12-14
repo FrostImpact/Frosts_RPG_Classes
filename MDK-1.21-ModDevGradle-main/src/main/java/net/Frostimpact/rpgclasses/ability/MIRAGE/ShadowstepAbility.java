@@ -15,6 +15,7 @@ import java.util.List;
 public class ShadowstepAbility extends Ability {
 
     private static final double MAX_DISTANCE = 50.0; // Line of sight check distance
+    private static final double FOV_THRESHOLD = 0.7; // ~45 degrees field of view
 
     public ShadowstepAbility() {
         super("shadowstep");
@@ -91,8 +92,8 @@ public class ShadowstepAbility extends Ability {
                     Vec3 dirToAfterimage = afterimagePos.subtract(playerEyePos).normalize();
                     double dotProduct = lookVec.dot(dirToAfterimage);
 
-                    // Must be in front (dot > 0.7 means roughly within 45 degrees)
-                    if (dotProduct > 0.7) {
+                    // Must be in front (roughly within 45 degrees field of view)
+                    if (dotProduct > FOV_THRESHOLD) {
                         // Raytrace to check for walls
                         HitResult hitResult = player.level().clip(new ClipContext(
                                 playerEyePos,

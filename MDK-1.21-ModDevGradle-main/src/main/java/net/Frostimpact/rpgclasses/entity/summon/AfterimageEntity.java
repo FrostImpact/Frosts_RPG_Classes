@@ -12,12 +12,16 @@ import net.minecraft.world.phys.Vec3;
 
 public class AfterimageEntity extends PathfinderMob {
 
+    private static final int LIFETIME_AFTER_TELEPORT_TICKS = 80; // 4 seconds
+    private static final double MAX_DISTANCE_FROM_OWNER = 20.0;
+    private static final double DEFAULT_MAX_GLIDE_DISTANCE = 10.0;
+
     private Player owner;
     private Vec3 glideDirection = Vec3.ZERO;
     private boolean isGliding = false;
-    private int lifetimeAfterTeleport = -1; // -1 means no timer, otherwise counts down from 80 ticks (4s)
+    private int lifetimeAfterTeleport = -1; // -1 means no timer, otherwise counts down from LIFETIME_AFTER_TELEPORT_TICKS
     private Vec3 glideStartPosition = Vec3.ZERO;
-    private double maxGlideDistance = 10.0;
+    private double maxGlideDistance = DEFAULT_MAX_GLIDE_DISTANCE;
 
     public AfterimageEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -57,7 +61,7 @@ public class AfterimageEntity extends PathfinderMob {
     }
 
     public void startLifetimeTimer() {
-        this.lifetimeAfterTeleport = 80; // 4 seconds = 80 ticks
+        this.lifetimeAfterTeleport = LIFETIME_AFTER_TELEPORT_TICKS;
     }
 
     public boolean hasLifetimeTimer() {
@@ -86,10 +90,10 @@ public class AfterimageEntity extends PathfinderMob {
         super.tick();
 
         if (!this.level().isClientSide) {
-            // Check if owner is too far away (>20 blocks)
+            // Check if owner is too far away
             if (owner != null && !owner.isRemoved()) {
                 double distanceToOwner = this.distanceTo(owner);
-                if (distanceToOwner > 20.0) {
+                if (distanceToOwner > MAX_DISTANCE_FROM_OWNER) {
                     this.discard();
                     return;
                 }
