@@ -17,16 +17,17 @@ public class AfterimageEntity extends PathfinderMob {
     private static final int LIFETIME_AFTER_TELEPORT_TICKS = 80; // 4 seconds
     private static final double MAX_DISTANCE_FROM_OWNER = 20.0;
     private static final double DEFAULT_MAX_GLIDE_DISTANCE = 10.0;
-    private static final double MOVEMENT_LERP_FACTOR = 0.3; // Interpolation smoothness
-    private static final int PARTICLE_SPAWN_INTERVAL = 2; // Spawn particles every N ticks
+    private static final double GLIDE_SPEED = 0.15; // Reduced for more natural walking speed
+    private static final int PARTICLE_SPAWN_INTERVAL = 1; // Spawn particles every tick for better outline
     
-    // Particle outline dimensions
+    // Particle outline dimensions - enhanced for better player representation
     private static final double OUTLINE_TORSO_RADIUS = 0.3;
     private static final double OUTLINE_HEAD_RADIUS = 0.25;
     private static final double OUTLINE_HEAD_HEIGHT = 1.6;
-    private static final double OUTLINE_ARM_WIDTH = 0.4;
-    private static final double OUTLINE_ARM_EXTEND = 0.7;
-    private static final double OUTLINE_LEG_WIDTH = 0.2;
+    private static final double OUTLINE_ARM_WIDTH = 0.3;
+    private static final double OUTLINE_ARM_EXTEND = 0.6;
+    private static final double OUTLINE_LEG_WIDTH = 0.15;
+    private static final double OUTLINE_SHOULDER_HEIGHT = 1.2;
 
     private Player owner;
     private Vec3 glideDirection = Vec3.ZERO;
@@ -147,24 +148,20 @@ public class AfterimageEntity extends PathfinderMob {
                 }
             }
 
-            // Handle gliding movement with smooth interpolation
+            // Handle gliding movement with smooth interpolation for natural walking
             if (isGliding && glideDirection.lengthSqr() > 0) {
                 // Check if we've traveled more than max distance
                 double distanceTraveled = this.position().distanceTo(glideStartPosition);
                 if (distanceTraveled >= maxGlideDistance) {
                     stopGliding();
                 } else {
-                    // Store previous position
-                    previousPosition = this.position();
-                    
-                    // Calculate target position
-                    Vec3 movement = glideDirection.normalize().scale(0.3); // Glide speed
-                    targetPosition = previousPosition.add(movement);
-                    hasTargetPosition = true;
-                    
-                    // Smoothly interpolate to target position
-                    Vec3 newPos = previousPosition.lerp(targetPosition, MOVEMENT_LERP_FACTOR);
+                    // Calculate smooth movement with natural walking speed
+                    Vec3 movement = glideDirection.normalize().scale(GLIDE_SPEED);
+                    Vec3 newPos = this.position().add(movement);
                     this.setPos(newPos.x, newPos.y, newPos.z);
+                    
+                    // Update velocity for smooth rendering
+                    this.setDeltaMovement(movement);
                     
                     // Check for collision/wall
                     if (this.horizontalCollision || this.verticalCollision) {
@@ -173,6 +170,7 @@ public class AfterimageEntity extends PathfinderMob {
                 }
             } else if (isGliding) {
                 stopGliding();
+                this.setDeltaMovement(Vec3.ZERO);
             }
             
             // Spawn particle outline to create ghostly humanoid silhouette (optimized to reduce performance impact)
@@ -192,27 +190,37 @@ public class AfterimageEntity extends PathfinderMob {
     }
     
     private void spawnParticleOutline(ServerLevel serverLevel) {
-        // Create a humanoid particle outline using soul fire particles
+        // Create an enhanced humanoid particle outline using soul fire particles
         double x = this.getX();
         double y = this.getY();
         double z = this.getZ();
         
-        // Body particles (torso)
-        for (int i = 0; i < 3; i++) {
-            double offsetY = 0.4 + i * 0.3;
-            spawnCircleParticles(serverLevel, x, y + offsetY, z, OUTLINE_TORSO_RADIUS, 2);
+        // Body particles (torso) - more particles for better definition
+        for (int i = 0; i < 5; i++) {
+            double offsetY = 0.5 + i * 0.2;
+            spawnCircleParticles(serverLevel, x, y + offsetY, z, OUTLINE_TORSO_RADIUS, 6);
         }
         
-        // Head particles
-        spawnCircleParticles(serverLevel, x, y + OUTLINE_HEAD_HEIGHT, z, OUTLINE_HEAD_RADIUS, 3);
+        // Head particles - more detailed
+        spawnCircleParticles(serverLevel, x, y + OUTLINE_HEAD_HEIGHT, z, OUTLINE_HEAD_RADIUS, 8);
+        spawnCircleParticles(serverLevel, x, y + OUTLINE_HEAD_HEIGHT - 0.1, z, OUTLINE_HEAD_RADIUS, 6);
+        spawnCircleParticles(serverLevel, x, y + OUTLINE_HEAD_HEIGHT - 0.2, z, OUTLINE_HEAD_RADIUS - 0.05, 6);
         
-        // Arms particles
-        spawnLineParticles(serverLevel, x - OUTLINE_ARM_WIDTH, y + 1.0, z, x - OUTLINE_ARM_EXTEND, y + 0.5, z, 2);
-        spawnLineParticles(serverLevel, x + OUTLINE_ARM_WIDTH, y + 1.0, z, x + OUTLINE_ARM_EXTEND, y + 0.5, z, 2);
+        // Shoulders
+        spawnCircleParticles(serverLevel, x - OUTLINE_ARM_WIDTH, y + OUTLINE_SHOULDER_HEIGHT, z, 0.1, 3);
+        spawnCircleParticles(serverLevel, x + OUTLINE_ARM_WIDTH, y + OUTLINE_SHOULDER_HEIGHT, z, 0.1, 3);
         
-        // Legs particles
-        spawnLineParticles(serverLevel, x - OUTLINE_LEG_WIDTH, y + 0.4, z, x - OUTLINE_LEG_WIDTH, y, z, 2);
-        spawnLineParticles(serverLevel, x + OUTLINE_LEG_WIDTH, y + 0.4, z, x + OUTLINE_LEG_WIDTH, y, z, 2);
+        // Arms particles - more detailed
+        spawnLineParticles(serverLevel, x - OUTLINE_ARM_WIDTH, y + OUTLINE_SHOULDER_HEIGHT, z, x - OUTLINE_ARM_EXTEND, y + 0.6, z, 4);
+        spawnLineParticles(serverLevel, x + OUTLINE_ARM_WIDTH, y + OUTLINE_SHOULDER_HEIGHT, z, x + OUTLINE_ARM_EXTEND, y + 0.6, z, 4);
+        
+        // Legs particles - more detailed for better visibility
+        spawnLineParticles(serverLevel, x - OUTLINE_LEG_WIDTH, y + 0.5, z, x - OUTLINE_LEG_WIDTH, y, z, 4);
+        spawnLineParticles(serverLevel, x + OUTLINE_LEG_WIDTH, y + 0.5, z, x + OUTLINE_LEG_WIDTH, y, z, 4);
+        
+        // Feet
+        spawnCircleParticles(serverLevel, x - OUTLINE_LEG_WIDTH, y, z, 0.1, 3);
+        spawnCircleParticles(serverLevel, x + OUTLINE_LEG_WIDTH, y, z, 0.1, 3);
     }
     
     private void spawnCircleParticles(ServerLevel serverLevel, double x, double y, double z, double radius, int count) {
