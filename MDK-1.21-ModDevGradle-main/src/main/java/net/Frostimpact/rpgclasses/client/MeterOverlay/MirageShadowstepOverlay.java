@@ -21,6 +21,8 @@ public class MirageShadowstepOverlay implements LayeredDraw.Layer {
     private static final int BAR_WIDTH = 140;
     private static final int BAR_HEIGHT = 8;
     private static final int BORDER_WIDTH = 1;
+    private static final int MAX_TICKS = 120; // 6 seconds
+    private static final int WARNING_THRESHOLD_TICKS = 60; // 3 seconds
 
     @SubscribeEvent
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
@@ -53,7 +55,6 @@ public class MirageShadowstepOverlay implements LayeredDraw.Layer {
         if (!rpg.isMirageShadowstepActive()) return;
 
         int remainingTicks = rpg.getMirageShadowstepTicks();
-        int maxTicks = 120; // 6 seconds
         
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
@@ -80,7 +81,7 @@ public class MirageShadowstepOverlay implements LayeredDraw.Layer {
         graphics.fill(innerX, innerY, innerX + 2, innerY + innerHeight, 0x60000000);
 
         // === WARNING GLOW (Last 3 seconds) ===
-        if (remainingTicks <= 60) { // Last 3 seconds
+        if (remainingTicks <= WARNING_THRESHOLD_TICKS) {
             long time = System.currentTimeMillis();
             float pulse = (float) (Math.sin(time / 100.0) * 0.5 + 0.5);
             int glowAlpha = (int) (pulse * 100);
@@ -89,7 +90,7 @@ public class MirageShadowstepOverlay implements LayeredDraw.Layer {
         }
 
         // === SHADOWSTEP BAR FILL ===
-        float progress = (float) remainingTicks / (float) maxTicks;
+        float progress = (float) remainingTicks / (float) MAX_TICKS;
         int fillWidth = (int) (innerWidth * progress);
 
         if (fillWidth > 0) {
@@ -128,7 +129,7 @@ public class MirageShadowstepOverlay implements LayeredDraw.Layer {
         graphics.drawString(mc.font, labelText, labelX, labelY, labelColor, true);
 
         // === WARNING GLOW FRAME (Last 3 seconds) ===
-        if (remainingTicks <= 60) {
+        if (remainingTicks <= WARNING_THRESHOLD_TICKS) {
             long pulseTime = System.currentTimeMillis() / 300;
             if (pulseTime % 2 == 0) {
                 int glowColor = 0x80FF4400;
