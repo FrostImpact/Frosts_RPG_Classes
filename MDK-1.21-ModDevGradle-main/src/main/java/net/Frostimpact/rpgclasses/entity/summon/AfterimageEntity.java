@@ -17,6 +17,16 @@ public class AfterimageEntity extends PathfinderMob {
     private static final int LIFETIME_AFTER_TELEPORT_TICKS = 80; // 4 seconds
     private static final double MAX_DISTANCE_FROM_OWNER = 20.0;
     private static final double DEFAULT_MAX_GLIDE_DISTANCE = 10.0;
+    private static final double MOVEMENT_LERP_FACTOR = 0.3; // Interpolation smoothness
+    private static final int PARTICLE_SPAWN_INTERVAL = 2; // Spawn particles every N ticks
+    
+    // Particle outline dimensions
+    private static final double OUTLINE_TORSO_RADIUS = 0.3;
+    private static final double OUTLINE_HEAD_RADIUS = 0.25;
+    private static final double OUTLINE_HEAD_HEIGHT = 1.6;
+    private static final double OUTLINE_ARM_WIDTH = 0.4;
+    private static final double OUTLINE_ARM_EXTEND = 0.7;
+    private static final double OUTLINE_LEG_WIDTH = 0.2;
 
     private Player owner;
     private Vec3 glideDirection = Vec3.ZERO;
@@ -33,6 +43,9 @@ public class AfterimageEntity extends PathfinderMob {
     // For swing animation
     private int swingTime = 0;
     private int swingDuration = 6; // Duration of swing animation in ticks
+    
+    // For particle optimization
+    private int particleSpawnTick = 0;
 
     public AfterimageEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -149,9 +162,8 @@ public class AfterimageEntity extends PathfinderMob {
                     targetPosition = previousPosition.add(movement);
                     hasTargetPosition = true;
                     
-                    // Smoothly interpolate to target position (lerp factor 0.3 for smooth movement)
-                    double lerpFactor = 0.3;
-                    Vec3 newPos = previousPosition.lerp(targetPosition, lerpFactor);
+                    // Smoothly interpolate to target position
+                    Vec3 newPos = previousPosition.lerp(targetPosition, MOVEMENT_LERP_FACTOR);
                     this.setPos(newPos.x, newPos.y, newPos.z);
                     
                     // Check for collision/wall
@@ -163,9 +175,13 @@ public class AfterimageEntity extends PathfinderMob {
                 stopGliding();
             }
             
-            // Spawn particle outline to create ghostly humanoid silhouette
-            if (this.level() instanceof ServerLevel serverLevel) {
-                spawnParticleOutline(serverLevel);
+            // Spawn particle outline to create ghostly humanoid silhouette (optimized to reduce performance impact)
+            particleSpawnTick++;
+            if (particleSpawnTick >= PARTICLE_SPAWN_INTERVAL) {
+                particleSpawnTick = 0;
+                if (this.level() instanceof ServerLevel serverLevel) {
+                    spawnParticleOutline(serverLevel);
+                }
             }
             
             // Handle swing animation countdown
@@ -184,19 +200,19 @@ public class AfterimageEntity extends PathfinderMob {
         // Body particles (torso)
         for (int i = 0; i < 3; i++) {
             double offsetY = 0.4 + i * 0.3;
-            spawnCircleParticles(serverLevel, x, y + offsetY, z, 0.3, 2);
+            spawnCircleParticles(serverLevel, x, y + offsetY, z, OUTLINE_TORSO_RADIUS, 2);
         }
         
         // Head particles
-        spawnCircleParticles(serverLevel, x, y + 1.6, z, 0.25, 3);
+        spawnCircleParticles(serverLevel, x, y + OUTLINE_HEAD_HEIGHT, z, OUTLINE_HEAD_RADIUS, 3);
         
         // Arms particles
-        spawnLineParticles(serverLevel, x - 0.4, y + 1.0, z, x - 0.7, y + 0.5, z, 2);
-        spawnLineParticles(serverLevel, x + 0.4, y + 1.0, z, x + 0.7, y + 0.5, z, 2);
+        spawnLineParticles(serverLevel, x - OUTLINE_ARM_WIDTH, y + 1.0, z, x - OUTLINE_ARM_EXTEND, y + 0.5, z, 2);
+        spawnLineParticles(serverLevel, x + OUTLINE_ARM_WIDTH, y + 1.0, z, x + OUTLINE_ARM_EXTEND, y + 0.5, z, 2);
         
         // Legs particles
-        spawnLineParticles(serverLevel, x - 0.2, y + 0.4, z, x - 0.2, y, z, 2);
-        spawnLineParticles(serverLevel, x + 0.2, y + 0.4, z, x + 0.2, y, z, 2);
+        spawnLineParticles(serverLevel, x - OUTLINE_LEG_WIDTH, y + 0.4, z, x - OUTLINE_LEG_WIDTH, y, z, 2);
+        spawnLineParticles(serverLevel, x + OUTLINE_LEG_WIDTH, y + 0.4, z, x + OUTLINE_LEG_WIDTH, y, z, 2);
     }
     
     private void spawnCircleParticles(ServerLevel serverLevel, double x, double y, double z, double radius, int count) {
@@ -248,6 +264,7 @@ public class AfterimageEntity extends PathfinderMob {
         tag.putDouble("glideStartZ", glideStartPosition.z);
         tag.putDouble("maxGlideDistance", maxGlideDistance);
         tag.putInt("swingTime", swingTime);
+        tag.putInt("particleSpawnTick", particleSpawnTick);
     }
 
     @Override
@@ -284,6 +301,9 @@ public class AfterimageEntity extends PathfinderMob {
         }
         if (tag.contains("swingTime")) {
             this.swingTime = tag.getInt("swingTime");
+        }
+        if (tag.contains("particleSpawnTick")) {
+            this.particleSpawnTick = tag.getInt("particleSpawnTick");
         }
     }
 }
