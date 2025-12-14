@@ -8,13 +8,11 @@ import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.List;
@@ -23,27 +21,29 @@ import java.util.List;
 public class AlchemistEventHandler {
 
     @SubscribeEvent
-    public static void onLeftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            handleClick(player, "L");
+            PlayerRPGData rpgData = player.getData(ModAttachments.PLAYER_RPG);
+            
+            if (!rpgData.getCurrentClass().equals("ALCHEMIST")) return;
+
+            // Handle reagent cycling when in injection mode and shifting
+            if (rpgData.isAlchemistInjectionActive() && player.isShiftKeyDown()) {
+                // Cycle reagent every 10 ticks when holding shift
+                if (player.tickCount % 10 == 0) {
+                    cycleReagent(player, rpgData);
+                }
+            }
+
+            // Handle POTION AFFINITY passive - make nearest enemy glow
+            if (player.tickCount % 20 == 0) { // Check every second
+                applyPotionAffinity(player);
+            }
         }
     }
 
-    @SubscribeEvent
-    public static void onRightClickEmpty(PlayerInteractEvent.RightClickEmpty event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            handleClick(player, "R");
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
-        if (event.getEntity() instanceof ServerPlayer player && event.getHand() == InteractionHand.MAIN_HAND) {
-            handleClick(player, "R");
-        }
-    }
-
-    private static void handleClick(ServerPlayer player, String clickType) {
+    // This method will be called via a packet when the player clicks during CONCOCTION mode
+    public static void handleClick(ServerPlayer player, String clickType) {
         PlayerRPGData rpgData = player.getData(ModAttachments.PLAYER_RPG);
         
         if (!rpgData.getCurrentClass().equals("ALCHEMIST")) return;
@@ -115,28 +115,6 @@ public class AlchemistEventHandler {
         // Sound effect
         player.level().playSound(null, player.blockPosition(),
                 SoundEvents.SPLASH_POTION_THROW, SoundSource.PLAYERS, 1.0f, 1.0f);
-    }
-
-    @SubscribeEvent
-    public static void onPlayerTick(PlayerTickEvent.Post event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            PlayerRPGData rpgData = player.getData(ModAttachments.PLAYER_RPG);
-            
-            if (!rpgData.getCurrentClass().equals("ALCHEMIST")) return;
-
-            // Handle reagent cycling when in injection mode and shifting
-            if (rpgData.isAlchemistInjectionActive() && player.isShiftKeyDown()) {
-                // Cycle reagent every 10 ticks when holding shift
-                if (player.tickCount % 10 == 0) {
-                    cycleReagent(player, rpgData);
-                }
-            }
-
-            // Handle POTION AFFINITY passive - make nearest enemy glow
-            if (player.tickCount % 20 == 0) { // Check every second
-                applyPotionAffinity(player);
-            }
-        }
     }
 
     private static void cycleReagent(ServerPlayer player, PlayerRPGData rpgData) {
