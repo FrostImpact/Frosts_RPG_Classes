@@ -44,6 +44,12 @@ public class AbilityDatabase {
         register("invigorate", new AbilityStats("Invigorate", 20, 40));
         register("regroup", new AbilityStats("Regroup", 15, 30));
         register("rally", new AbilityStats("Rally", 25, 10));
+
+        // ARTIFICER
+        register("turret", new AbilityStats("Turret", 7, 20));
+        register("tower", new AbilityStats("Tower", 14, 20));
+        register("reposition", new AbilityStats("Reposition", 4, 10));
+        register("self_destruct", new AbilityStats("Self-Destruct", 20, 40));
     }
 
     private static void register(String id, AbilityStats stats) {

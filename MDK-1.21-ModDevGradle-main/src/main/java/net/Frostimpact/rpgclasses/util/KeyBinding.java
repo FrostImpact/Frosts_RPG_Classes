@@ -203,4 +203,37 @@ public class KeyBinding {
             InputConstants.KEY_Z,
             "key.category.rpgclasses"
     );
+
+    // ARTIFICER Keys
+    public static final KeyMapping TURRET_KEY = new KeyMapping(
+            "key.rpgclasses.turret",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_V,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping TOWER_KEY = new KeyMapping(
+            "key.rpgclasses.tower",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_C,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping REPOSITION_KEY = new KeyMapping(
+            "key.rpgclasses.reposition",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_X,
+            "key.category.rpgclasses"
+    );
+
+    public static final KeyMapping SELF_DESTRUCT_KEY = new KeyMapping(
+            "key.rpgclasses.self_destruct",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_Z,
+            "key.category.rpgclasses"
+    );
 }
