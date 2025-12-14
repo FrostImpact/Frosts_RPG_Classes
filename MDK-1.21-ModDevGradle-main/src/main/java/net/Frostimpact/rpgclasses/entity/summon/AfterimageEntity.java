@@ -34,9 +34,9 @@ public class AfterimageEntity extends PathfinderMob {
     private static final double OUTLINE_LEG_WIDTH = 0.15;
     private static final double OUTLINE_SHOULDER_HEIGHT = 1.2;
     
-    // Particle colors for afterimage outline
-    private static final Vector3f LIGHT_BLUE_COLOR = new Vector3f(0.39f, 0.78f, 1.0f); // RGB: 100, 200, 255
-    private static final Vector3f RED_COLOR = new Vector3f(1.0f, 0.0f, 0.0f);
+    // Particle colors for afterimage outline (normalized RGB values 0-1)
+    private static final Vector3f LIGHT_BLUE_COLOR = new Vector3f(0.39f, 0.78f, 1.0f); // Approx RGB: 100, 199, 255
+    private static final Vector3f RED_COLOR = new Vector3f(1.0f, 0.0f, 0.0f); // RGB: 255, 0, 0
 
     private Player owner;
     private Vec3 glideDirection = Vec3.ZERO;
