@@ -85,6 +85,12 @@ public class RpgClassesMod {
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.REGROUP_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.RALLY_KEY);
 
+        // ARTIFICER Keys
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.TURRET_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.TOWER_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.REPOSITION_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.SELF_DESTRUCT_KEY);
+
         System.out.println("RPG Classes: Keybinds Registered!");
 
         // Register ability database

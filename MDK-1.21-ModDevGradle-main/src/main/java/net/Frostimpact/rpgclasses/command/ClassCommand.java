@@ -91,7 +91,8 @@ public class ClassCommand {
                         "§7- §eBATTLE_PRIEST §7(Offensive healer)\n" +
                         "§7- §2ALCHEMIST §7(Potion specialist)\n\n" +
                         "§e§lSUMMON:\n" +
-                        "§7- §6RULER §7(Army commander)"), false);
+                        "§7- §6RULER §7(Army commander)\n" +
+                        "§7- §7ARTIFICER §7(Turret engineer)"), false);
         return 1;
     }
 
@@ -158,10 +159,17 @@ public class ClassCommand {
                 // Support classes - reset when implemented
                 break;
 
-            case "RULER":  // ADD THIS CASE
+            case "RULER":
                 rpg.setRulerRallyActive(false);
                 rpg.setRulerRallyTicks(0);
                 rpg.setRulerBannerPosition(player.position());
+                break;
+
+            case "ARTIFICER":
+                rpg.setArtificerConstructing(false);
+                rpg.setArtificerConstructionTicks(0);
+                rpg.setArtificerConstructionType("");
+                rpg.setArtificerConstructionPos(player.position());
                 break;
         }
 

@@ -68,6 +68,31 @@ public class ModEntities {
                     .updateInterval(10)
                     .build("archer_summon"));
 
+    // === ARTIFICER SUMMONS ===
+    public static final DeferredHolder<EntityType<?>, EntityType<net.Frostimpact.rpgclasses.entity.summon.TurretSummonEntity>> TURRET_SUMMON =
+            ENTITY_TYPES.register("turret_summon", () -> EntityType.Builder
+                    .<net.Frostimpact.rpgclasses.entity.summon.TurretSummonEntity>of(net.Frostimpact.rpgclasses.entity.summon.TurretSummonEntity::new, MobCategory.CREATURE)
+                    .sized(0.8f, 1.0f)
+                    .clientTrackingRange(8)
+                    .updateInterval(10)
+                    .build("turret_summon"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<net.Frostimpact.rpgclasses.entity.summon.ShockTowerEntity>> SHOCK_TOWER =
+            ENTITY_TYPES.register("shock_tower", () -> EntityType.Builder
+                    .<net.Frostimpact.rpgclasses.entity.summon.ShockTowerEntity>of(net.Frostimpact.rpgclasses.entity.summon.ShockTowerEntity::new, MobCategory.CREATURE)
+                    .sized(0.9f, 1.5f)
+                    .clientTrackingRange(8)
+                    .updateInterval(10)
+                    .build("shock_tower"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<net.Frostimpact.rpgclasses.entity.summon.WindTowerEntity>> WIND_TOWER =
+            ENTITY_TYPES.register("wind_tower", () -> EntityType.Builder
+                    .<net.Frostimpact.rpgclasses.entity.summon.WindTowerEntity>of(net.Frostimpact.rpgclasses.entity.summon.WindTowerEntity::new, MobCategory.CREATURE)
+                    .sized(0.9f, 1.5f)
+                    .clientTrackingRange(8)
+                    .updateInterval(10)
+                    .build("wind_tower"));
+
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
     }

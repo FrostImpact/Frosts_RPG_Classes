@@ -108,6 +108,12 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     private boolean rulerRallyActive = false;
     private int rulerRallyTicks = 0;
 
+    // ** ARTIFICER - CONSTRUCTION **
+    private boolean artificerConstructing = false;
+    private int artificerConstructionTicks = 0;
+    private String artificerConstructionType = "";
+    private Vec3 artificerConstructionPos = Vec3.ZERO;
+
     //DASH
     public boolean isDashActive() {
         return dashActive;
@@ -669,6 +675,39 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         this.rulerRallyTicks = ticks;
     }
 
+    // ARTIFICER - CONSTRUCTION
+    public boolean isArtificerConstructing() {
+        return artificerConstructing;
+    }
+
+    public void setArtificerConstructing(boolean constructing) {
+        this.artificerConstructing = constructing;
+    }
+
+    public int getArtificerConstructionTicks() {
+        return artificerConstructionTicks;
+    }
+
+    public void setArtificerConstructionTicks(int ticks) {
+        this.artificerConstructionTicks = ticks;
+    }
+
+    public String getArtificerConstructionType() {
+        return artificerConstructionType;
+    }
+
+    public void setArtificerConstructionType(String type) {
+        this.artificerConstructionType = type;
+    }
+
+    public Vec3 getArtificerConstructionPos() {
+        return artificerConstructionPos;
+    }
+
+    public void setArtificerConstructionPos(Vec3 pos) {
+        this.artificerConstructionPos = pos;
+    }
+
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
 
@@ -751,6 +790,13 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         nbt.putBoolean("ruler_rally_active", rulerRallyActive);
         nbt.putInt("ruler_rally_ticks", rulerRallyTicks);
 
+        // ** ARTIFICER **
+        nbt.putBoolean("artificer_constructing", artificerConstructing);
+        nbt.putInt("artificer_construction_ticks", artificerConstructionTicks);
+        nbt.putString("artificer_construction_type", artificerConstructionType);
+        nbt.putDouble("artificer_construction_x", artificerConstructionPos.x);
+        nbt.putDouble("artificer_construction_y", artificerConstructionPos.y);
+        nbt.putDouble("artificer_construction_z", artificerConstructionPos.z);
 
         // Save cooldowns
         CompoundTag cooldownsTag = new CompoundTag();
@@ -948,6 +994,23 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         }
         if (nbt.contains("ruler_rally_ticks")) {
             this.rulerRallyTicks = nbt.getInt("ruler_rally_ticks");
+        }
+
+        // ** ARTIFICER **
+        if (nbt.contains("artificer_constructing")) {
+            this.artificerConstructing = nbt.getBoolean("artificer_constructing");
+        }
+        if (nbt.contains("artificer_construction_ticks")) {
+            this.artificerConstructionTicks = nbt.getInt("artificer_construction_ticks");
+        }
+        if (nbt.contains("artificer_construction_type")) {
+            this.artificerConstructionType = nbt.getString("artificer_construction_type");
+        }
+        if (nbt.contains("artificer_construction_x")) {
+            double x = nbt.getDouble("artificer_construction_x");
+            double y = nbt.getDouble("artificer_construction_y");
+            double z = nbt.getDouble("artificer_construction_z");
+            this.artificerConstructionPos = new Vec3(x, y, z);
         }
 
         // Load cooldowns

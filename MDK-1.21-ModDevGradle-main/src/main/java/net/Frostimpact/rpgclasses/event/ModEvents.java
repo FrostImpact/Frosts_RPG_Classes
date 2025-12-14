@@ -247,6 +247,11 @@ public class ModEvents {
             // Link the Archer entity to the Archer attributes
             event.put(ModEntities.ARCHER_SUMMON.get(), ArcherSummonEntity.createAttributes().build());
 
+            // Link the Artificer entities
+            event.put(ModEntities.TURRET_SUMMON.get(), net.Frostimpact.rpgclasses.entity.summon.TurretSummonEntity.createAttributes().build());
+            event.put(ModEntities.SHOCK_TOWER.get(), net.Frostimpact.rpgclasses.entity.summon.ShockTowerEntity.createAttributes().build());
+            event.put(ModEntities.WIND_TOWER.get(), net.Frostimpact.rpgclasses.entity.summon.WindTowerEntity.createAttributes().build());
+
             System.out.println("RPG Classes: Entity Attributes Registered!");
         }
     }

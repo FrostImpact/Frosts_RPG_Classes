@@ -501,13 +501,13 @@ public class ClassSelectionScreen extends Screen {
                                         new Ability("RALLY", "Place banner for 12s. Reactivate to recall. 25s CD / 10 MP")
                                 }),
                         new ClassSpec("ARTIFICER", "Artificer", "Any",
-                                "Summons stationary turrets and other useful spawns",
-                                "Coming Soon", "Passive not yet implemented",
+                                "Summons stationary turrets and towers for area control and utility.",
+                                "RESTORATION + VISION", "Hitting turrets/towers with reset attack heals them. All summons glow.",
                                 new Ability[]{
-                                        new Ability("Coming Soon", ""),
-                                        new Ability("Coming Soon", ""),
-                                        new Ability("Coming Soon", ""),
-                                        new Ability("Coming Soon", "")
+                                        new Ability("TURRET", "Construct turret for 3s. Shoots pellets at enemies. Max 3. Decay after 30s. 7s CD / 20 MP"),
+                                        new Ability("TOWER", "Construct SHOCK tower for 5s (slows). Shift: WIND tower (knockback). Max 2 total. 14s CD / 20 MP"),
+                                        new Ability("REPOSITION", "Teleport to closest summon in line of sight. 4s CD / 10 MP"),
+                                        new Ability("SELF-DESTRUCT", "Kill all summons, causing AOE explosions. 20s CD / 40 MP")
                                 })
 
                 });

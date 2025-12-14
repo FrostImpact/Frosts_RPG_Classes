@@ -64,6 +64,12 @@ public class AbilityRegistry {
         register(new InvigorateAbility());
         register(new RegroupAbility());
         register(new RallyAbility());
+
+        // ARTIFICER Abilities
+        register(new net.Frostimpact.rpgclasses.ability.ARTIFICER.TurretAbility());
+        register(new net.Frostimpact.rpgclasses.ability.ARTIFICER.TowerAbility());
+        register(new net.Frostimpact.rpgclasses.ability.ARTIFICER.RepositionAbility());
+        register(new net.Frostimpact.rpgclasses.ability.ARTIFICER.SelfDestructAbility());
     }
 
     private static void register(Ability ability) {

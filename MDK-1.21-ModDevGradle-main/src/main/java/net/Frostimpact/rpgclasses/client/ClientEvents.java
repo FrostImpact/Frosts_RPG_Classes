@@ -111,5 +111,21 @@ public class ClientEvents {
                 ModMessages.sendToServer(new PacketUseAbility("rally"));
             }
         }
+
+        // ARTIFICER Keys
+        if (currentClass.equals("ARTIFICER")) {
+            if (KeyBinding.TURRET_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("turret"));
+            }
+            if (KeyBinding.TOWER_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("tower"));
+            }
+            if (KeyBinding.REPOSITION_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("reposition"));
+            }
+            if (KeyBinding.SELF_DESTRUCT_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("self_destruct"));
+            }
+        }
     }
 }
