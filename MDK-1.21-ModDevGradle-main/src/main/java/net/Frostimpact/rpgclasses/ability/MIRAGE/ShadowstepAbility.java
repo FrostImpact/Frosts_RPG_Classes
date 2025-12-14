@@ -42,9 +42,48 @@ public class ShadowstepAbility extends Ability {
             return false;
         }
 
+        // Store origin position for particles
+        Vec3 originPos = player.position();
+        
         // Teleport to afterimage
         Vec3 targetPos = closestAfterimage.position();
         player.teleportTo(targetPos.x, targetPos.y, targetPos.z);
+
+        // Spawn particles at origin
+        if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            // Spiral of soul particles at origin
+            for (int i = 0; i < 25; i++) {
+                double angle = (2 * Math.PI * i) / 25;
+                double radius = 0.5;
+                double offsetX = radius * Math.cos(angle);
+                double offsetZ = radius * Math.sin(angle);
+                serverLevel.sendParticles(
+                    net.minecraft.core.particles.ParticleTypes.SOUL,
+                    originPos.x + offsetX, originPos.y + 1, originPos.z + offsetZ,
+                    1, 0.0, 0.3, 0.0, 0.1
+                );
+            }
+            
+            // Particles at destination
+            for (int i = 0; i < 25; i++) {
+                double angle = (2 * Math.PI * i) / 25;
+                double radius = 0.5;
+                double offsetX = radius * Math.cos(angle);
+                double offsetZ = radius * Math.sin(angle);
+                serverLevel.sendParticles(
+                    net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME,
+                    targetPos.x + offsetX, targetPos.y + 1, targetPos.z + offsetZ,
+                    1, 0.0, 0.3, 0.0, 0.1
+                );
+            }
+            
+            // End rod particles to show teleport trail
+            serverLevel.sendParticles(
+                net.minecraft.core.particles.ParticleTypes.END_ROD,
+                targetPos.x, targetPos.y + 1, targetPos.z,
+                20, 0.3, 0.5, 0.3, 0.1
+            );
+        }
 
         // Start lifetime timer on the afterimage
         closestAfterimage.startLifetimeTimer();
