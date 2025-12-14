@@ -211,7 +211,7 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
             
             // Impact particles
             serverLevel.sendParticles(
-                    ParticleTypes.CRIT_HIT,
+                    ParticleTypes.CRIT,
                     targetPos.x, targetPos.y, targetPos.z,
                     8, 0.2, 0.2, 0.2, 0.1
             );
