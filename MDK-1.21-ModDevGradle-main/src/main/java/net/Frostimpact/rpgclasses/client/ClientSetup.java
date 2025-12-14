@@ -73,36 +73,42 @@ public class ClientSetup {
     // Turret summon renderer - use a smaller model since turrets are stationary
     private static class TurretRenderer extends MobRenderer<TurretSummonEntity, HumanoidModel<TurretSummonEntity>> {
         public TurretRenderer(EntityRendererProvider.Context context) {
+            // Smaller shadow radius for compact appearance
             super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ARMOR_STAND)), 0.4f);
         }
 
         @Override
         public ResourceLocation getTextureLocation(TurretSummonEntity entity) {
+            // Keep iron golem texture for metallic turret appearance
             return ResourceLocation.withDefaultNamespace("textures/entity/iron_golem/iron_golem.png");
         }
     }
 
-    // Shock Tower renderer
+    // Shock Tower renderer - scaled differently with blue-themed texture
     private static class ShockTowerRenderer extends MobRenderer<ShockTowerEntity, HumanoidModel<ShockTowerEntity>> {
         public ShockTowerRenderer(EntityRendererProvider.Context context) {
+            // Use ARMOR_STAND model with different scale for distinct appearance
             super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ARMOR_STAND)), 0.5f);
         }
 
         @Override
         public ResourceLocation getTextureLocation(ShockTowerEntity entity) {
-            return ResourceLocation.withDefaultNamespace("textures/entity/iron_golem/iron_golem.png");
+            // Use wither skeleton texture for dark/electric themed appearance
+            return ResourceLocation.withDefaultNamespace("textures/entity/skeleton/wither_skeleton.png");
         }
     }
 
-    // Wind Tower renderer
+    // Wind Tower renderer - different scale and texture for green/wind theme
     private static class WindTowerRenderer extends MobRenderer<WindTowerEntity, HumanoidModel<WindTowerEntity>> {
         public WindTowerRenderer(EntityRendererProvider.Context context) {
-            super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ARMOR_STAND)), 0.5f);
+            // Slightly larger shadow for wind tower
+            super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ARMOR_STAND)), 0.6f);
         }
 
         @Override
         public ResourceLocation getTextureLocation(WindTowerEntity entity) {
-            return ResourceLocation.withDefaultNamespace("textures/entity/iron_golem/iron_golem.png");
+            // Use zombie texture for green/wind themed appearance
+            return ResourceLocation.withDefaultNamespace("textures/entity/zombie/zombie.png");
         }
     }
 }

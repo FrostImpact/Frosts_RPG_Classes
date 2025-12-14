@@ -21,6 +21,12 @@ public class ModAttachments {
             () -> AttachmentType.serializable(() -> new PlayerRPGData()).build()
     );
 
+    // Register PlayerStats
+    public static final Supplier<AttachmentType<PlayerStats>> PLAYER_STATS = ATTACHMENT_TYPES.register(
+            "player_stats",
+            () -> AttachmentType.serializable(() -> new PlayerStats()).build()
+    );
+
     // Call this in your main mod constructor
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);

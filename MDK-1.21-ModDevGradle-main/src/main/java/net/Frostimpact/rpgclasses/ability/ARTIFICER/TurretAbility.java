@@ -4,6 +4,8 @@ import net.Frostimpact.rpgclasses.ability.Ability;
 import net.Frostimpact.rpgclasses.entity.summon.TurretSummonEntity;
 import net.Frostimpact.rpgclasses.registry.ModEntities;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
+import net.Frostimpact.rpgclasses.rpg.PlayerStats;
+import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,12 +43,25 @@ public class TurretAbility extends Ability {
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                 "§7⚙ Constructing TURRET... (3s)"));
 
-        // Construction start effect
+        // Enhanced construction start effect - rising particles and energy convergence
         level.sendParticles(
                 ParticleTypes.CRIT,
                 player.getX(), player.getY() + 1, player.getZ(),
-                20, 0.5, 0.5, 0.5, 0.1
+                30, 0.5, 0.5, 0.5, 0.1
         );
+        
+        // Energy convergence particles
+        for (int i = 0; i < 8; i++) {
+            double angle = (2 * Math.PI * i) / 8;
+            double distance = 2.0;
+            double x = player.getX() + Math.cos(angle) * distance;
+            double z = player.getZ() + Math.sin(angle) * distance;
+            level.sendParticles(
+                    ParticleTypes.FLAME,
+                    x, player.getY() + 0.5, z,
+                    1, 0, 0.2, 0, 0.05
+            );
+        }
 
         level.playSound(null, player.blockPosition(),
                 SoundEvents.ANVIL_USE, SoundSource.PLAYERS, 0.5f, 1.2f);
@@ -96,6 +111,14 @@ public class TurretAbility extends Ability {
                 rpgData.getArtificerConstructionPos().z
         );
         turret.setOwner(player);
+        
+        // Set turret damage based on player's damage multiplier
+        PlayerStats stats = player.getData(ModAttachments.PLAYER_STATS);
+        if (stats != null) {
+            double playerDamage = stats.getDamageMultiplier();
+            turret.setBaseDamage(4.0 * playerDamage);
+        }
+        
         level.addFreshEntity(turret);
 
         // Spawn effects
