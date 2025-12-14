@@ -19,6 +19,7 @@ import org.joml.Vector3f;
 public class AfterimageEntity extends PathfinderMob {
 
     private static final int LIFETIME_AFTER_TELEPORT_TICKS = 80; // 4 seconds
+    private static final int INVISIBILITY_DURATION_TICKS = 200; // 10 seconds
     private static final double MAX_DISTANCE_FROM_OWNER = 20.0;
     private static final double DEFAULT_MAX_GLIDE_DISTANCE = 10.0;
     private static final double GLIDE_SPEED = 0.15; // Reduced for more natural walking speed
@@ -32,6 +33,10 @@ public class AfterimageEntity extends PathfinderMob {
     private static final double OUTLINE_ARM_EXTEND = 0.6;
     private static final double OUTLINE_LEG_WIDTH = 0.15;
     private static final double OUTLINE_SHOULDER_HEIGHT = 1.2;
+    
+    // Particle colors for afterimage outline
+    private static final Vector3f LIGHT_BLUE_COLOR = new Vector3f(0.39f, 0.78f, 1.0f); // RGB: 100, 200, 255
+    private static final Vector3f RED_COLOR = new Vector3f(1.0f, 0.0f, 0.0f);
 
     private Player owner;
     private Vec3 glideDirection = Vec3.ZERO;
@@ -131,10 +136,10 @@ public class AfterimageEntity extends PathfinderMob {
 
         if (!this.level().isClientSide) {
             // Apply permanent invisibility effect without particles
-            if (!this.hasEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY)) {
-                this.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                    net.minecraft.world.effect.MobEffects.INVISIBILITY,
-                    200, // 10 seconds duration to reduce reapplication frequency
+            if (!this.hasEffect(MobEffects.INVISIBILITY)) {
+                this.addEffect(new MobEffectInstance(
+                    MobEffects.INVISIBILITY,
+                    INVISIBILITY_DURATION_TICKS,
                     0,
                     false, // Not ambient
                     false, // No particles
@@ -213,14 +218,8 @@ public class AfterimageEntity extends PathfinderMob {
         
         // Determine particle color based on teleport status
         boolean hasTeleportedTo = this.getPersistentData().getBoolean("teleported_to");
-        // Light blue color (RGB: 100, 200, 255) or red if teleported to
-        float red = hasTeleportedTo ? 1.0f : 0.39f;
-        float green = hasTeleportedTo ? 0.0f : 0.78f;
-        float blue = hasTeleportedTo ? 0.0f : 1.0f;
-        net.minecraft.core.particles.DustParticleOptions dustColor = 
-            new net.minecraft.core.particles.DustParticleOptions(
-                new org.joml.Vector3f(red, green, blue), 1.0f
-            );
+        Vector3f color = hasTeleportedTo ? RED_COLOR : LIGHT_BLUE_COLOR;
+        DustParticleOptions dustColor = new DustParticleOptions(color, 1.0f);
         
         // Body blocks (torso) - cubic/volumetric structure
         for (int i = 0; i < 6; i++) {

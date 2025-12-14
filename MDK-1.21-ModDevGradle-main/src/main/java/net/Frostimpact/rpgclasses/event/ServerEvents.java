@@ -17,6 +17,14 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.joml.Vector3f;
 
 public class ServerEvents {
+    
+    // Fracture Line explosion particle colors (cached for performance)
+    private static final DustParticleOptions LIGHT_BLUE_DUST = 
+        new DustParticleOptions(new Vector3f(0.39f, 0.78f, 1.0f), 2.0f);
+    private static final DustParticleOptions WHITE_DUST = 
+        new DustParticleOptions(new Vector3f(0.9f, 0.95f, 1.0f), 2.5f);
+    private static final DustParticleOptions CYAN_DUST = 
+        new DustParticleOptions(new Vector3f(0.0f, 0.8f, 0.9f), 1.5f);
 
     @SubscribeEvent
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
@@ -286,67 +294,55 @@ public class ServerEvents {
                                     // Explode with flashy and impactful visual effects
                                     net.minecraft.world.phys.Vec3 pos = afterimage.position();
                                     
-                                    // Spawn dramatic explosion particles with velocity and spread
+                                    // Spawn dramatic explosion particles with velocity and spread (optimized particle count)
                                     if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-                                        // Create light blue dust explosion particles with velocity
-                                        net.minecraft.core.particles.DustParticleOptions lightBlueDust = 
-                                            new net.minecraft.core.particles.DustParticleOptions(
-                                                new org.joml.Vector3f(0.39f, 0.78f, 1.0f), 2.0f
-                                            );
+                                        // Light blue dust explosion particles with velocity
                                         serverLevel.sendParticles(
-                                            lightBlueDust,
+                                            LIGHT_BLUE_DUST,
                                             pos.x, pos.y + 1, pos.z,
-                                            80, 1.5, 1.5, 1.5, 0.3
+                                            40, 1.5, 1.5, 1.5, 0.3
                                         );
                                         
                                         // White/cyan flash particles for impact
-                                        net.minecraft.core.particles.DustParticleOptions whiteDust = 
-                                            new net.minecraft.core.particles.DustParticleOptions(
-                                                new org.joml.Vector3f(0.9f, 0.95f, 1.0f), 2.5f
-                                            );
                                         serverLevel.sendParticles(
-                                            whiteDust,
+                                            WHITE_DUST,
                                             pos.x, pos.y + 1, pos.z,
-                                            60, 1.2, 1.2, 1.2, 0.25
+                                            30, 1.2, 1.2, 1.2, 0.25
                                         );
                                         
                                         // Explosion particles for flashy effect
                                         serverLevel.sendParticles(
                                             net.minecraft.core.particles.ParticleTypes.EXPLOSION,
                                             pos.x, pos.y + 1, pos.z,
-                                            15, 0.5, 0.5, 0.5, 0.0
+                                            8, 0.5, 0.5, 0.5, 0.0
                                         );
                                         
                                         // Flash particles for bright burst
                                         serverLevel.sendParticles(
                                             net.minecraft.core.particles.ParticleTypes.FLASH,
                                             pos.x, pos.y + 1, pos.z,
-                                            3, 0.1, 0.1, 0.1, 0.0
+                                            2, 0.1, 0.1, 0.1, 0.0
                                         );
                                         
                                         // End rod particles with velocity for dynamic effect
                                         serverLevel.sendParticles(
                                             net.minecraft.core.particles.ParticleTypes.END_ROD,
                                             pos.x, pos.y + 1, pos.z,
-                                            50, 1.5, 1.5, 1.5, 0.4
+                                            25, 1.5, 1.5, 1.5, 0.4
                                         );
                                         
                                         // Cyan dust cloud spreading outward
-                                        net.minecraft.core.particles.DustParticleOptions cyanDust = 
-                                            new net.minecraft.core.particles.DustParticleOptions(
-                                                new org.joml.Vector3f(0.0f, 0.8f, 0.9f), 1.5f
-                                            );
                                         serverLevel.sendParticles(
-                                            cyanDust,
+                                            CYAN_DUST,
                                             pos.x, pos.y + 1, pos.z,
-                                            70, 2.0, 2.0, 2.0, 0.35
+                                            35, 2.0, 2.0, 2.0, 0.35
                                         );
                                         
                                         // Glow particles for lingering effect
                                         serverLevel.sendParticles(
                                             net.minecraft.core.particles.ParticleTypes.GLOW,
                                             pos.x, pos.y + 1, pos.z,
-                                            40, 1.0, 1.0, 1.0, 0.2
+                                            20, 1.0, 1.0, 1.0, 0.2
                                         );
                                     }
                                     
