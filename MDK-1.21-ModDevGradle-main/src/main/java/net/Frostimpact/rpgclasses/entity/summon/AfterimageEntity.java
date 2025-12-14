@@ -16,6 +16,8 @@ public class AfterimageEntity extends PathfinderMob {
     private Vec3 glideDirection = Vec3.ZERO;
     private boolean isGliding = false;
     private int lifetimeAfterTeleport = -1; // -1 means no timer, otherwise counts down from 80 ticks (4s)
+    private Vec3 glideStartPosition = Vec3.ZERO;
+    private double maxGlideDistance = 10.0;
 
     public AfterimageEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -42,6 +44,7 @@ public class AfterimageEntity extends PathfinderMob {
     public void setGlideDirection(Vec3 direction) {
         this.glideDirection = direction;
         this.isGliding = true;
+        this.glideStartPosition = this.position();
     }
 
     public boolean isGliding() {
@@ -107,13 +110,19 @@ public class AfterimageEntity extends PathfinderMob {
 
             // Handle gliding movement
             if (isGliding && glideDirection.lengthSqr() > 0) {
-                // Move in glide direction
-                Vec3 movement = glideDirection.normalize().scale(0.3); // Glide speed
-                this.setDeltaMovement(movement);
-                
-                // Check for collision/wall
-                if (this.horizontalCollision || this.verticalCollision) {
+                // Check if we've traveled more than max distance
+                double distanceTraveled = this.position().distanceTo(glideStartPosition);
+                if (distanceTraveled >= maxGlideDistance) {
                     stopGliding();
+                } else {
+                    // Move in glide direction
+                    Vec3 movement = glideDirection.normalize().scale(0.3); // Glide speed
+                    this.setDeltaMovement(movement);
+                    
+                    // Check for collision/wall
+                    if (this.horizontalCollision || this.verticalCollision) {
+                        stopGliding();
+                    }
                 }
             } else if (isGliding) {
                 stopGliding();
@@ -138,6 +147,10 @@ public class AfterimageEntity extends PathfinderMob {
         tag.putDouble("glideY", glideDirection.y);
         tag.putDouble("glideZ", glideDirection.z);
         tag.putInt("lifetimeAfterTeleport", lifetimeAfterTeleport);
+        tag.putDouble("glideStartX", glideStartPosition.x);
+        tag.putDouble("glideStartY", glideStartPosition.y);
+        tag.putDouble("glideStartZ", glideStartPosition.z);
+        tag.putDouble("maxGlideDistance", maxGlideDistance);
     }
 
     @Override
@@ -154,6 +167,15 @@ public class AfterimageEntity extends PathfinderMob {
         }
         if (tag.contains("lifetimeAfterTeleport")) {
             this.lifetimeAfterTeleport = tag.getInt("lifetimeAfterTeleport");
+        }
+        if (tag.contains("glideStartX")) {
+            double x = tag.getDouble("glideStartX");
+            double y = tag.getDouble("glideStartY");
+            double z = tag.getDouble("glideStartZ");
+            this.glideStartPosition = new Vec3(x, y, z);
+        }
+        if (tag.contains("maxGlideDistance")) {
+            this.maxGlideDistance = tag.getDouble("maxGlideDistance");
         }
     }
 }
