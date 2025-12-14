@@ -285,6 +285,16 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
             };
         }
 
+        if (className.equals("MIRAGE")) {
+            return switch (abilityId) {
+                case "reflections" -> new ItemStack(Items.GLASS_PANE);
+                case "shadowstep" -> new ItemStack(Items.ENDER_PEARL);
+                case "recall" -> new ItemStack(Items.RECOVERY_COMPASS);
+                case "fracture_line" -> new ItemStack(Items.PRISMARINE_SHARD);
+                default -> new ItemStack(Items.BARRIER);
+            };
+        }
+
         return new ItemStack(Items.BARRIER);
     }
 }
