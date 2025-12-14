@@ -72,8 +72,8 @@ public class SelfDestructAbility extends Ability {
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                 "§c💥 SELF-DESTRUCT! §7Destroyed " + destructedCount + " summons!"));
 
-        level.playSound(null, player.blockPosition(),
-                SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 2.0f, 0.8f);
+        //level.playSound(null, player.blockPosition(),
+                //SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 2.0f, 0.8f);
 
         // Consume resources
         rpgData.setAbilityCooldown(id, getCooldownTicks());
@@ -103,8 +103,8 @@ public class SelfDestructAbility extends Ability {
         );
 
         // Explosion sound
-        level.playSound(null, summon.blockPosition(),
-                SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.0f, 1.0f);
+        //level.playSound(null, summon.blockPosition(),
+                //SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.0f, 1.0f);
 
         // Damage nearby entities
         List<LivingEntity> nearbyEntities = level.getEntitiesOfClass(

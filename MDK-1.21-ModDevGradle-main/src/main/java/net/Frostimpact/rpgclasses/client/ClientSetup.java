@@ -52,7 +52,7 @@ public class ClientSetup {
         }
 
         @Override
-        public ResourceLocation getTextureLocation(KnightSummonEntity entity) {
+        public ResourceLocation getTextureLocation(KnightSummonEntity entity) {  
             return ResourceLocation.withDefaultNamespace("textures/entity/zombie/zombie.png");
         }
     }

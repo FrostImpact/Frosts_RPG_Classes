@@ -134,7 +134,7 @@ public class WindTowerEntity extends PathfinderMob {
                 );
             }
             
-            this.playSound(SoundEvents.BREEZE_WIND_BURST, 0.5f, 1.2f);
+            //this.playSound(SoundEvents.BREEZE_WIND_BURST, 0.5f, 1.2f);
         }
     }
 

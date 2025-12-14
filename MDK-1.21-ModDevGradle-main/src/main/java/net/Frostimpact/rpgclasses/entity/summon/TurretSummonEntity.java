@@ -9,7 +9,11 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.SmallFireball;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.nbt.CompoundTag;
@@ -109,28 +113,33 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
         if (shootCooldown > 0) return;
         if (target == null) return;
 
-        // Shoot a small fireball (pellet)
+        // Calculate direction
         double dx = target.getX() - this.getX();
-        double dy = target.getY(0.5) - this.getY(0.5);
+        double dy = target.getY(0.5) - (this.getY() + 0.5); // Target body center
         double dz = target.getZ() - this.getZ();
-        
-        SmallFireball fireball = new SmallFireball(this.level(), this, dx, dy, dz);
-        fireball.setPos(this.getX(), this.getY() + 0.5, this.getZ());
-        
-        this.level().addFreshEntity(fireball);
-        this.playSound(SoundEvents.BLAZE_SHOOT, 0.5f, 1.5f);
+
+        // Create the "Pellet" (Modified Arrow)
+        Arrow pellet = new Arrow(this.level(), this, new ItemStack(Items.ARROW), null);
+        pellet.setPos(this.getX(), this.getY() + 0.5, this.getZ());
+
+        // Shoot: velocity 1.6f, inaccuracy 0.5f
+        pellet.shoot(dx, dy, dz, 1.6f, 0.5f);
+
+        // Pellet Properties
+        pellet.setNoGravity(true);                   // Flies straight like a fireball
+        pellet.setBaseDamage(4.0);                   // Adjust damage (2.0 = 1 heart)
+        pellet.pickup = AbstractArrow.Pickup.DISALLOWED; // Players can't pick it up
+
+        // Visuals: Invisible entity + Critical Particles = "Particle Pellet"
+        pellet.setInvisible(true);
+        pellet.setCritArrow(true);                   // Forces the magical particle trail
+
+        this.level().addFreshEntity(pellet);
+
+        // Changed sound to something lighter/magical
+        this.playSound(SoundEvents.SNOWBALL_THROW, 1.0f, 1.5f);
 
         shootCooldown = SHOOT_INTERVAL;
-    }
-
-    @Override
-    public boolean hurt(DamageSource source, float amount) {
-        // Check if healing from owner (RESTORATION passive)
-        if (source.getEntity() != null && source.getEntity().equals(owner)) {
-            // This is handled by the passive handler
-            return false;
-        }
-        return super.hurt(source, amount);
     }
 
     @Override
