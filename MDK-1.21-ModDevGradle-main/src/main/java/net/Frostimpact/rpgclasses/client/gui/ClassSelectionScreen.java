@@ -486,14 +486,15 @@ public class ClassSelectionScreen extends Screen {
                                         new Ability("Coming Soon", ""),
                                         new Ability("Coming Soon", "")
                                 }),
-                        new ClassSpec("ALCHEMIST", "Alchemist", "Potions, Throwables",
-                                "Concocts powerful brews and explosives for offensive support.",
-                                "Coming Soon", "Passive not yet implemented",
+                        new ClassSpec("ALCHEMIST", "Alchemist", "Any",
+                                "Support your teammates by debuffing enemies. Rewards positioning and ability knowledge, excels at area control and debuffs. Long cooldowns.",
+                                "POTION AFFINITY",
+                                "You can see the debuffs of the nearest enemy.",
                                 new Ability[]{
-                                        new Ability("Coming Soon", ""),
-                                        new Ability("Coming Soon", ""),
-                                        new Ability("Coming Soon", ""),
-                                        new Ability("Coming Soon", "")
+                                        new Ability("FLASK", "Activate CONCOCTION for 6s. Click patterns create different potions. 3 clicks for debuffs, Shift+2 clicks for buffs. 9s CD / 20 MP"),
+                                        new Ability("VOLATILE MIX", "Next FLASK leaves a lingering field for 6s. 15s CD / 25 MP"),
+                                        new Ability("DISTILL", "Remove all debuffs on nearest enemy, gain random buffs for 3s. 12s CD / 30 MP"),
+                                        new Ability("INJECTION", "Cycle between 4 REAGENTs and shoot a bolt that triggers effects based on target's debuffs. 18s CD / 30 MP")
                                 })
                 }),
 

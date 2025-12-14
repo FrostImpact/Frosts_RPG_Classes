@@ -1,6 +1,8 @@
 package net.Frostimpact.rpgclasses.registry;
 
 import net.Frostimpact.rpgclasses.RpgClassesMod;
+import net.Frostimpact.rpgclasses.entity.projectile.AlchemistPotionEntity;
+import net.Frostimpact.rpgclasses.entity.projectile.InjectionBoltEntity;
 import net.Frostimpact.rpgclasses.entity.projectile.MagicMissileEntity;
 import net.Frostimpact.rpgclasses.entity.projectile.SeekerArrowEntity;
 import net.Frostimpact.rpgclasses.entity.projectile.StunBoltEntity;
@@ -51,6 +53,23 @@ public class ModEntities {
                     .clientTrackingRange(4)
                     .updateInterval(10)
                     .build("stun_bolt"));
+
+    // === ALCHEMIST PROJECTILES ===
+    public static final DeferredHolder<EntityType<?>, EntityType<AlchemistPotionEntity>> ALCHEMIST_POTION =
+            ENTITY_TYPES.register("alchemist_potion", () -> EntityType.Builder
+                    .<AlchemistPotionEntity>of(AlchemistPotionEntity::new, MobCategory.MISC)
+                    .sized(0.25f, 0.25f)
+                    .clientTrackingRange(4)
+                    .updateInterval(10)
+                    .build("alchemist_potion"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<InjectionBoltEntity>> INJECTION_BOLT =
+            ENTITY_TYPES.register("injection_bolt", () -> EntityType.Builder
+                    .<InjectionBoltEntity>of(InjectionBoltEntity::new, MobCategory.MISC)
+                    .sized(0.25f, 0.25f)
+                    .clientTrackingRange(4)
+                    .updateInterval(10)
+                    .build("injection_bolt"));
 
     // === RULER SUMMONS ===
     public static final DeferredHolder<EntityType<?>, EntityType<KnightSummonEntity>> KNIGHT_SUMMON =

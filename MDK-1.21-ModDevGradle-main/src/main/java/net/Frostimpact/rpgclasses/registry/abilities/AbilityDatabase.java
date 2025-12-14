@@ -56,6 +56,12 @@ public class AbilityDatabase {
         register("shadowstep", new AbilityStats("Shadowstep", 12, 10));
         register("recall", new AbilityStats("Recall", 8, 20));
         register("fracture_line", new AbilityStats("Fracture Line", 20, 40));
+
+        // ALCHEMIST
+        register("flask", new AbilityStats("Flask", 9, 20));
+        register("volatile_mix", new AbilityStats("Volatile Mix", 15, 25));
+        register("distill", new AbilityStats("Distill", 12, 30));
+        register("injection", new AbilityStats("Injection", 18, 30));
     }
 
     private static void register(String id, AbilityStats stats) {
