@@ -27,6 +27,7 @@ public class ShockTowerEntity extends PathfinderMob {
     private static final double PULSE_RADIUS = 8.0;
     private static final int ARC_PARTICLES_PER_UNIT = 3; // Particle density for electric arcs
     private static final int MAX_ARC_PARTICLES = 20; // Performance cap for arc trails
+    private static final int MAX_ELECTRIC_ARCS = 5; // Limit visual arcs to prevent performance issues
     private int decayTicks = 0;
     private static final int DECAY_START = 600; // 30 seconds
     private static final int DECAY_DAMAGE = 1;
@@ -144,10 +145,10 @@ public class ShockTowerEntity extends PathfinderMob {
         if (!monsters.isEmpty()) {
             // Enhanced visual and audio effects
             if (this.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-                // Electric arcs to each target (limit to first 5 for performance)
+                // Electric arcs to each target (limit for performance)
                 int arcCount = 0;
                 for (Monster monster : monsters) {
-                    if (arcCount >= 5) break; // Limit arcs to prevent performance issues
+                    if (arcCount >= MAX_ELECTRIC_ARCS) break;
                     
                     Vec3 direction = monster.position().subtract(this.position()).normalize();
                     double distance = this.position().distanceTo(monster.position());

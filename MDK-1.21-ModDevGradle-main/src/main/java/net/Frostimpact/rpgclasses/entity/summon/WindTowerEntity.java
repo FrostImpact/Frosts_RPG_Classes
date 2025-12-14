@@ -24,6 +24,7 @@ public class WindTowerEntity extends PathfinderMob {
     private static final int PULSE_INTERVAL = 60; // Pulse every 3 seconds
     private static final double PULSE_RADIUS = 8.0;
     private static final double KNOCKBACK_STRENGTH = 1.5;
+    private static final int PULSE_RING_COUNT = 3; // Number of expanding particle rings
     private int decayTicks = 0;
     private static final int DECAY_START = 600; // 30 seconds
     private static final int DECAY_DAMAGE = 1;
@@ -140,8 +141,8 @@ public class WindTowerEntity extends PathfinderMob {
             // Enhanced visual and audio effects
             if (this.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                 // Expanding ring particles - multiple rings
-                for (int ring = 0; ring < 3; ring++) {
-                    double ringRadius = PULSE_RADIUS * (ring + 1) / 3.0;
+                for (int ring = 0; ring < PULSE_RING_COUNT; ring++) {
+                    double ringRadius = PULSE_RADIUS * (ring + 1) / (double) PULSE_RING_COUNT;
                     for (int i = 0; i < 40; i++) {
                         double angle = (2 * Math.PI * i) / 40;
                         double x = this.getX() + Math.cos(angle) * ringRadius;

@@ -29,6 +29,7 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
     private static final int SHOOT_INTERVAL = 30; // Shoots every 1.5 seconds
     private static final int PARTICLES_PER_UNIT_DISTANCE = 2; // Particle density for beam trail
     private static final int MAX_BEAM_PARTICLES = 30; // Performance cap for particle trails
+    private static final double TARGET_HIT_TOLERANCE = 0.5; // Floating point tolerance for hit detection
     private int decayTicks = 0;
     private static final int DECAY_START = 600; // 30 seconds
     private static final int DECAY_DAMAGE = 1; // 1 HP every 2 seconds
@@ -186,7 +187,7 @@ public class TurretSummonEntity extends PathfinderMob implements RangedAttackMob
         if (!blockedByWall) {
             // More robust check: verify target is within shooting distance
             double distanceToTarget = start.distanceTo(targetPos);
-            if (distanceToTarget <= hitDistance + 0.5) { // Small tolerance for floating point
+            if (distanceToTarget <= hitDistance + TARGET_HIT_TOLERANCE) {
                 hitTarget = true;
             }
         }
