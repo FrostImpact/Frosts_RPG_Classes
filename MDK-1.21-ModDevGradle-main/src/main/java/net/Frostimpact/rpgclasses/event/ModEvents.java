@@ -235,6 +235,58 @@ public class ModEvents {
                     }
                 }
             }
+
+            // MIRAGE: ESSENCE OF CREATION passive - Afterimages mimic attacks
+            if (rpg.getCurrentClass().equals("MIRAGE")) {
+                if (player.getAttackStrengthScale(0.5f) >= 1.0f) {
+                    // Get the target entity
+                    net.minecraft.world.entity.Entity target = event.getTarget();
+                    
+                    // Get player's look direction
+                    net.minecraft.world.phys.Vec3 playerLookVec = player.getLookAngle();
+                    
+                    // Make all afterimages attack in the same direction (30% damage)
+                    for (Integer id : rpg.getMirageAfterimageIds()) {
+                        if (player.level().getEntity(id) instanceof net.Frostimpact.rpgclasses.entity.summon.AfterimageEntity afterimage) {
+                            // Find nearest entity in the direction the afterimage is "looking"
+                            net.minecraft.world.phys.Vec3 afterimagePos = afterimage.position();
+                            
+                            // Use player's attack damage
+                            float playerDamage = (float) player.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+                            float afterimageDamage = playerDamage * 0.3f;
+                            
+                            // Raycast to find entities in front of afterimage
+                            net.minecraft.world.phys.Vec3 lookEnd = afterimagePos.add(playerLookVec.scale(5.0));
+                            
+                            java.util.List<net.minecraft.world.entity.Entity> nearbyEntities = player.level().getEntities(
+                                    afterimage,
+                                    new net.minecraft.world.phys.AABB(
+                                            afterimagePos.x - 3, afterimagePos.y - 2, afterimagePos.z - 3,
+                                            afterimagePos.x + 3, afterimagePos.y + 2, afterimagePos.z + 3
+                                    )
+                            );
+                            
+                            for (net.minecraft.world.entity.Entity entity : nearbyEntities) {
+                                if (entity instanceof net.minecraft.world.entity.LivingEntity living && 
+                                    entity != player && 
+                                    !(entity instanceof net.Frostimpact.rpgclasses.entity.summon.AfterimageEntity)) {
+                                    // Deal damage
+                                    living.hurt(player.damageSources().playerAttack(player), afterimageDamage);
+                                    
+                                    // Visual feedback
+                                    ((net.minecraft.server.level.ServerLevel) player.level()).sendParticles(
+                                            net.minecraft.core.particles.ParticleTypes.CRIT,
+                                            living.getX(), living.getY() + living.getBbHeight() / 2, living.getZ(),
+                                            5, 0.3, 0.3, 0.3, 0.1
+                                    );
+                                    
+                                    break; // Only hit one entity per afterimage
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     @EventBusSubscriber(modid = RpgClassesMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
