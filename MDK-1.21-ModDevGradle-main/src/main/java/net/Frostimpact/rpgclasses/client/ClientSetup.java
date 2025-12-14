@@ -7,6 +7,9 @@ import net.Frostimpact.rpgclasses.client.renderer.VaultProjectileRenderer;
 import net.Frostimpact.rpgclasses.client.renderer.StunBoltRenderer;
 import net.Frostimpact.rpgclasses.entity.summon.ArcherSummonEntity;
 import net.Frostimpact.rpgclasses.entity.summon.KnightSummonEntity;
+import net.Frostimpact.rpgclasses.entity.summon.TurretSummonEntity;
+import net.Frostimpact.rpgclasses.entity.summon.ShockTowerEntity;
+import net.Frostimpact.rpgclasses.entity.summon.WindTowerEntity;
 import net.Frostimpact.rpgclasses.registry.ModEntities;
 import net.minecraft.client.model.HumanoidModel; // CHANGED: Import HumanoidModel
 import net.minecraft.client.model.geom.ModelLayers;
@@ -31,6 +34,11 @@ public class ClientSetup {
         // RULER summon entities
         event.registerEntityRenderer(ModEntities.KNIGHT_SUMMON.get(), KnightRenderer::new);
         event.registerEntityRenderer(ModEntities.ARCHER_SUMMON.get(), ArcherRenderer::new);
+
+        // ARTIFICER summon entities
+        event.registerEntityRenderer(ModEntities.TURRET_SUMMON.get(), TurretRenderer::new);
+        event.registerEntityRenderer(ModEntities.SHOCK_TOWER.get(), ShockTowerRenderer::new);
+        event.registerEntityRenderer(ModEntities.WIND_TOWER.get(), WindTowerRenderer::new);
 
         System.out.println("RPG Classes: Entity Renderers Registered!");
     }
@@ -59,6 +67,42 @@ public class ClientSetup {
         @Override
         public ResourceLocation getTextureLocation(ArcherSummonEntity entity) {
             return ResourceLocation.withDefaultNamespace("textures/entity/zombie/zombie.png");
+        }
+    }
+
+    // Turret summon renderer - use a smaller model since turrets are stationary
+    private static class TurretRenderer extends MobRenderer<TurretSummonEntity, HumanoidModel<TurretSummonEntity>> {
+        public TurretRenderer(EntityRendererProvider.Context context) {
+            super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ARMOR_STAND)), 0.4f);
+        }
+
+        @Override
+        public ResourceLocation getTextureLocation(TurretSummonEntity entity) {
+            return ResourceLocation.withDefaultNamespace("textures/entity/iron_golem/iron_golem.png");
+        }
+    }
+
+    // Shock Tower renderer
+    private static class ShockTowerRenderer extends MobRenderer<ShockTowerEntity, HumanoidModel<ShockTowerEntity>> {
+        public ShockTowerRenderer(EntityRendererProvider.Context context) {
+            super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ARMOR_STAND)), 0.5f);
+        }
+
+        @Override
+        public ResourceLocation getTextureLocation(ShockTowerEntity entity) {
+            return ResourceLocation.withDefaultNamespace("textures/entity/iron_golem/iron_golem.png");
+        }
+    }
+
+    // Wind Tower renderer
+    private static class WindTowerRenderer extends MobRenderer<WindTowerEntity, HumanoidModel<WindTowerEntity>> {
+        public WindTowerRenderer(EntityRendererProvider.Context context) {
+            super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ARMOR_STAND)), 0.5f);
+        }
+
+        @Override
+        public ResourceLocation getTextureLocation(WindTowerEntity entity) {
+            return ResourceLocation.withDefaultNamespace("textures/entity/iron_golem/iron_golem.png");
         }
     }
 }

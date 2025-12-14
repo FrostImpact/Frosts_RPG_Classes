@@ -47,6 +47,9 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
         CLASS_ABILITIES.put("RULER", new String[]{
                 "call_to_arms", "invigorate", "regroup", "rally"
         });
+        CLASS_ABILITIES.put("ARTIFICER", new String[]{
+                "turret", "tower", "reposition", "self_destruct"
+        });
     }
 
     private static final int ICON_SIZE = 16;
@@ -255,6 +258,16 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
                 case "invigorate" -> new ItemStack(Items.GOLDEN_APPLE);
                 case "regroup" -> new ItemStack(Items.BELL);
                 case "rally" -> new ItemStack(Items.YELLOW_BANNER);
+                default -> new ItemStack(Items.BARRIER);
+            };
+        }
+
+        if (className.equals("ARTIFICER")) {
+            return switch (abilityId) {
+                case "turret" -> new ItemStack(Items.DISPENSER);
+                case "tower" -> new ItemStack(Items.LIGHTNING_ROD);
+                case "reposition" -> new ItemStack(Items.ENDER_PEARL);
+                case "self_destruct" -> new ItemStack(Items.TNT);
                 default -> new ItemStack(Items.BARRIER);
             };
         }
