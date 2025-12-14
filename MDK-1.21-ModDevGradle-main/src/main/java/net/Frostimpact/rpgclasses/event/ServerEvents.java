@@ -17,14 +17,14 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.joml.Vector3f;
 
 public class ServerEvents {
-    
+
     // Fracture Line explosion particle colors (cached for performance)
-    private static final DustParticleOptions LIGHT_BLUE_DUST = 
-        new DustParticleOptions(new Vector3f(0.39f, 0.78f, 1.0f), 2.0f);
-    private static final DustParticleOptions WHITE_DUST = 
-        new DustParticleOptions(new Vector3f(0.9f, 0.95f, 1.0f), 2.5f);
-    private static final DustParticleOptions CYAN_DUST = 
-        new DustParticleOptions(new Vector3f(0.0f, 0.8f, 0.9f), 1.5f);
+    private static final DustParticleOptions LIGHT_BLUE_DUST =
+            new DustParticleOptions(new Vector3f(0.39f, 0.78f, 1.0f), 2.0f);
+    private static final DustParticleOptions WHITE_DUST =
+            new DustParticleOptions(new Vector3f(0.9f, 0.95f, 1.0f), 2.5f);
+    private static final DustParticleOptions CYAN_DUST =
+            new DustParticleOptions(new Vector3f(0.0f, 0.8f, 0.9f), 1.5f);
 
     @SubscribeEvent
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
@@ -255,26 +255,26 @@ public class ServerEvents {
                     // Fracture Line dash with enhanced particle trail
                     if (rpg.isMirageFractureLineActive()) {
                         rpg.setMirageFractureLineTicks(rpg.getMirageFractureLineTicks() - 1);
-                        
+
                         // Spawn dramatic particles along the dash path
                         if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                             serverLevel.sendParticles(
-                                net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME,
-                                player.getX(), player.getY() + 1, player.getZ(),
-                                15, 0.3, 0.5, 0.3, 0.05
+                                    net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME,
+                                    player.getX(), player.getY() + 1, player.getZ(),
+                                    15, 0.3, 0.5, 0.3, 0.05
                             );
                             serverLevel.sendParticles(
-                                net.minecraft.core.particles.ParticleTypes.END_ROD,
-                                player.getX(), player.getY() + 1, player.getZ(),
-                                10, 0.2, 0.4, 0.2, 0.02
+                                    net.minecraft.core.particles.ParticleTypes.END_ROD,
+                                    player.getX(), player.getY() + 1, player.getZ(),
+                                    10, 0.2, 0.4, 0.2, 0.02
                             );
                             serverLevel.sendParticles(
-                                net.minecraft.core.particles.ParticleTypes.WITCH,
-                                player.getX(), player.getY() + 0.5, player.getZ(),
-                                8, 0.3, 0.3, 0.3, 0.03
+                                    net.minecraft.core.particles.ParticleTypes.WITCH,
+                                    player.getX(), player.getY() + 0.5, player.getZ(),
+                                    8, 0.3, 0.3, 0.3, 0.03
                             );
                         }
-                        
+
                         if (rpg.getMirageFractureLineTicks() <= 0) {
                             rpg.setMirageFractureLineActive(false);
                         }
@@ -293,59 +293,59 @@ public class ServerEvents {
                                 if (timer <= 0) {
                                     // Explode with flashy and impactful visual effects
                                     net.minecraft.world.phys.Vec3 pos = afterimage.position();
-                                    
+
                                     // Spawn dramatic explosion particles with velocity and spread (optimized particle count)
                                     if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                                         // Light blue dust explosion particles with velocity
                                         serverLevel.sendParticles(
-                                            LIGHT_BLUE_DUST,
-                                            pos.x, pos.y + 1, pos.z,
-                                            40, 1.5, 1.5, 1.5, 0.3
+                                                LIGHT_BLUE_DUST,
+                                                pos.x, pos.y + 1, pos.z,
+                                                40, 1.5, 1.5, 1.5, 0.3
                                         );
-                                        
+
                                         // White/cyan flash particles for impact
                                         serverLevel.sendParticles(
-                                            WHITE_DUST,
-                                            pos.x, pos.y + 1, pos.z,
-                                            30, 1.2, 1.2, 1.2, 0.25
+                                                WHITE_DUST,
+                                                pos.x, pos.y + 1, pos.z,
+                                                30, 1.2, 1.2, 1.2, 0.25
                                         );
-                                        
+
                                         // Explosion particles for flashy effect
                                         serverLevel.sendParticles(
-                                            net.minecraft.core.particles.ParticleTypes.EXPLOSION,
-                                            pos.x, pos.y + 1, pos.z,
-                                            8, 0.5, 0.5, 0.5, 0.0
+                                                net.minecraft.core.particles.ParticleTypes.EXPLOSION,
+                                                pos.x, pos.y + 1, pos.z,
+                                                8, 0.5, 0.5, 0.5, 0.0
                                         );
-                                        
+
                                         // Flash particles for bright burst
                                         serverLevel.sendParticles(
-                                            net.minecraft.core.particles.ParticleTypes.FLASH,
-                                            pos.x, pos.y + 1, pos.z,
-                                            2, 0.1, 0.1, 0.1, 0.0
+                                                net.minecraft.core.particles.ParticleTypes.FLASH,
+                                                pos.x, pos.y + 1, pos.z,
+                                                2, 0.1, 0.1, 0.1, 0.0
                                         );
-                                        
+
                                         // End rod particles with velocity for dynamic effect
                                         serverLevel.sendParticles(
-                                            net.minecraft.core.particles.ParticleTypes.END_ROD,
-                                            pos.x, pos.y + 1, pos.z,
-                                            25, 1.5, 1.5, 1.5, 0.4
+                                                net.minecraft.core.particles.ParticleTypes.END_ROD,
+                                                pos.x, pos.y + 1, pos.z,
+                                                25, 1.5, 1.5, 1.5, 0.4
                                         );
-                                        
+
                                         // Cyan dust cloud spreading outward
                                         serverLevel.sendParticles(
-                                            CYAN_DUST,
-                                            pos.x, pos.y + 1, pos.z,
-                                            35, 2.0, 2.0, 2.0, 0.35
+                                                CYAN_DUST,
+                                                pos.x, pos.y + 1, pos.z,
+                                                35, 2.0, 2.0, 2.0, 0.35
                                         );
-                                        
+
                                         // Glow particles for lingering effect
                                         serverLevel.sendParticles(
-                                            net.minecraft.core.particles.ParticleTypes.GLOW,
-                                            pos.x, pos.y + 1, pos.z,
-                                            20, 1.0, 1.0, 1.0, 0.2
+                                                net.minecraft.core.particles.ParticleTypes.GLOW,
+                                                pos.x, pos.y + 1, pos.z,
+                                                20, 1.0, 1.0, 1.0, 0.2
                                         );
                                     }
-                                    
+
                                     player.level().explode(
                                             afterimage,
                                             pos.x, pos.y, pos.z,

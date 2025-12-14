@@ -8,6 +8,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
 
 import java.util.ArrayList;
@@ -16,10 +17,9 @@ import java.util.List;
 public class FractureLineAbility extends Ability {
 
     private static final int CHARGE_TIME = 20; // 1 second charge time
-    private static final double DASH_DISTANCE = 35.0; // Increased range for more dramatic effect
-    private static final double DASH_SPEED = 2.5; // Increased speed for more dramatic dash
-    private static final double AFTERIMAGE_COLLECT_RADIUS = 3.0;
-    private static final int FRACTURE_EXPLOSION_DELAY_TICKS = 30; // 1.5 seconds
+    private static final double DASH_SPEED = 4.5; // Increased from 2.5 to 4.5 for much longer distance
+    private static final double AFTERIMAGE_COLLECT_RADIUS = 4.0; // Slightly larger collection radius
+    private static final int FRACTURE_EXPLOSION_DELAY_TICKS = 30;
 
     public FractureLineAbility() {
         super("fracture_line");
@@ -27,113 +27,117 @@ public class FractureLineAbility extends Ability {
 
     @Override
     public boolean execute(ServerPlayer player, PlayerRPGData rpgData) {
-        // Check if already charging or dashing
         if (rpgData.isMirageFractureLineCharging() || rpgData.isMirageFractureLineActive()) {
             return false;
         }
 
-        // Start charging
         rpgData.setMirageFractureLineCharging(true);
         rpgData.setMirageFractureLineTicks(CHARGE_TIME);
 
-        // Store dash direction - HORIZONTAL ONLY (remove vertical component)
         Vec3 lookVec = player.getLookAngle();
-        Vec3 dashDirection = new Vec3(lookVec.x, 0, lookVec.z).normalize(); // Y set to 0 for horizontal only
+        Vec3 dashDirection = new Vec3(lookVec.x, 0, lookVec.z).normalize();
         rpgData.setMirageFractureLineDirection(dashDirection);
 
-        // Spawn enhanced charging particles (optimized)
+        // Visuals: DNA/Helix Spiral for charging
         if (player.level() instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(
-                ParticleTypes.WITCH,
-                player.getX(), player.getY() + 1, player.getZ(),
-                30, 0.5, 0.8, 0.5, 0.1
-            );
-            serverLevel.sendParticles(
-                ParticleTypes.SOUL_FIRE_FLAME,
-                player.getX(), player.getY() + 1, player.getZ(),
-                20, 0.4, 0.6, 0.4, 0.08
-            );
+            spawnHelixParticles(serverLevel, player.position(), 1.0, 2.0, ParticleTypes.SOUL_FIRE_FLAME);
+            spawnHelixParticles(serverLevel, player.position(), 1.0, 2.0, ParticleTypes.SCULK_SOUL);
         }
 
-        // Sound effect for charging
         player.level().playSound(null, player.blockPosition(),
-                SoundEvents.ENDER_DRAGON_GROWL, player.getSoundSource(), 0.5f, 2.0f);
+                SoundEvents.WARDEN_SONIC_CHARGE, player.getSoundSource(), 0.5f, 1.5f);
 
         player.sendSystemMessage(Component.literal("§5Charging Fracture Line..."));
 
-        // Resources (consume immediately)
         rpgData.setAbilityCooldown(id, getCooldownTicks());
         rpgData.useMana(getManaCost());
 
         return true;
     }
 
-    // This method is called from ServerEvents when charge completes
     public static void startDash(ServerPlayer player, PlayerRPGData rpgData) {
         rpgData.setMirageFractureLineCharging(false);
         rpgData.setMirageFractureLineActive(true);
-        rpgData.setMirageFractureLineTicks(20); // Dash duration (1 second)
+        rpgData.setMirageFractureLineTicks(20);
 
-        // Set player velocity for dash - horizontal only
         Vec3 dashDirection = rpgData.getMirageFractureLineDirection();
         player.setDeltaMovement(dashDirection.scale(DASH_SPEED));
         player.hurtMarked = true;
         player.hasImpulse = true;
 
-        // Spawn dramatic dash start particles (optimized for performance)
+        // Visuals: Sonic Boom Ring + Directional Burst
         if (player.level() instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(
-                ParticleTypes.SOUL_FIRE_FLAME,
-                player.getX(), player.getY() + 1, player.getZ(),
-                50, 0.5, 0.8, 0.5, 0.3
-            );
-            serverLevel.sendParticles(
-                ParticleTypes.END_ROD,
-                player.getX(), player.getY() + 1, player.getZ(),
-                40, 0.4, 0.6, 0.4, 0.2
-            );
-            serverLevel.sendParticles(
-                ParticleTypes.WITCH,
-                player.getX(), player.getY() + 1, player.getZ(),
-                30, 0.3, 0.5, 0.3, 0.15
-            );
-            // Add explosion-like effect at start
-            serverLevel.sendParticles(
-                ParticleTypes.DRAGON_BREATH,
-                player.getX(), player.getY() + 1, player.getZ(),
-                25, 0.6, 0.8, 0.6, 0.1
-            );
+            Vec3 pos = player.position();
+
+            // 1. Expanding Ring (Sonic Boom effect)
+            spawnRingParticles(serverLevel, pos.add(0, 0.5, 0), 2.5, 40, ParticleTypes.SOUL);
+            spawnRingParticles(serverLevel, pos.add(0, 0.5, 0), 1.5, 30, ParticleTypes.END_ROD);
+
+            // 2. Directional Cone (Speed lines)
+            for (int i = 0; i < 20; i++) {
+                double speed = 0.5 + Math.random() * 0.5;
+                serverLevel.sendParticles(
+                        ParticleTypes.SOUL_FIRE_FLAME,
+                        pos.x, pos.y + 1, pos.z,
+                        0, // count 0 allows setting velocity manually
+                        dashDirection.x * speed, 0.1, dashDirection.z * speed, 1.0
+                );
+            }
         }
 
-        // Collect afterimages hit by the dash path
-        // We'll mark them for explosion in ServerEvents
+        // Collect afterimages
         List<Integer> afterimageIds = new ArrayList<>(rpgData.getMirageAfterimageIds());
         for (Integer id : afterimageIds) {
             if (player.level().getEntity(id) instanceof AfterimageEntity afterimage) {
-                // Check if afterimage is in the dash path
                 double distance = player.distanceTo(afterimage);
                 if (distance < AFTERIMAGE_COLLECT_RADIUS) {
-                    // Mark this afterimage for explosion by setting a tag
                     afterimage.getPersistentData().putBoolean("fracture_explode", true);
                     afterimage.getPersistentData().putInt("fracture_timer", FRACTURE_EXPLOSION_DELAY_TICKS);
-                    
-                    // Spawn particles when afterimage is collected
+
                     if (player.level() instanceof ServerLevel serverLevel) {
-                        Vec3 pos = afterimage.position();
-                        serverLevel.sendParticles(
-                            ParticleTypes.WITCH,
-                            pos.x, pos.y + 1, pos.z,
-                            25, 0.3, 0.5, 0.3, 0.1
-                        );
+                        spawnRingParticles(serverLevel, afterimage.position().add(0, 1, 0), 1.0, 15, ParticleTypes.WITCH);
                     }
                 }
             }
         }
 
-        // Sound effect for dash
-        player.level().playSound(null, player.blockPosition(),
-                SoundEvents.PLAYER_ATTACK_SWEEP, player.getSoundSource(), 1f, 0.5f);
+        //player.level().playSound(null, player.blockPosition(),
+                //.TRIDENT_RIPTIDE_3, player.getSoundSource(), 1f, 0.8f);
 
         player.sendSystemMessage(Component.literal("§5FRACTURE LINE!"));
+    }
+
+    // --- Particle Shape Helpers ---
+
+    /**
+     * Spawns a spiral of particles rising up.
+     */
+    private static void spawnHelixParticles(ServerLevel level, Vec3 center, double radius, double height, SimpleParticleType particle) {
+        double density = 0.4; // Distance between points
+        for (double y = 0; y < height; y += 0.1) {
+            double angle = y * 5.0; // Rotation speed
+            double x = center.x + radius * Math.cos(angle);
+            double z = center.z + radius * Math.sin(angle);
+
+            // Create the particle
+            level.sendParticles(particle, x, center.y + y, z, 1, 0, 0, 0, 0);
+        }
+    }
+
+    /**
+     * Spawns a flat horizontal ring of particles.
+     */
+    private static void spawnRingParticles(ServerLevel level, Vec3 center, double radius, int count, SimpleParticleType particle) {
+        for (int i = 0; i < count; i++) {
+            double angle = (2 * Math.PI * i) / count;
+            double x = center.x + radius * Math.cos(angle);
+            double z = center.z + radius * Math.sin(angle);
+
+            // Spawn particle with slight outward motion
+            double motionX = Math.cos(angle) * 0.1;
+            double motionZ = Math.sin(angle) * 0.1;
+
+            level.sendParticles(particle, x, center.y, z, 0, motionX, 0, motionZ, 1.0);
+        }
     }
 }
