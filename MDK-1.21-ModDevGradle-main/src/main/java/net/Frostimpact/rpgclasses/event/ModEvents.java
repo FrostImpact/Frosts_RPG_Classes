@@ -3,6 +3,7 @@ package net.Frostimpact.rpgclasses.event;
 import net.Frostimpact.rpgclasses.RpgClassesMod;
 import net.Frostimpact.rpgclasses.entity.summon.ArcherSummonEntity;
 import net.Frostimpact.rpgclasses.entity.summon.KnightSummonEntity;
+import net.Frostimpact.rpgclasses.entity.summon.AfterimageEntity;
 import net.Frostimpact.rpgclasses.registry.ModEntities;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
@@ -234,6 +235,58 @@ public class ModEvents {
                     }
                 }
             }
+
+            // MIRAGE: ESSENCE OF CREATION passive - Afterimages mimic attacks
+            if (rpg.getCurrentClass().equals("MIRAGE")) {
+                if (player.getAttackStrengthScale(0.5f) >= 1.0f) {
+                    // Get the target entity
+                    net.minecraft.world.entity.Entity target = event.getTarget();
+                    
+                    // Get player's look direction
+                    net.minecraft.world.phys.Vec3 playerLookVec = player.getLookAngle();
+                    
+                    // Make all afterimages attack in the same direction (30% damage)
+                    for (Integer id : rpg.getMirageAfterimageIds()) {
+                        if (player.level().getEntity(id) instanceof net.Frostimpact.rpgclasses.entity.summon.AfterimageEntity afterimage) {
+                            // Find nearest entity in the direction the afterimage is "looking"
+                            net.minecraft.world.phys.Vec3 afterimagePos = afterimage.position();
+                            
+                            // Use player's attack damage
+                            float playerDamage = (float) player.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+                            float afterimageDamage = playerDamage * 0.3f;
+                            
+                            // Raycast to find entities in front of afterimage
+                            net.minecraft.world.phys.Vec3 lookEnd = afterimagePos.add(playerLookVec.scale(5.0));
+                            
+                            java.util.List<net.minecraft.world.entity.Entity> nearbyEntities = player.level().getEntities(
+                                    afterimage,
+                                    new net.minecraft.world.phys.AABB(
+                                            afterimagePos.x - 3, afterimagePos.y - 2, afterimagePos.z - 3,
+                                            afterimagePos.x + 3, afterimagePos.y + 2, afterimagePos.z + 3
+                                    )
+                            );
+                            
+                            for (net.minecraft.world.entity.Entity entity : nearbyEntities) {
+                                if (entity instanceof net.minecraft.world.entity.LivingEntity living && 
+                                    entity != player && 
+                                    !(entity instanceof net.Frostimpact.rpgclasses.entity.summon.AfterimageEntity)) {
+                                    // Deal damage
+                                    living.hurt(player.damageSources().playerAttack(player), afterimageDamage);
+                                    
+                                    // Visual feedback
+                                    ((net.minecraft.server.level.ServerLevel) player.level()).sendParticles(
+                                            net.minecraft.core.particles.ParticleTypes.CRIT,
+                                            living.getX(), living.getY() + living.getBbHeight() / 2, living.getZ(),
+                                            5, 0.3, 0.3, 0.3, 0.1
+                                    );
+                                    
+                                    break; // Only hit one entity per afterimage
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     @EventBusSubscriber(modid = RpgClassesMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
@@ -251,6 +304,9 @@ public class ModEvents {
             event.put(ModEntities.TURRET_SUMMON.get(), net.Frostimpact.rpgclasses.entity.summon.TurretSummonEntity.createAttributes().build());
             event.put(ModEntities.SHOCK_TOWER.get(), net.Frostimpact.rpgclasses.entity.summon.ShockTowerEntity.createAttributes().build());
             event.put(ModEntities.WIND_TOWER.get(), net.Frostimpact.rpgclasses.entity.summon.WindTowerEntity.createAttributes().build());
+
+            // Link the Mirage entities
+            event.put(ModEntities.AFTERIMAGE.get(), AfterimageEntity.createAttributes().build());
 
             System.out.println("RPG Classes: Entity Attributes Registered!");
         }

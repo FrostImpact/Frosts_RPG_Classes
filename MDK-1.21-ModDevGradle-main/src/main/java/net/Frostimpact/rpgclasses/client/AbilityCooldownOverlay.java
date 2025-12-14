@@ -50,9 +50,8 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
         CLASS_ABILITIES.put("ARTIFICER", new String[]{
                 "turret", "tower", "reposition", "self_destruct"
         });
-
-        CLASS_ABILITIES.put("ARTIFICER", new String[]{
-                "turret", "tower", "reposition", "self_destruct"
+        CLASS_ABILITIES.put("MIRAGE", new String[]{
+                "reflections", "shadowstep", "recall", "fracture_line"
         });
     }
 

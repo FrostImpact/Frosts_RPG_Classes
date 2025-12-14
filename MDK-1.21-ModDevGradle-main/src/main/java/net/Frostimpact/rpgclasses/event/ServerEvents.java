@@ -221,6 +221,98 @@ public class ServerEvents {
                     }
                 }
 
+                // --- MIRAGE HANDLING ---
+                if (rpg.getCurrentClass().equals("MIRAGE")) {
+                    // Shadowstep reactivation window countdown
+                    if (rpg.isMirageShadowstepActive()) {
+                        rpg.setMirageShadowstepTicks(rpg.getMirageShadowstepTicks() - 1);
+                        if (rpg.getMirageShadowstepTicks() <= 0) {
+                            rpg.setMirageShadowstepActive(false);
+                            rpg.setAbilityCooldown("shadowstep", 240); // 12s cooldown
+                            player.sendSystemMessage(Component.literal("§9Shadowstep §7window expired"));
+                        }
+                    }
+
+                    // Fracture Line charging
+                    if (rpg.isMirageFractureLineCharging()) {
+                        rpg.setMirageFractureLineTicks(rpg.getMirageFractureLineTicks() - 1);
+                        if (rpg.getMirageFractureLineTicks() <= 0) {
+                            // Start dash
+                            net.Frostimpact.rpgclasses.ability.MIRAGE.FractureLineAbility.startDash(player, rpg);
+                        }
+                    }
+
+                    // Fracture Line dash
+                    if (rpg.isMirageFractureLineActive()) {
+                        rpg.setMirageFractureLineTicks(rpg.getMirageFractureLineTicks() - 1);
+                        if (rpg.getMirageFractureLineTicks() <= 0) {
+                            rpg.setMirageFractureLineActive(false);
+                        }
+                    }
+
+                    // Handle afterimage explosions from Fracture Line
+                    java.util.List<Integer> afterimageIds = new java.util.ArrayList<>(rpg.getMirageAfterimageIds());
+                    java.util.List<Integer> idsToRemove = new java.util.ArrayList<>();
+                    for (Integer id : afterimageIds) {
+                        if (player.level().getEntity(id) instanceof net.Frostimpact.rpgclasses.entity.summon.AfterimageEntity afterimage) {
+                            if (afterimage.getPersistentData().getBoolean("fracture_explode")) {
+                                int timer = afterimage.getPersistentData().getInt("fracture_timer");
+                                timer--;
+                                afterimage.getPersistentData().putInt("fracture_timer", timer);
+
+                                if (timer <= 0) {
+                                    // Explode
+                                    net.minecraft.world.phys.Vec3 pos = afterimage.position();
+                                    player.level().explode(
+                                            afterimage,
+                                            pos.x, pos.y, pos.z,
+                                            2.0f,
+                                            net.minecraft.world.level.Level.ExplosionInteraction.NONE
+                                    );
+                                    afterimage.discard();
+                                    idsToRemove.add(afterimage.getId());
+                                }
+                            }
+                        }
+                    }
+                    // Remove exploded afterimages
+                    for (Integer id : idsToRemove) {
+                        rpg.getMirageAfterimageIds().remove(id);
+                    }
+
+                    // Clean up dead afterimages from the list
+                    idsToRemove.clear();
+                    afterimageIds = new java.util.ArrayList<>(rpg.getMirageAfterimageIds());
+                    for (Integer id : afterimageIds) {
+                        if (player.level().getEntity(id) == null) {
+                            idsToRemove.add(id);
+                        }
+                    }
+                    // Remove dead afterimages
+                    for (Integer id : idsToRemove) {
+                        rpg.getMirageAfterimageIds().remove(id);
+                    }
+
+                    // Handle recall - stop afterimages when they reach the recall position
+                    if (rpg.isMirageRecallActive()) {
+                        net.minecraft.world.phys.Vec3 recallPos = rpg.getMirageRecallPosition();
+                        boolean allReached = true;
+                        for (Integer id : rpg.getMirageAfterimageIds()) {
+                            if (player.level().getEntity(id) instanceof net.Frostimpact.rpgclasses.entity.summon.AfterimageEntity afterimage) {
+                                double distance = afterimage.position().distanceTo(recallPos);
+                                if (distance > 1.0) {
+                                    allReached = false;
+                                } else {
+                                    afterimage.stopGliding();
+                                }
+                            }
+                        }
+                        if (allReached) {
+                            rpg.setMirageRecallActive(false);
+                        }
+                    }
+                }
+
                 // Mana Regeneration
                 if (player.level().getGameTime() % 5 == 0) {
                     if (rpg.getMana() < rpg.getMaxMana()) {

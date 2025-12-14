@@ -50,6 +50,12 @@ public class AbilityDatabase {
         register("tower", new AbilityStats("Tower", 14, 20));
         register("reposition", new AbilityStats("Reposition", 4, 10));
         register("self_destruct", new AbilityStats("Self-Destruct", 20, 40));
+
+        // MIRAGE
+        register("reflections", new AbilityStats("Reflections", 4, 15));
+        register("shadowstep", new AbilityStats("Shadowstep", 12, 10));
+        register("recall", new AbilityStats("Recall", 8, 20));
+        register("fracture_line", new AbilityStats("Fracture Line", 20, 40));
     }
 
     private static void register(String id, AbilityStats stats) {

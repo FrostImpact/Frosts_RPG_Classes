@@ -127,5 +127,21 @@ public class ClientEvents {
                 ModMessages.sendToServer(new PacketUseAbility("self_destruct"));
             }
         }
+
+        // MIRAGE Keys
+        if (currentClass.equals("MIRAGE")) {
+            if (KeyBinding.REFLECTIONS_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("reflections"));
+            }
+            if (KeyBinding.SHADOWSTEP_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("shadowstep"));
+            }
+            if (KeyBinding.RECALL_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("recall"));
+            }
+            if (KeyBinding.FRACTURE_LINE_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("fracture_line"));
+            }
+        }
     }
 }
