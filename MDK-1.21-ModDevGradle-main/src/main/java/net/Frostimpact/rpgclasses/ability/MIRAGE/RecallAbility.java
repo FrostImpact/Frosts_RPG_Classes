@@ -7,6 +7,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.List;
 
@@ -30,13 +32,36 @@ public class RecallAbility extends Ability {
         rpgData.setMirageRecallActive(true);
         rpgData.setMirageRecallPosition(castPosition);
 
-        // Set all afterimages to glide towards the cast position
-        for (Integer id : afterimageIds) {
-            if (player.level().getEntity(id) instanceof AfterimageEntity afterimage) {
-                Vec3 afterimagePos = afterimage.position();
-                Vec3 directionToRecall = castPosition.subtract(afterimagePos).normalize();
-                afterimage.setGlideDirection(directionToRecall);
+        // Set all afterimages to glide towards the cast position and spawn particles
+        if (player.level() instanceof ServerLevel serverLevel) {
+            for (Integer id : afterimageIds) {
+                if (player.level().getEntity(id) instanceof AfterimageEntity afterimage) {
+                    Vec3 afterimagePos = afterimage.position();
+                    Vec3 directionToRecall = castPosition.subtract(afterimagePos).normalize();
+                    afterimage.setGlideDirection(directionToRecall);
+                    
+                    // Spawn witch particles at each afterimage being recalled
+                    serverLevel.sendParticles(
+                        ParticleTypes.WITCH,
+                        afterimagePos.x, afterimagePos.y + 1, afterimagePos.z,
+                        15, 0.3, 0.5, 0.3, 0.1
+                    );
+                    
+                    // Spawn soul particles showing the direction
+                    serverLevel.sendParticles(
+                        ParticleTypes.SOUL,
+                        afterimagePos.x, afterimagePos.y + 1, afterimagePos.z,
+                        10, directionToRecall.x * 0.3, 0.2, directionToRecall.z * 0.3, 0.3
+                    );
+                }
             }
+            
+            // Spawn particles at the recall target position
+            serverLevel.sendParticles(
+                ParticleTypes.END_ROD,
+                castPosition.x, castPosition.y + 1, castPosition.z,
+                30, 0.5, 0.5, 0.5, 0.05
+            );
         }
 
         // Sound effect

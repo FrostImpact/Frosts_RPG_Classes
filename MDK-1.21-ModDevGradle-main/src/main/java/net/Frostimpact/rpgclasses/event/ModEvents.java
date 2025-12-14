@@ -248,6 +248,9 @@ public class ModEvents {
                     // Make all afterimages attack in the same direction (30% damage)
                     for (Integer id : rpg.getMirageAfterimageIds()) {
                         if (player.level().getEntity(id) instanceof net.Frostimpact.rpgclasses.entity.summon.AfterimageEntity afterimage) {
+                            // Trigger swing animation on afterimage
+                            afterimage.performSwingAnimation();
+                            
                             // Find nearest entity in the direction the afterimage is "looking"
                             net.minecraft.world.phys.Vec3 afterimagePos = afterimage.position();
                             
@@ -273,11 +276,18 @@ public class ModEvents {
                                     // Deal damage
                                     living.hurt(player.damageSources().playerAttack(player), afterimageDamage);
                                     
-                                    // Visual feedback
+                                    // Visual feedback with swing particles
                                     ((net.minecraft.server.level.ServerLevel) player.level()).sendParticles(
                                             net.minecraft.core.particles.ParticleTypes.CRIT,
                                             living.getX(), living.getY() + living.getBbHeight() / 2, living.getZ(),
                                             5, 0.3, 0.3, 0.3, 0.1
+                                    );
+                                    
+                                    // Additional soul particles during swing
+                                    ((net.minecraft.server.level.ServerLevel) player.level()).sendParticles(
+                                            net.minecraft.core.particles.ParticleTypes.SOUL,
+                                            afterimagePos.x, afterimagePos.y + 1, afterimagePos.z,
+                                            3, 0.2, 0.2, 0.2, 0.05
                                     );
                                     
                                     break; // Only hit one entity per afterimage

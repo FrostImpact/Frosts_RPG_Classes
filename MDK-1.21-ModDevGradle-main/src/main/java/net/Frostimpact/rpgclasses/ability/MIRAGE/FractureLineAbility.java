@@ -7,6 +7,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +16,8 @@ import java.util.List;
 public class FractureLineAbility extends Ability {
 
     private static final int CHARGE_TIME = 20; // 1 second charge time
-    private static final double DASH_DISTANCE = 15.0;
-    private static final double DASH_SPEED = 1.5;
+    private static final double DASH_DISTANCE = 25.0; // Increased from 15.0
+    private static final double DASH_SPEED = 2.0; // Increased from 1.5
     private static final double AFTERIMAGE_COLLECT_RADIUS = 3.0;
     private static final int FRACTURE_EXPLOSION_DELAY_TICKS = 30; // 1.5 seconds
 
@@ -34,10 +36,19 @@ public class FractureLineAbility extends Ability {
         rpgData.setMirageFractureLineCharging(true);
         rpgData.setMirageFractureLineTicks(CHARGE_TIME);
 
-        // Store dash direction
+        // Store dash direction - HORIZONTAL ONLY (remove vertical component)
         Vec3 lookVec = player.getLookAngle();
-        Vec3 dashDirection = new Vec3(lookVec.x, lookVec.y, lookVec.z).normalize();
+        Vec3 dashDirection = new Vec3(lookVec.x, 0, lookVec.z).normalize(); // Y set to 0 for horizontal only
         rpgData.setMirageFractureLineDirection(dashDirection);
+
+        // Spawn charging particles
+        if (player.level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(
+                ParticleTypes.WITCH,
+                player.getX(), player.getY() + 1, player.getZ(),
+                20, 0.3, 0.5, 0.3, 0.05
+            );
+        }
 
         // Sound effect for charging
         player.level().playSound(null, player.blockPosition(),
@@ -58,11 +69,25 @@ public class FractureLineAbility extends Ability {
         rpgData.setMirageFractureLineActive(true);
         rpgData.setMirageFractureLineTicks(20); // Dash duration (1 second)
 
-        // Set player velocity for dash
+        // Set player velocity for dash - horizontal only
         Vec3 dashDirection = rpgData.getMirageFractureLineDirection();
         player.setDeltaMovement(dashDirection.scale(DASH_SPEED));
         player.hurtMarked = true;
         player.hasImpulse = true;
+
+        // Spawn dash start particles
+        if (player.level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(
+                ParticleTypes.SOUL_FIRE_FLAME,
+                player.getX(), player.getY() + 1, player.getZ(),
+                30, 0.3, 0.5, 0.3, 0.2
+            );
+            serverLevel.sendParticles(
+                ParticleTypes.END_ROD,
+                player.getX(), player.getY() + 1, player.getZ(),
+                20, 0.2, 0.3, 0.2, 0.1
+            );
+        }
 
         // Collect afterimages hit by the dash path
         // We'll mark them for explosion in ServerEvents
@@ -75,6 +100,16 @@ public class FractureLineAbility extends Ability {
                     // Mark this afterimage for explosion by setting a tag
                     afterimage.getPersistentData().putBoolean("fracture_explode", true);
                     afterimage.getPersistentData().putInt("fracture_timer", FRACTURE_EXPLOSION_DELAY_TICKS);
+                    
+                    // Spawn particles when afterimage is collected
+                    if (player.level() instanceof ServerLevel serverLevel) {
+                        Vec3 pos = afterimage.position();
+                        serverLevel.sendParticles(
+                            ParticleTypes.WITCH,
+                            pos.x, pos.y + 1, pos.z,
+                            25, 0.3, 0.5, 0.3, 0.1
+                        );
+                    }
                 }
             }
         }
