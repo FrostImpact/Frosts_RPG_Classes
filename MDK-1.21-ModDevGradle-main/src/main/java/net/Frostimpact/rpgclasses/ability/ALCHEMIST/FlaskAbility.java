@@ -1,6 +1,8 @@
 package net.Frostimpact.rpgclasses.ability.ALCHEMIST;
 
 import net.Frostimpact.rpgclasses.ability.Ability;
+import net.Frostimpact.rpgclasses.networking.ModMessages;
+import net.Frostimpact.rpgclasses.networking.packet.PacketSyncAlchemistState;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -21,6 +23,15 @@ public class FlaskAbility extends Ability {
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                 "§d⚗ CONCOCTION activated! " + 
                 (rpgData.isAlchemistBuffMode() ? "§a[BUFF MODE]" : "§c[DEBUFF MODE]")));
+
+        // Sync to client
+        ModMessages.sendToPlayer(new PacketSyncAlchemistState(
+                rpgData.isAlchemistConcoction(),
+                rpgData.isAlchemistInjectionActive(),
+                rpgData.getAlchemistClickPattern(),
+                rpgData.isAlchemistBuffMode(),
+                rpgData.getAlchemistSelectedReagent()
+        ), player);
 
         // Consume resources
         rpgData.setAbilityCooldown(id, getCooldownTicks());

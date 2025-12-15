@@ -2,6 +2,8 @@ package net.Frostimpact.rpgclasses.ability.ALCHEMIST;
 
 import net.Frostimpact.rpgclasses.ability.Ability;
 import net.Frostimpact.rpgclasses.entity.projectile.InjectionBoltEntity;
+import net.Frostimpact.rpgclasses.networking.ModMessages;
+import net.Frostimpact.rpgclasses.networking.packet.PacketSyncAlchemistState;
 import net.Frostimpact.rpgclasses.registry.ModEntities;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,6 +27,15 @@ public class InjectionAbility extends Ability {
                     "§6⚗ INJECTION mode! Shift to cycle reagents, use again to fire."));
             player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                     "§7Current: §e" + rpgData.getAlchemistSelectedReagent()));
+
+            // Sync to client
+            ModMessages.sendToPlayer(new PacketSyncAlchemistState(
+                    rpgData.isAlchemistConcoction(),
+                    rpgData.isAlchemistInjectionActive(),
+                    rpgData.getAlchemistClickPattern(),
+                    rpgData.isAlchemistBuffMode(),
+                    rpgData.getAlchemistSelectedReagent()
+            ), player);
 
             // Don't consume resources yet - wait for second activation
             return true;
@@ -60,6 +71,15 @@ public class InjectionAbility extends Ability {
 
             // Exit injection mode
             rpgData.setAlchemistInjectionActive(false);
+
+            // Sync to client
+            ModMessages.sendToPlayer(new PacketSyncAlchemistState(
+                    rpgData.isAlchemistConcoction(),
+                    rpgData.isAlchemistInjectionActive(),
+                    rpgData.getAlchemistClickPattern(),
+                    rpgData.isAlchemistBuffMode(),
+                    rpgData.getAlchemistSelectedReagent()
+            ), player);
 
             // Consume resources
             rpgData.setAbilityCooldown(id, getCooldownTicks());

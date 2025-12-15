@@ -133,6 +133,7 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     private boolean alchemistVolatileMixActive = false;
     private boolean alchemistInjectionActive = false;
     private String alchemistSelectedReagent = "CRYOSTAT"; // CRYOSTAT, CATALYST, FRACTURE, SANCTIFIED
+    private java.util.List<String> alchemistEnemyDebuffs = new java.util.ArrayList<>();
 
     //DASH
     public boolean isDashActive() {
@@ -864,6 +865,14 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
 
     public void setAlchemistSelectedReagent(String reagent) {
         this.alchemistSelectedReagent = reagent;
+    }
+
+    public java.util.List<String> getAlchemistEnemyDebuffs() {
+        return alchemistEnemyDebuffs;
+    }
+
+    public void setAlchemistEnemyDebuffs(java.util.List<String> debuffs) {
+        this.alchemistEnemyDebuffs = debuffs != null ? new java.util.ArrayList<>(debuffs) : new java.util.ArrayList<>();
     }
 
     @Override

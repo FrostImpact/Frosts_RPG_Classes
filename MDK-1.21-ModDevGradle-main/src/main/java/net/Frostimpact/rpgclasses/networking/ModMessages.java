@@ -90,6 +90,20 @@ public class ModMessages {
                 PacketAlchemistClick::handle
         );
 
+        // 10. PacketSyncAlchemistState (Server -> Client)
+        registrar.playToClient(
+                PacketSyncAlchemistState.TYPE,
+                PacketSyncAlchemistState.STREAM_CODEC,
+                PacketSyncAlchemistState::handle
+        );
+
+        // 11. PacketSyncEnemyDebuffs (Server -> Client)
+        registrar.playToClient(
+                PacketSyncEnemyDebuffs.TYPE,
+                PacketSyncEnemyDebuffs.STREAM_CODEC,
+                PacketSyncEnemyDebuffs::handle
+        );
+
         System.out.println("RPG Classes: All packets registered!");
     }
 

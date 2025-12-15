@@ -2,36 +2,60 @@ package net.Frostimpact.rpgclasses.event.classes;
 
 import net.Frostimpact.rpgclasses.RpgClassesMod;
 import net.Frostimpact.rpgclasses.entity.projectile.AlchemistPotionEntity;
+import net.Frostimpact.rpgclasses.networking.ModMessages;
+import net.Frostimpact.rpgclasses.networking.packet.PacketSyncAlchemistState;
+import net.Frostimpact.rpgclasses.networking.packet.PacketSyncEnemyDebuffs;
 import net.Frostimpact.rpgclasses.registry.ModEntities;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @EventBusSubscriber(modid = RpgClassesMod.MOD_ID)
 public class AlchemistEventHandler {
+
+    private static final int GLOWING_DURATION_TICKS = 40; // 2 seconds
+    
+    // Map to track glowing targets per player (thread-safe for multiplayer)
+    private static final java.util.concurrent.ConcurrentHashMap<java.util.UUID, LivingEntity> previousGlowingTargets = new java.util.concurrent.ConcurrentHashMap<>();
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             PlayerRPGData rpgData = player.getData(ModAttachments.PLAYER_RPG);
             
-            if (!rpgData.getCurrentClass().equals("ALCHEMIST")) return;
+            if (!rpgData.getCurrentClass().equals("ALCHEMIST")) {
+                // Clean up glowing target tracking if player is not an alchemist
+                previousGlowingTargets.remove(player.getUUID());
+                return;
+            }
 
             // Handle reagent cycling when in injection mode and shifting
             if (rpgData.isAlchemistInjectionActive() && player.isShiftKeyDown()) {
                 // Cycle reagent every 10 ticks when holding shift
                 if (player.tickCount % 10 == 0) {
                     cycleReagent(player, rpgData);
+                    // Sync to client after cycling
+                    ModMessages.sendToPlayer(new PacketSyncAlchemistState(
+                            rpgData.isAlchemistConcoction(),
+                            rpgData.isAlchemistInjectionActive(),
+                            rpgData.getAlchemistClickPattern(),
+                            rpgData.isAlchemistBuffMode(),
+                            rpgData.getAlchemistSelectedReagent()
+                    ), player);
                 }
             }
 
@@ -39,6 +63,14 @@ public class AlchemistEventHandler {
             if (player.tickCount % 20 == 0) { // Check every second
                 applyPotionAffinity(player);
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        // Clean up tracking map when player logs out to prevent memory leaks
+        if (event.getEntity() instanceof ServerPlayer player) {
+            previousGlowingTargets.remove(player.getUUID());
         }
     }
 
@@ -63,6 +95,15 @@ public class AlchemistEventHandler {
             player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                     "§d⚗ Pattern: §e" + newPattern));
 
+            // Sync to client after click
+            ModMessages.sendToPlayer(new PacketSyncAlchemistState(
+                    rpgData.isAlchemistConcoction(),
+                    rpgData.isAlchemistInjectionActive(),
+                    newPattern,
+                    rpgData.isAlchemistBuffMode(),
+                    rpgData.getAlchemistSelectedReagent()
+            ), player);
+
             // Check if pattern is complete
             if (newPattern.length() == maxClicks) {
                 // Throw the potion
@@ -72,6 +113,15 @@ public class AlchemistEventHandler {
                 rpgData.setAlchemistConcoction(false);
                 rpgData.setAlchemistClickPattern("");
                 rpgData.setAlchemistConcoctionTicks(0);
+
+                // Sync to client after completing pattern
+                ModMessages.sendToPlayer(new PacketSyncAlchemistState(
+                        false,
+                        rpgData.isAlchemistInjectionActive(),
+                        "",
+                        rpgData.isAlchemistBuffMode(),
+                        rpgData.getAlchemistSelectedReagent()
+                ), player);
             }
         }
     }
@@ -165,9 +215,37 @@ public class AlchemistEventHandler {
             }
         }
 
+        // Get previous target for this player
+        LivingEntity previousTarget = previousGlowingTargets.get(player.getUUID());
+
+        // Remove glow from previous target if it's different and still valid
+        if (previousTarget != null && previousTarget != nearest && !previousTarget.isRemoved()) {
+            if (previousTarget.hasEffect(MobEffects.GLOWING)) {
+                previousTarget.removeEffect(MobEffects.GLOWING);
+            }
+        }
+
         if (nearest != null) {
-            // Make the nearest enemy glow
-            nearest.setGlowingTag(true);
+            // Apply glowing effect with duration
+            nearest.addEffect(new MobEffectInstance(MobEffects.GLOWING, GLOWING_DURATION_TICKS, 0, false, false));
+            previousGlowingTargets.put(player.getUUID(), nearest);
+
+            // Collect and send debuffs to client
+            List<String> debuffs = new ArrayList<>();
+            for (MobEffectInstance effect : nearest.getActiveEffects()) {
+                // Only include negative effects (debuffs)
+                if (!effect.getEffect().value().isBeneficial()) {
+                    String effectName = effect.getEffect().value().getDisplayName().getString();
+                    int amplifier = effect.getAmplifier();
+                    String level = amplifier > 0 ? " " + (amplifier + 1) : "";
+                    debuffs.add(effectName + level);
+                }
+            }
+            ModMessages.sendToPlayer(new PacketSyncEnemyDebuffs(debuffs), player);
+        } else {
+            previousGlowingTargets.remove(player.getUUID());
+            // Send empty list when no enemy nearby
+            ModMessages.sendToPlayer(new PacketSyncEnemyDebuffs(new ArrayList<>()), player);
         }
     }
 }
