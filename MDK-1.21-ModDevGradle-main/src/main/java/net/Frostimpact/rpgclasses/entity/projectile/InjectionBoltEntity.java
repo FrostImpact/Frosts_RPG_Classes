@@ -133,7 +133,7 @@ public class InjectionBoltEntity extends Projectile {
                     case "CRYOSTAT":
                         // Check for slowness or freeze
                         if (livingTarget.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) || 
-                            livingTarget.hasEffect(ModEffects.FREEZE.get())) {
+                            livingTarget.hasEffect(ModEffects.FREEZE)) {
                             triggerCryostatExplosion(livingTarget);
                             triggered = true;
                         }
@@ -149,7 +149,7 @@ public class InjectionBoltEntity extends Projectile {
                     case "FRACTURE":
                         // Check for weakness or corrosion
                         if (livingTarget.hasEffect(MobEffects.WEAKNESS) || 
-                            livingTarget.hasEffect(ModEffects.CORROSION.get())) {
+                            livingTarget.hasEffect(ModEffects.CORROSION)) {
                             triggerFractureExplosion(livingTarget);
                             triggered = true;
                         }
@@ -244,7 +244,7 @@ public class InjectionBoltEntity extends Projectile {
         );
 
         for (LivingEntity entity : nearbyEntities) {
-            entity.addEffect(new MobEffectInstance(ModEffects.BRITTLE.get(), 80, 0)); // 4s
+            entity.addEffect(new MobEffectInstance(ModEffects.BRITTLE, 80, 0)); // 4s
         }
 
         // Explosion particles
