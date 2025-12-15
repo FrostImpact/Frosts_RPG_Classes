@@ -18,6 +18,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.ArrayList;
@@ -34,7 +35,11 @@ public class AlchemistEventHandler {
         if (event.getEntity() instanceof ServerPlayer player) {
             PlayerRPGData rpgData = player.getData(ModAttachments.PLAYER_RPG);
             
-            if (!rpgData.getCurrentClass().equals("ALCHEMIST")) return;
+            if (!rpgData.getCurrentClass().equals("ALCHEMIST")) {
+                // Clean up glowing target tracking if player is not an alchemist
+                previousGlowingTargets.remove(player.getUUID());
+                return;
+            }
 
             // Handle reagent cycling when in injection mode and shifting
             if (rpgData.isAlchemistInjectionActive() && player.isShiftKeyDown()) {
@@ -56,6 +61,14 @@ public class AlchemistEventHandler {
             if (player.tickCount % 20 == 0) { // Check every second
                 applyPotionAffinity(player);
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        // Clean up tracking map when player logs out to prevent memory leaks
+        if (event.getEntity() instanceof ServerPlayer player) {
+            previousGlowingTargets.remove(player.getUUID());
         }
     }
 
