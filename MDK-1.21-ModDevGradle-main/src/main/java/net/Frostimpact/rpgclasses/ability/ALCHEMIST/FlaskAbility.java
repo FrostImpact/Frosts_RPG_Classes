@@ -14,6 +14,9 @@ public class FlaskAbility extends Ability {
 
     @Override
     public boolean execute(ServerPlayer player, PlayerRPGData rpgData) {
+        System.out.println("[SERVER] FLASK ABILITY EXECUTED!");
+        System.out.println("[SERVER] Player shift key down: " + player.isShiftKeyDown());
+
         // Activate CONCOCTION mode for 6 seconds (120 ticks)
         rpgData.setAlchemistConcoction(true);
         rpgData.setAlchemistConcoctionTicks(120);
@@ -21,22 +24,32 @@ public class FlaskAbility extends Ability {
         rpgData.setAlchemistBuffMode(player.isShiftKeyDown());
 
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                "§d⚗ CONCOCTION activated! " + 
-                (rpgData.isAlchemistBuffMode() ? "§a[BUFF MODE]" : "§c[DEBUFF MODE]")));
+                "§d⚗ CONCOCTION activated! " +
+                        (rpgData.isAlchemistBuffMode() ? "§a[BUFF MODE]" : "§c[DEBUFF MODE]")));
 
-        // Sync to client
-        ModMessages.sendToPlayer(new PacketSyncAlchemistState(
+        System.out.println("[SERVER] Concoction state set - Active: " + rpgData.isAlchemistConcoction() +
+                ", Ticks: " + rpgData.getAlchemistConcoctionTicks() +
+                ", Buff Mode: " + rpgData.isAlchemistBuffMode());
+
+        // Sync to client - UPDATED to include ticks
+        PacketSyncAlchemistState packet = new PacketSyncAlchemistState(
                 rpgData.isAlchemistConcoction(),
+                // ADDED
+                rpgData.getAlchemistConcoctionTicks(),
                 rpgData.isAlchemistInjectionActive(),
                 rpgData.getAlchemistClickPattern(),
                 rpgData.isAlchemistBuffMode(),
                 rpgData.getAlchemistSelectedReagent()
-        ), player);
+        );
+
+        System.out.println("[SERVER] Sending sync packet to client...");
+        ModMessages.sendToPlayer(packet, player);
 
         // Consume resources
         rpgData.setAbilityCooldown(id, getCooldownTicks());
         rpgData.useMana(getManaCost());
 
+        System.out.println("[SERVER] FLASK ABILITY COMPLETE!");
         return true;
     }
 }

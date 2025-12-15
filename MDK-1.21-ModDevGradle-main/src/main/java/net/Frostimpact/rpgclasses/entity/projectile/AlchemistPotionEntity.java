@@ -1,3 +1,4 @@
+// AlchemistPotionEntity.java
 package net.Frostimpact.rpgclasses.entity.projectile;
 
 import net.Frostimpact.rpgclasses.registry.ModEffects;
@@ -15,6 +16,9 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.projectile.ItemSupplier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -22,10 +26,10 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
-public class AlchemistPotionEntity extends Projectile {
+public class AlchemistPotionEntity extends Projectile implements ItemSupplier {
 
     private static final int MAX_LIFETIME = 100; // 5 seconds
-    
+
     private int tickCount = 0;
     private boolean hasHit = false;
     private String effectType = ""; // Pattern like "LLL", "LRR", etc.
@@ -112,9 +116,9 @@ public class AlchemistPotionEntity extends Projectile {
         if (!this.level().isClientSide) {
             // Splash effect - apply to nearby entities
             List<LivingEntity> nearbyEntities = this.level().getEntitiesOfClass(
-                LivingEntity.class,
-                this.getBoundingBox().inflate(3.0),
-                entity -> entity != this.getOwner()
+                    LivingEntity.class,
+                    this.getBoundingBox().inflate(3.0),
+                    entity -> entity != this.getOwner()
             );
 
             for (LivingEntity entity : nearbyEntities) {
@@ -143,7 +147,7 @@ public class AlchemistPotionEntity extends Projectile {
 
     private void applyEffect(LivingEntity target) {
         int duration = 80; // 4 seconds
-        
+
         switch (effectType) {
             // Debuff patterns (3 clicks)
             case "LLL":
@@ -167,7 +171,7 @@ public class AlchemistPotionEntity extends Projectile {
             case "RRR":
                 target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 0));
                 break;
-            
+
             // Buff patterns (2 clicks)
             case "LL":
                 target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0));
@@ -190,11 +194,11 @@ public class AlchemistPotionEntity extends Projectile {
         cloud.setDuration(120); // 6 seconds
         cloud.setWaitTime(0);
         cloud.setRadiusPerTick(-cloud.getRadius() / cloud.getDuration());
-        
+
         // Add the appropriate effect to the cloud
         MobEffectInstance effectToAdd = null;
         int duration = 80;
-        
+
         switch (effectType) {
             case "LLL":
                 effectToAdd = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 0);
@@ -230,15 +234,15 @@ public class AlchemistPotionEntity extends Projectile {
                 effectToAdd = new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 0);
                 break;
         }
-        
+
         if (effectToAdd != null) {
             cloud.addEffect(effectToAdd);
         }
-        
+
         if (this.getOwner() instanceof LivingEntity livingOwner) {
             cloud.setOwner(livingOwner);
         }
-        
+
         this.level().addFreshEntity(cloud);
     }
 
@@ -247,5 +251,12 @@ public class AlchemistPotionEntity extends Projectile {
         if (!super.canHitEntity(entity)) return false;
         if (entity.isSpectator()) return false;
         return true;
+    }
+
+    // --- ITEM SUPPLIER IMPLEMENTATION ---
+    @Override
+    public ItemStack getItem() {
+        // Return the rendered item for this projectile entity
+        return new ItemStack(Items.SPLASH_POTION); // Replace with your custom item if needed
     }
 }

@@ -11,6 +11,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class PacketAlchemistClick implements CustomPacketPayload {
 
+
     public static final CustomPacketPayload.Type<PacketAlchemistClick> TYPE =
             new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(RpgClassesMod.MOD_ID, "alchemist_click"));
 
@@ -18,6 +19,7 @@ public class PacketAlchemistClick implements CustomPacketPayload {
             (buf, message) -> buf.writeUtf(message.clickType),
             (buf) -> new PacketAlchemistClick(buf.readUtf())
     );
+
 
     private final String clickType; // "L" or "R"
 
@@ -33,6 +35,7 @@ public class PacketAlchemistClick implements CustomPacketPayload {
     public static void handle(PacketAlchemistClick message, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player) {
+
                 AlchemistEventHandler.handleClick(player, message.clickType);
             }
         });

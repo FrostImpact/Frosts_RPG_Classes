@@ -31,6 +31,7 @@ public class InjectionAbility extends Ability {
             // Sync to client
             ModMessages.sendToPlayer(new PacketSyncAlchemistState(
                     rpgData.isAlchemistConcoction(),
+                    rpgData.getAlchemistConcoctionTicks(),
                     rpgData.isAlchemistInjectionActive(),
                     rpgData.getAlchemistClickPattern(),
                     rpgData.isAlchemistBuffMode(),
@@ -75,6 +76,7 @@ public class InjectionAbility extends Ability {
             // Sync to client
             ModMessages.sendToPlayer(new PacketSyncAlchemistState(
                     rpgData.isAlchemistConcoction(),
+                    rpgData.getAlchemistConcoctionTicks(),
                     rpgData.isAlchemistInjectionActive(),
                     rpgData.getAlchemistClickPattern(),
                     rpgData.isAlchemistBuffMode(),

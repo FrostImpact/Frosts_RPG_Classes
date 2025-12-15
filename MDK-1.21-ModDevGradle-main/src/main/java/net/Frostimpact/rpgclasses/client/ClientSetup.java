@@ -14,7 +14,7 @@ import net.Frostimpact.rpgclasses.entity.summon.ShockTowerEntity;
 import net.Frostimpact.rpgclasses.entity.summon.WindTowerEntity;
 import net.Frostimpact.rpgclasses.entity.summon.AfterimageEntity;
 import net.Frostimpact.rpgclasses.registry.ModEntities;
-import net.minecraft.client.model.HumanoidModel; // CHANGED: Import HumanoidModel
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
@@ -34,9 +34,11 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.VAULT_PROJECTILE.get(), VaultProjectileRenderer::new);
         event.registerEntityRenderer(ModEntities.STUN_BOLT.get(), StunBoltRenderer::new);
 
-        // ALCHEMIST projectile entities
-        event.registerEntityRenderer(ModEntities.ALCHEMIST_POTION.get(), ThrownItemRenderer::new);
-        event.registerEntityRenderer(ModEntities.INJECTION_BOLT.get(), ThrownItemRenderer::new);
+        // ALCHEMIST projectile entities - FIXED for thrown items!
+        event.registerEntityRenderer(ModEntities.ALCHEMIST_POTION.get(),
+                context -> new ThrownItemRenderer<>(context));
+        event.registerEntityRenderer(ModEntities.INJECTION_BOLT.get(),
+                context -> new ThrownItemRenderer<>(context));
 
         // RULER summon entities
         event.registerEntityRenderer(ModEntities.KNIGHT_SUMMON.get(), KnightRenderer::new);
@@ -54,21 +56,18 @@ public class ClientSetup {
     }
 
     // Knight summon renderer
-    // CHANGED: ZombieModel -> HumanoidModel
     private static class KnightRenderer extends MobRenderer<KnightSummonEntity, HumanoidModel<KnightSummonEntity>> {
         public KnightRenderer(EntityRendererProvider.Context context) {
-            // We can still use ModelLayers.ZOMBIE because the bone structure is the same
             super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ZOMBIE)), 0.5f);
         }
 
         @Override
-        public ResourceLocation getTextureLocation(KnightSummonEntity entity) {  
+        public ResourceLocation getTextureLocation(KnightSummonEntity entity) {
             return ResourceLocation.withDefaultNamespace("textures/entity/zombie/zombie.png");
         }
     }
 
     // Archer summon renderer
-    // CHANGED: ZombieModel -> HumanoidModel
     private static class ArcherRenderer extends MobRenderer<ArcherSummonEntity, HumanoidModel<ArcherSummonEntity>> {
         public ArcherRenderer(EntityRendererProvider.Context context) {
             super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ZOMBIE)), 0.5f);
@@ -97,7 +96,6 @@ public class ClientSetup {
     // Shock Tower renderer - scaled differently with blue-themed texture
     private static class ShockTowerRenderer extends MobRenderer<ShockTowerEntity, HumanoidModel<ShockTowerEntity>> {
         public ShockTowerRenderer(EntityRendererProvider.Context context) {
-            // Use ARMOR_STAND model with different scale for distinct appearance
             super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ARMOR_STAND)), 0.5f);
         }
 
@@ -111,7 +109,6 @@ public class ClientSetup {
     // Wind Tower renderer - different scale and texture for green/wind theme
     private static class WindTowerRenderer extends MobRenderer<WindTowerEntity, HumanoidModel<WindTowerEntity>> {
         public WindTowerRenderer(EntityRendererProvider.Context context) {
-            // Slightly larger shadow for wind tower
             super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ARMOR_STAND)), 0.6f);
         }
 

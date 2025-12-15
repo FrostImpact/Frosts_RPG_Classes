@@ -1,3 +1,4 @@
+// InjectionBoltEntity.java
 package net.Frostimpact.rpgclasses.entity.projectile;
 
 import net.Frostimpact.rpgclasses.registry.ModEffects;
@@ -16,6 +17,9 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.projectile.ItemSupplier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -23,10 +27,10 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
-public class InjectionBoltEntity extends Projectile {
+public class InjectionBoltEntity extends Projectile implements ItemSupplier {
 
     private static final int MAX_LIFETIME = 100; // 5 seconds
-    
+
     private int tickCount = 0;
     private boolean hasHit = false;
     private String reagentType = "CRYOSTAT"; // CRYOSTAT, CATALYST, FRACTURE, SANCTIFIED
@@ -132,8 +136,8 @@ public class InjectionBoltEntity extends Projectile {
                 switch (reagentType) {
                     case "CRYOSTAT":
                         // Check for slowness or freeze
-                        if (livingTarget.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) || 
-                            livingTarget.hasEffect(ModEffects.FREEZE)) {
+                        if (livingTarget.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) ||
+                                livingTarget.hasEffect(ModEffects.FREEZE)) {
                             clearReactingEffects(livingTarget);
                             triggerCryostatExplosion(livingTarget);
                             triggered = true;
@@ -141,8 +145,8 @@ public class InjectionBoltEntity extends Projectile {
                         break;
                     case "CATALYST":
                         // Check for poison or wither
-                        if (livingTarget.hasEffect(MobEffects.POISON) || 
-                            livingTarget.hasEffect(MobEffects.WITHER)) {
+                        if (livingTarget.hasEffect(MobEffects.POISON) ||
+                                livingTarget.hasEffect(MobEffects.WITHER)) {
                             clearReactingEffects(livingTarget);
                             triggerCatalystExplosion(livingTarget);
                             triggered = true;
@@ -150,8 +154,8 @@ public class InjectionBoltEntity extends Projectile {
                         break;
                     case "FRACTURE":
                         // Check for weakness or corrosion
-                        if (livingTarget.hasEffect(MobEffects.WEAKNESS) || 
-                            livingTarget.hasEffect(ModEffects.CORROSION)) {
+                        if (livingTarget.hasEffect(MobEffects.WEAKNESS) ||
+                                livingTarget.hasEffect(ModEffects.CORROSION)) {
                             clearReactingEffects(livingTarget);
                             triggerFractureExplosion(livingTarget);
                             triggered = true;
@@ -198,9 +202,9 @@ public class InjectionBoltEntity extends Projectile {
     private void triggerCryostatExplosion(LivingEntity target) {
         // Release an explosion that stuns in a radius for 4s
         List<LivingEntity> nearbyEntities = this.level().getEntitiesOfClass(
-            LivingEntity.class,
-            target.getBoundingBox().inflate(4.0),
-            entity -> entity != this.getOwner()
+                LivingEntity.class,
+                target.getBoundingBox().inflate(4.0),
+                entity -> entity != this.getOwner()
         );
 
         for (LivingEntity entity : nearbyEntities) {
@@ -226,9 +230,9 @@ public class InjectionBoltEntity extends Projectile {
     private void triggerCatalystExplosion(LivingEntity target) {
         // Release an explosion that deals instant damage in a radius
         List<LivingEntity> nearbyEntities = this.level().getEntitiesOfClass(
-            LivingEntity.class,
-            target.getBoundingBox().inflate(4.0),
-            entity -> entity != this.getOwner()
+                LivingEntity.class,
+                target.getBoundingBox().inflate(4.0),
+                entity -> entity != this.getOwner()
         );
 
         DamageSource damageSource = this.damageSources().explosion(this, this.getOwner());
@@ -245,17 +249,14 @@ public class InjectionBoltEntity extends Projectile {
                     target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(),
                     30, 2.0, 2.0, 2.0, 0.1);
         }
-
-        this.level().playSound(null, target.blockPosition(),
-                SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1.5f, 1.0f);
     }
 
     private void triggerFractureExplosion(LivingEntity target) {
         // Release an explosion that applies BRITTLE in a radius for 4s
         List<LivingEntity> nearbyEntities = this.level().getEntitiesOfClass(
-            LivingEntity.class,
-            target.getBoundingBox().inflate(4.0),
-            entity -> entity != this.getOwner()
+                LivingEntity.class,
+                target.getBoundingBox().inflate(4.0),
+                entity -> entity != this.getOwner()
         );
 
         for (LivingEntity entity : nearbyEntities) {
@@ -279,7 +280,7 @@ public class InjectionBoltEntity extends Projectile {
     private void triggerSanctifiedSmite(LivingEntity target) {
         // Conjure a holy smite that does massive damage to undead enemies
         float damage = 5.0f;
-        
+
         if (target.getType().is(EntityTypeTags.UNDEAD)) {
             damage = 20.0f; // Massive damage to undead
         }
@@ -317,5 +318,12 @@ public class InjectionBoltEntity extends Projectile {
         if (entity.isSpectator()) return false;
         if (entity == this.getOwner()) return false;
         return entity instanceof LivingEntity;
+    }
+
+    // --- ITEM SUPPLIER IMPLEMENTATION ---
+    @Override
+    public ItemStack getItem() {
+        // Return the item to be rendered as the projectile (e.g., an arrow)
+        return new ItemStack(Items.ARROW); // Replace with your custom item if desired
     }
 }

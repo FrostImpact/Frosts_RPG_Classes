@@ -1,7 +1,9 @@
 package net.Frostimpact.rpgclasses.event;
 
 import net.Frostimpact.rpgclasses.RpgClassesMod;
+import net.Frostimpact.rpgclasses.networking.ModMessages;
 import net.Frostimpact.rpgclasses.networking.packet.SyncMirageDataPacket;
+import net.Frostimpact.rpgclasses.networking.packet.PacketSyncAlchemistState;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,7 +20,7 @@ public class RPGTickHandler {
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         Player player = event.getEntity();
         PlayerRPGData rpgData = player.getData(ModAttachments.PLAYER_RPG);
-        
+
         if (rpgData == null) return;
 
         // --- MIRAGE SHADOWSTEP LOGIC ---
@@ -44,28 +46,50 @@ public class RPGTickHandler {
             int currentTicks = rpgData.getAlchemistConcoctionTicks();
 
             if (currentTicks > 0) {
-                // Decrement the timer
                 rpgData.setAlchemistConcoctionTicks(currentTicks - 1);
+
+                // ADDED: Sync to client every tick so the overlay sees the updates
+                if (!player.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
+                    // Only sync every 10 ticks to reduce network traffic
+                    if (currentTicks % 10 == 0) {
+                        ModMessages.sendToPlayer(new PacketSyncAlchemistState(
+                                true,
+                                rpgData.getAlchemistConcoctionTicks(),
+                                rpgData.isAlchemistInjectionActive(),
+                                rpgData.getAlchemistClickPattern(),
+                                rpgData.isAlchemistBuffMode(),
+                                rpgData.getAlchemistSelectedReagent()
+                        ), serverPlayer);
+                    }
+                }
             } else {
                 // Time is up - automatically put flask on cooldown
                 rpgData.setAlchemistConcoction(false);
                 rpgData.setAlchemistClickPattern("");
-                
+
                 if (!player.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
                     serverPlayer.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                             "§c⚗ CONCOCTION expired! FLASK on cooldown."));
-                    
+
                     // Put flask ability on cooldown
                     rpgData.setAbilityCooldown("flask", 180); // 9s
+
+                    // Sync the expiration to client
+                    ModMessages.sendToPlayer(new PacketSyncAlchemistState(
+                            false,
+                            rpgData.getAlchemistConcoctionTicks(),
+                            rpgData.isAlchemistInjectionActive(),
+                            rpgData.getAlchemistClickPattern(),
+                            rpgData.isAlchemistBuffMode(),
+                            rpgData.getAlchemistSelectedReagent()
+                    ), serverPlayer);
                 }
             }
         }
 
         // --- ALCHEMIST INJECTION MOVEMENT LOCK ---
         if (rpgData.isAlchemistInjectionActive()) {
-            // Prevent movement while in injection mode
             if (!player.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
-                // Apply slowness to simulate movement lock
                 serverPlayer.addEffect(new net.minecraft.world.effect.MobEffectInstance(
                         net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 2, 9, false, false));
             }

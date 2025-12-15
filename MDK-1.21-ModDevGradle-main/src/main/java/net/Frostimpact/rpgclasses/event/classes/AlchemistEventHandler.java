@@ -27,30 +27,27 @@ import java.util.List;
 @EventBusSubscriber(modid = RpgClassesMod.MOD_ID)
 public class AlchemistEventHandler {
 
-    private static final int GLOWING_DURATION_TICKS = 40; // 2 seconds
-    
-    // Map to track glowing targets per player (thread-safe for multiplayer)
+    private static final int GLOWING_DURATION_TICKS = 40;
     private static final java.util.concurrent.ConcurrentHashMap<java.util.UUID, LivingEntity> previousGlowingTargets = new java.util.concurrent.ConcurrentHashMap<>();
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             PlayerRPGData rpgData = player.getData(ModAttachments.PLAYER_RPG);
-            
+
             if (!rpgData.getCurrentClass().equals("ALCHEMIST")) {
-                // Clean up glowing target tracking if player is not an alchemist
                 previousGlowingTargets.remove(player.getUUID());
                 return;
             }
 
             // Handle reagent cycling when in injection mode and shifting
             if (rpgData.isAlchemistInjectionActive() && player.isShiftKeyDown()) {
-                // Cycle reagent every 10 ticks when holding shift
                 if (player.tickCount % 10 == 0) {
                     cycleReagent(player, rpgData);
-                    // Sync to client after cycling
+                    // UPDATED: Include ticks in sync
                     ModMessages.sendToPlayer(new PacketSyncAlchemistState(
                             rpgData.isAlchemistConcoction(),
+                            rpgData.getAlchemistConcoctionTicks(),
                             rpgData.isAlchemistInjectionActive(),
                             rpgData.getAlchemistClickPattern(),
                             rpgData.isAlchemistBuffMode(),
@@ -59,8 +56,8 @@ public class AlchemistEventHandler {
                 }
             }
 
-            // Handle POTION AFFINITY passive - make nearest enemy glow
-            if (player.tickCount % 20 == 0) { // Check every second
+            // Handle POTION AFFINITY passive
+            if (player.tickCount % 20 == 0) {
                 applyPotionAffinity(player);
             }
         }
@@ -68,65 +65,81 @@ public class AlchemistEventHandler {
 
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        // Clean up tracking map when player logs out to prevent memory leaks
         if (event.getEntity() instanceof ServerPlayer player) {
             previousGlowingTargets.remove(player.getUUID());
         }
     }
 
-    // This method will be called via a packet when the player clicks during CONCOCTION mode
     public static void handleClick(ServerPlayer player, String clickType) {
+        System.out.println("[SERVER] Handling click: " + clickType + " for player: " + player.getName().getString());
+
         PlayerRPGData rpgData = player.getData(ModAttachments.PLAYER_RPG);
-        
-        if (!rpgData.getCurrentClass().equals("ALCHEMIST")) return;
-        if (!rpgData.isAlchemistConcoction()) return;
+
+        if (!rpgData.getCurrentClass().equals("ALCHEMIST")) {
+            System.out.println("[SERVER] Player is not ALCHEMIST, ignoring click");
+            return;
+        }
+
+        if (!rpgData.isAlchemistConcoction()) {
+            System.out.println("[SERVER] CONCOCTION is not active, ignoring click");
+            return;
+        }
 
         String currentPattern = rpgData.getAlchemistClickPattern();
-        boolean isBuffMode = rpgData.isAlchemistBuffMode();
+        if (currentPattern == null) currentPattern = "";
 
-        // Determine max clicks based on mode
+        boolean isBuffMode = rpgData.isAlchemistBuffMode();
         int maxClicks = isBuffMode ? 2 : 3;
 
+        System.out.println("[SERVER] Current pattern: '" + currentPattern + "', Max clicks: " + maxClicks +
+                ", Buff mode: " + isBuffMode);
+
         if (currentPattern.length() < maxClicks) {
-            // Add the click to the pattern
             String newPattern = currentPattern + clickType;
             rpgData.setAlchemistClickPattern(newPattern);
 
             player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                     "§d⚗ Pattern: §e" + newPattern));
 
-            // Sync to client after click
+            System.out.println("[SERVER] New pattern: '" + newPattern + "'");
+
+            // UPDATED: Include ticks in sync
             ModMessages.sendToPlayer(new PacketSyncAlchemistState(
                     rpgData.isAlchemistConcoction(),
+                    rpgData.getAlchemistConcoctionTicks(),
                     rpgData.isAlchemistInjectionActive(),
-                    newPattern,
+                    rpgData.getAlchemistClickPattern(),
                     rpgData.isAlchemistBuffMode(),
                     rpgData.getAlchemistSelectedReagent()
             ), player);
 
-            // Check if pattern is complete
             if (newPattern.length() == maxClicks) {
-                // Throw the potion
+                System.out.println("[SERVER] Pattern complete! Throwing potion...");
+
                 throwPotion(player, rpgData, newPattern);
-                
-                // Reset concoction state
+
                 rpgData.setAlchemistConcoction(false);
                 rpgData.setAlchemistClickPattern("");
                 rpgData.setAlchemistConcoctionTicks(0);
 
-                // Sync to client after completing pattern
+                // UPDATED: Include ticks in sync
                 ModMessages.sendToPlayer(new PacketSyncAlchemistState(
                         false,
+                        rpgData.getAlchemistConcoctionTicks(),
                         rpgData.isAlchemistInjectionActive(),
-                        "",
+                        rpgData.getAlchemistClickPattern(),
                         rpgData.isAlchemistBuffMode(),
                         rpgData.getAlchemistSelectedReagent()
                 ), player);
             }
+        } else {
+            System.out.println("[SERVER] Pattern already at max length, ignoring click");
         }
     }
 
     private static void throwPotion(ServerPlayer player, PlayerRPGData rpgData, String pattern) {
+        System.out.println("[SERVER] Throwing potion with pattern: " + pattern);
+
         Vec3 lookVec = player.getLookAngle();
         Vec3 spawnPos = player.position()
                 .add(0, player.getEyeHeight() - 0.1, 0)
@@ -140,29 +153,26 @@ public class AlchemistEventHandler {
 
         potion.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
         potion.setEffectType(pattern);
-        
-        // Check if volatile mix is active
+
         if (rpgData.isAlchemistVolatileMixActive()) {
             potion.setLingering(true);
             rpgData.setAlchemistVolatileMixActive(false);
-            
+
             player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                     "§5⚗ Volatile FLASK thrown!"));
         } else {
             player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                     "§d⚗ FLASK thrown!"));
         }
-        
-        // Set velocity with arc
+
         float speed = 1.2f;
         Vec3 velocity = lookVec.scale(speed);
-        velocity = velocity.add(0, 0.2, 0); // Add upward arc
+        velocity = velocity.add(0, 0.2, 0);
         potion.setDeltaMovement(velocity);
         potion.hurtMarked = true;
 
         player.level().addFreshEntity(potion);
 
-        // Sound effect
         player.level().playSound(null, player.blockPosition(),
                 SoundEvents.SPLASH_POTION_THROW, SoundSource.PLAYERS, 1.0f, 1.0f);
     }
@@ -190,18 +200,17 @@ public class AlchemistEventHandler {
         }
 
         rpgData.setAlchemistSelectedReagent(next);
-        
+
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                 "§7Reagent: §e" + next));
     }
 
     private static void applyPotionAffinity(ServerPlayer player) {
-        // Find nearest enemy
         AABB searchBox = player.getBoundingBox().inflate(15.0);
         List<LivingEntity> entities = player.level().getEntitiesOfClass(
-            LivingEntity.class,
-            searchBox,
-            entity -> entity != player && !entity.isAlliedTo(player)
+                LivingEntity.class,
+                searchBox,
+                entity -> entity != player && !entity.isAlliedTo(player)
         );
 
         LivingEntity nearest = null;
@@ -215,10 +224,8 @@ public class AlchemistEventHandler {
             }
         }
 
-        // Get previous target for this player
         LivingEntity previousTarget = previousGlowingTargets.get(player.getUUID());
 
-        // Remove glow from previous target if it's different and still valid
         if (previousTarget != null && previousTarget != nearest && !previousTarget.isRemoved()) {
             if (previousTarget.hasEffect(MobEffects.GLOWING)) {
                 previousTarget.removeEffect(MobEffects.GLOWING);
@@ -226,14 +233,11 @@ public class AlchemistEventHandler {
         }
 
         if (nearest != null) {
-            // Apply glowing effect with duration
             nearest.addEffect(new MobEffectInstance(MobEffects.GLOWING, GLOWING_DURATION_TICKS, 0, false, false));
             previousGlowingTargets.put(player.getUUID(), nearest);
 
-            // Collect and send debuffs to client
             List<String> debuffs = new ArrayList<>();
             for (MobEffectInstance effect : nearest.getActiveEffects()) {
-                // Only include negative effects (debuffs)
                 if (!effect.getEffect().value().isBeneficial()) {
                     String effectName = effect.getEffect().value().getDisplayName().getString();
                     int amplifier = effect.getAmplifier();
@@ -244,7 +248,6 @@ public class AlchemistEventHandler {
             ModMessages.sendToPlayer(new PacketSyncEnemyDebuffs(debuffs), player);
         } else {
             previousGlowingTargets.remove(player.getUUID());
-            // Send empty list when no enemy nearby
             ModMessages.sendToPlayer(new PacketSyncEnemyDebuffs(new ArrayList<>()), player);
         }
     }
