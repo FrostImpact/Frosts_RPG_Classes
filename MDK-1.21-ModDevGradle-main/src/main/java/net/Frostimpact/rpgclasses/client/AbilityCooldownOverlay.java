@@ -53,6 +53,9 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
         CLASS_ABILITIES.put("MIRAGE", new String[]{
                 "reflections", "shadowstep", "recall", "fracture_line"
         });
+        CLASS_ABILITIES.put("ALCHEMIST", new String[]{
+                "flask", "volatile_mix", "distill", "injection"
+        });
     }
 
     private static final int ICON_SIZE = 16;
@@ -291,6 +294,16 @@ public class AbilityCooldownOverlay implements LayeredDraw.Layer {
                 case "shadowstep" -> new ItemStack(Items.ENDER_PEARL);
                 case "recall" -> new ItemStack(Items.RECOVERY_COMPASS);
                 case "fracture_line" -> new ItemStack(Items.PRISMARINE_SHARD);
+                default -> new ItemStack(Items.BARRIER);
+            };
+        }
+
+        if (className.equals("ALCHEMIST")) {
+            return switch (abilityId) {
+                case "flask" -> new ItemStack(Items.POTION);
+                case "volatile_mix" -> new ItemStack(Items.DRAGON_BREATH);
+                case "distill" -> new ItemStack(Items.GLASS_BOTTLE);
+                case "injection" -> new ItemStack(Items.ARROW);
                 default -> new ItemStack(Items.BARRIER);
             };
         }
