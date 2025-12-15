@@ -6,6 +6,7 @@ import net.Frostimpact.rpgclasses.entity.summon.ArcherSummonEntity;
 import net.Frostimpact.rpgclasses.entity.summon.KnightSummonEntity;
 import net.Frostimpact.rpgclasses.event.ServerEvents;
 import net.Frostimpact.rpgclasses.networking.ModMessages;
+import net.Frostimpact.rpgclasses.registry.ModEffects;
 import net.Frostimpact.rpgclasses.registry.ModEntities;
 import net.Frostimpact.rpgclasses.registry.abilities.AbilityDatabase;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;
@@ -32,6 +33,9 @@ public class RpgClassesMod {
 
         // Register entities
         ModEntities.register(modEventBus);
+
+        // Register effects
+        ModEffects.register(modEventBus);
 
         // Register items
         net.Frostimpact.rpgclasses.registry.ModItems.register(modEventBus);
@@ -96,6 +100,12 @@ public class RpgClassesMod {
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.SHADOWSTEP_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.RECALL_KEY);
         event.register(net.Frostimpact.rpgclasses.util.KeyBinding.FRACTURE_LINE_KEY);
+
+        // ALCHEMIST Keys
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.FLASK_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.VOLATILE_MIX_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.DISTILL_KEY);
+        event.register(net.Frostimpact.rpgclasses.util.KeyBinding.INJECTION_KEY);
 
         System.out.println("RPG Classes: Keybinds Registered!");
 

@@ -125,6 +125,15 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
     private int mirageFractureLineTicks = 0;
     private Vec3 mirageFractureLineDirection = Vec3.ZERO;
 
+    // ** ALCHEMIST **
+    private boolean alchemistConcoction = false;
+    private int alchemistConcoctionTicks = 0;
+    private String alchemistClickPattern = "";
+    private boolean alchemistBuffMode = false;
+    private boolean alchemistVolatileMixActive = false;
+    private boolean alchemistInjectionActive = false;
+    private String alchemistSelectedReagent = "CRYOSTAT"; // CRYOSTAT, CATALYST, FRACTURE, SANCTIFIED
+
     //DASH
     public boolean isDashActive() {
         return dashActive;
@@ -800,6 +809,63 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         this.mirageFractureLineDirection = direction;
     }
 
+    // ALCHEMIST GETTERS/SETTERS
+    public boolean isAlchemistConcoction() {
+        return alchemistConcoction;
+    }
+
+    public void setAlchemistConcoction(boolean active) {
+        this.alchemistConcoction = active;
+    }
+
+    public int getAlchemistConcoctionTicks() {
+        return alchemistConcoctionTicks;
+    }
+
+    public void setAlchemistConcoctionTicks(int ticks) {
+        this.alchemistConcoctionTicks = ticks;
+    }
+
+    public String getAlchemistClickPattern() {
+        return alchemistClickPattern;
+    }
+
+    public void setAlchemistClickPattern(String pattern) {
+        this.alchemistClickPattern = pattern;
+    }
+
+    public boolean isAlchemistBuffMode() {
+        return alchemistBuffMode;
+    }
+
+    public void setAlchemistBuffMode(boolean buffMode) {
+        this.alchemistBuffMode = buffMode;
+    }
+
+    public boolean isAlchemistVolatileMixActive() {
+        return alchemistVolatileMixActive;
+    }
+
+    public void setAlchemistVolatileMixActive(boolean active) {
+        this.alchemistVolatileMixActive = active;
+    }
+
+    public boolean isAlchemistInjectionActive() {
+        return alchemistInjectionActive;
+    }
+
+    public void setAlchemistInjectionActive(boolean active) {
+        this.alchemistInjectionActive = active;
+    }
+
+    public String getAlchemistSelectedReagent() {
+        return alchemistSelectedReagent;
+    }
+
+    public void setAlchemistSelectedReagent(String reagent) {
+        this.alchemistSelectedReagent = reagent;
+    }
+
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
 
@@ -907,6 +973,15 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
         nbt.putDouble("mirage_fracture_dir_x", mirageFractureLineDirection.x);
         nbt.putDouble("mirage_fracture_dir_y", mirageFractureLineDirection.y);
         nbt.putDouble("mirage_fracture_dir_z", mirageFractureLineDirection.z);
+
+        // ** ALCHEMIST **
+        nbt.putBoolean("alchemist_concoction", alchemistConcoction);
+        nbt.putInt("alchemist_concoction_ticks", alchemistConcoctionTicks);
+        nbt.putString("alchemist_click_pattern", alchemistClickPattern);
+        nbt.putBoolean("alchemist_buff_mode", alchemistBuffMode);
+        nbt.putBoolean("alchemist_volatile_mix", alchemistVolatileMixActive);
+        nbt.putBoolean("alchemist_injection_active", alchemistInjectionActive);
+        nbt.putString("alchemist_selected_reagent", alchemistSelectedReagent);
 
         // Save cooldowns
         CompoundTag cooldownsTag = new CompoundTag();
@@ -1162,6 +1237,29 @@ public class PlayerRPGData implements INBTSerializable<CompoundTag> {
             double y = nbt.getDouble("mirage_fracture_dir_y");
             double z = nbt.getDouble("mirage_fracture_dir_z");
             this.mirageFractureLineDirection = new Vec3(x, y, z);
+        }
+
+        // ** ALCHEMIST **
+        if (nbt.contains("alchemist_concoction")) {
+            this.alchemistConcoction = nbt.getBoolean("alchemist_concoction");
+        }
+        if (nbt.contains("alchemist_concoction_ticks")) {
+            this.alchemistConcoctionTicks = nbt.getInt("alchemist_concoction_ticks");
+        }
+        if (nbt.contains("alchemist_click_pattern")) {
+            this.alchemistClickPattern = nbt.getString("alchemist_click_pattern");
+        }
+        if (nbt.contains("alchemist_buff_mode")) {
+            this.alchemistBuffMode = nbt.getBoolean("alchemist_buff_mode");
+        }
+        if (nbt.contains("alchemist_volatile_mix")) {
+            this.alchemistVolatileMixActive = nbt.getBoolean("alchemist_volatile_mix");
+        }
+        if (nbt.contains("alchemist_injection_active")) {
+            this.alchemistInjectionActive = nbt.getBoolean("alchemist_injection_active");
+        }
+        if (nbt.contains("alchemist_selected_reagent")) {
+            this.alchemistSelectedReagent = nbt.getString("alchemist_selected_reagent");
         }
 
         // Load cooldowns

@@ -24,6 +24,10 @@ import net.Frostimpact.rpgclasses.ability.MIRAGE.ReflectionsAbility;
 import net.Frostimpact.rpgclasses.ability.MIRAGE.ShadowstepAbility;
 import net.Frostimpact.rpgclasses.ability.MIRAGE.RecallAbility;
 import net.Frostimpact.rpgclasses.ability.MIRAGE.FractureLineAbility;
+import net.Frostimpact.rpgclasses.ability.ALCHEMIST.FlaskAbility;
+import net.Frostimpact.rpgclasses.ability.ALCHEMIST.VolatileMixAbility;
+import net.Frostimpact.rpgclasses.ability.ALCHEMIST.DistillAbility;
+import net.Frostimpact.rpgclasses.ability.ALCHEMIST.InjectionAbility;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,6 +84,12 @@ public class AbilityRegistry {
         register(new ShadowstepAbility());
         register(new RecallAbility());
         register(new FractureLineAbility());
+
+        // ALCHEMIST Abilities
+        register(new FlaskAbility());
+        register(new VolatileMixAbility());
+        register(new DistillAbility());
+        register(new InjectionAbility());
     }
 
     private static void register(Ability ability) {

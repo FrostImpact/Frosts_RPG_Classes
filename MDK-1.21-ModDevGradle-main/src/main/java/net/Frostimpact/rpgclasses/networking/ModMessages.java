@@ -83,6 +83,13 @@ public class ModMessages {
                 net.Frostimpact.rpgclasses.networking.packet.PacketSelectClass::handle
         );
 
+        // 9. PacketAlchemistClick (Client -> Server)
+        registrar.playToServer(
+                PacketAlchemistClick.TYPE,
+                PacketAlchemistClick.STREAM_CODEC,
+                PacketAlchemistClick::handle
+        );
+
         System.out.println("RPG Classes: All packets registered!");
     }
 

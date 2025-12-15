@@ -1,6 +1,7 @@
 package net.Frostimpact.rpgclasses.client;
 
 import net.Frostimpact.rpgclasses.networking.ModMessages;
+import net.Frostimpact.rpgclasses.networking.packet.PacketAlchemistClick;
 import net.Frostimpact.rpgclasses.networking.packet.PacketUseAbility;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
@@ -10,6 +11,26 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 
 public class ClientEvents {
+
+    @SubscribeEvent
+    public void onMouseClick(InputEvent.MouseButton.Pre event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+
+        PlayerRPGData rpg = mc.player.getData(ModAttachments.PLAYER_RPG);
+        
+        // Handle Alchemist CONCOCTION mode clicks
+        if (rpg.getCurrentClass().equals("ALCHEMIST") && rpg.isAlchemistConcoction()) {
+            // Left click = 0, Right click = 1
+            if (event.getButton() == 0) { // Left click
+                ModMessages.sendToServer(new PacketAlchemistClick("L"));
+                event.setCanceled(true); // Prevent normal left click
+            } else if (event.getButton() == 1) { // Right click
+                ModMessages.sendToServer(new PacketAlchemistClick("R"));
+                event.setCanceled(true); // Prevent normal right click
+            }
+        }
+    }
 
     @SubscribeEvent
     public void onKeyInput(InputEvent.Key event) {
@@ -141,6 +162,22 @@ public class ClientEvents {
             }
             if (KeyBinding.FRACTURE_LINE_KEY.consumeClick()) {
                 ModMessages.sendToServer(new PacketUseAbility("fracture_line"));
+            }
+        }
+
+        // ALCHEMIST Keys
+        if (currentClass.equals("ALCHEMIST")) {
+            if (KeyBinding.FLASK_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("flask"));
+            }
+            if (KeyBinding.VOLATILE_MIX_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("volatile_mix"));
+            }
+            if (KeyBinding.DISTILL_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("distill"));
+            }
+            if (KeyBinding.INJECTION_KEY.consumeClick()) {
+                ModMessages.sendToServer(new PacketUseAbility("injection"));
             }
         }
     }
