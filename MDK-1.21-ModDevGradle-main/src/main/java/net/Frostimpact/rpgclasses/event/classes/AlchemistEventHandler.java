@@ -4,6 +4,7 @@ import net.Frostimpact.rpgclasses.RpgClassesMod;
 import net.Frostimpact.rpgclasses.entity.projectile.AlchemistPotionEntity;
 import net.Frostimpact.rpgclasses.networking.ModMessages;
 import net.Frostimpact.rpgclasses.networking.packet.PacketSyncAlchemistState;
+import net.Frostimpact.rpgclasses.networking.packet.PacketSyncEnemyDebuffs;
 import net.Frostimpact.rpgclasses.registry.ModEntities;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;
 import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
@@ -19,6 +20,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @EventBusSubscriber(modid = RpgClassesMod.MOD_ID)
@@ -206,8 +208,23 @@ public class AlchemistEventHandler {
             // Apply glowing effect with duration (2 seconds / 40 ticks)
             nearest.addEffect(new MobEffectInstance(MobEffects.GLOWING, 40, 0, false, false));
             previousGlowingTarget = nearest;
+
+            // Collect and send debuffs to client
+            List<String> debuffs = new ArrayList<>();
+            for (MobEffectInstance effect : nearest.getActiveEffects()) {
+                // Only include negative effects (debuffs)
+                if (!effect.getEffect().value().isBeneficial()) {
+                    String effectName = effect.getEffect().value().getDisplayName().getString();
+                    int amplifier = effect.getAmplifier();
+                    String level = amplifier > 0 ? " " + (amplifier + 1) : "";
+                    debuffs.add(effectName + level);
+                }
+            }
+            ModMessages.sendToPlayer(new PacketSyncEnemyDebuffs(debuffs), player);
         } else {
             previousGlowingTarget = null;
+            // Send empty list when no enemy nearby
+            ModMessages.sendToPlayer(new PacketSyncEnemyDebuffs(new ArrayList<>()), player);
         }
     }
 }

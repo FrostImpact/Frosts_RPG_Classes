@@ -48,8 +48,6 @@ public class AlchemistOverlay implements LayeredDraw.Layer {
         boolean isConcoctionActive = rpg.isAlchemistConcoction();
         boolean isInjectionActive = rpg.isAlchemistInjectionActive();
 
-        if (!isConcoctionActive && !isInjectionActive) return;
-
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
 
@@ -61,6 +59,9 @@ public class AlchemistOverlay implements LayeredDraw.Layer {
         } else if (isInjectionActive) {
             renderInjectionOverlay(graphics, mc, rpg, screenWidth, screenHeight);
         }
+
+        // Always render enemy debuffs if any
+        renderEnemyDebuffs(graphics, mc, rpg, screenWidth, screenHeight);
 
         RenderSystem.disableBlend();
     }
@@ -141,6 +142,26 @@ public class AlchemistOverlay implements LayeredDraw.Layer {
         // Draw instruction
         int instructionY = reagentY + 12;
         graphics.drawString(mc.font, "(Shift to cycle)", startX, instructionY, 0xFF888888, false);
+    }
+
+    private void renderEnemyDebuffs(GuiGraphics graphics, Minecraft mc, PlayerRPGData rpg, int screenWidth, int screenHeight) {
+        java.util.List<String> debuffs = rpg.getAlchemistEnemyDebuffs();
+        
+        if (debuffs == null || debuffs.isEmpty()) return;
+
+        // Position: Right side of screen, middle
+        int startX = screenWidth - 150;
+        int startY = screenHeight / 2;
+
+        // Draw title
+        graphics.drawString(mc.font, "Enemy Debuffs:", startX, startY, 0xFFff5555, true);
+
+        // Draw each debuff
+        int yOffset = startY + 12;
+        for (String debuff : debuffs) {
+            graphics.drawString(mc.font, "• " + debuff, startX, yOffset, 0xFFffaa00, false);
+            yOffset += 10;
+        }
     }
 
     private String getEffectName(String pattern) {
