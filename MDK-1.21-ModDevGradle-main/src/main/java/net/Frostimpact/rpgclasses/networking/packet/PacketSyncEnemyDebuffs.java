@@ -45,8 +45,10 @@ public record PacketSyncEnemyDebuffs(List<String> debuffs) implements CustomPack
             if (context.player() != null) {
                 PlayerRPGData rpgData = context.player().getData(ModAttachments.PLAYER_RPG);
                 if (rpgData != null) {
-                    // We need to add a field to store enemy debuffs
-                    rpgData.setAlchemistEnemyDebuffs(message.debuffs);
+                    // Validate list size to prevent memory issues from malicious packets
+                    if (message.debuffs.size() <= 20) { // Max 20 debuffs is reasonable
+                        rpgData.setAlchemistEnemyDebuffs(message.debuffs);
+                    }
                 }
             }
         });

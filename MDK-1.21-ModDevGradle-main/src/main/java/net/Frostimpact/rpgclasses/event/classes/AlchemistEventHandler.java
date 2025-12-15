@@ -27,8 +27,10 @@ import java.util.List;
 @EventBusSubscriber(modid = RpgClassesMod.MOD_ID)
 public class AlchemistEventHandler {
 
-    // Map to track glowing targets per player
-    private static final java.util.Map<java.util.UUID, LivingEntity> previousGlowingTargets = new java.util.HashMap<>();
+    private static final int GLOWING_DURATION_TICKS = 40; // 2 seconds
+    
+    // Map to track glowing targets per player (thread-safe for multiplayer)
+    private static final java.util.concurrent.ConcurrentHashMap<java.util.UUID, LivingEntity> previousGlowingTargets = new java.util.concurrent.ConcurrentHashMap<>();
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
@@ -218,12 +220,14 @@ public class AlchemistEventHandler {
 
         // Remove glow from previous target if it's different and still valid
         if (previousTarget != null && previousTarget != nearest && !previousTarget.isRemoved()) {
-            previousTarget.removeEffect(MobEffects.GLOWING);
+            if (previousTarget.hasEffect(MobEffects.GLOWING)) {
+                previousTarget.removeEffect(MobEffects.GLOWING);
+            }
         }
 
         if (nearest != null) {
-            // Apply glowing effect with duration (2 seconds / 40 ticks)
-            nearest.addEffect(new MobEffectInstance(MobEffects.GLOWING, 40, 0, false, false));
+            // Apply glowing effect with duration
+            nearest.addEffect(new MobEffectInstance(MobEffects.GLOWING, GLOWING_DURATION_TICKS, 0, false, false));
             previousGlowingTargets.put(player.getUUID(), nearest);
 
             // Collect and send debuffs to client
