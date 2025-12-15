@@ -85,8 +85,8 @@ public class AlchemistOverlay implements LayeredDraw.Layer {
         int maxClicks = isBuffMode ? 2 : 3;
 
         // Position: Bottom center, above hotbar
-        int startX = screenWidth / 2 - 60;
-        int startY = screenHeight - 80;
+        int startX = screenWidth / 3;
+        int startY = screenHeight - 100;
 
         // Draw title with glow effect for visibility
         String title = isBuffMode ? "§a§lCONCOCTION (BUFF)" : "§c§lCONCOCTION (DEBUFF)";
@@ -153,8 +153,8 @@ public class AlchemistOverlay implements LayeredDraw.Layer {
         if (reagent == null) reagent = "CRYOSTAT";
 
         // Position: Bottom center, above hotbar
-        int startX = screenWidth / 2 - 60;
-        int startY = screenHeight - 80;
+        int startX = screenWidth / 3;
+        int startY = screenHeight - 100;
 
         // Draw title with background
         graphics.fill(startX - 2, startY - 2, startX + 100, startY + 10, 0xAA000000);

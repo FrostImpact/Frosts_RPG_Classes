@@ -1,14 +1,15 @@
-package net.Frostimpact.rpgclasses.client;
+package net.Frostimpact. rpgclasses.client;
 
-import net.Frostimpact.rpgclasses.networking.ModMessages;
-import net.Frostimpact.rpgclasses.networking.packet.PacketAlchemistClick;
-import net.Frostimpact.rpgclasses.networking.packet.PacketUseAbility;
+import net.Frostimpact.rpgclasses.networking. ModMessages;
+import net. Frostimpact.rpgclasses.networking.packet.PacketAlchemistClick;
+import net.Frostimpact.rpgclasses.networking.packet. PacketUseAbility;
 import net.Frostimpact.rpgclasses.rpg.ModAttachments;
-import net.Frostimpact.rpgclasses.rpg.PlayerRPGData;
-import net.Frostimpact.rpgclasses.util.KeyBinding;
-import net.minecraft.client.Minecraft;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
+import net.Frostimpact. rpgclasses.rpg. PlayerRPGData;
+import net.Frostimpact. rpgclasses.util.KeyBinding;
+import net.minecraft. client.Minecraft;
+import net.neoforged.bus. api.SubscribeEvent;
+import net.neoforged. neoforge.client.event. InputEvent;
+import org.lwjgl.glfw. GLFW;
 
 public class ClientEvents {
 
@@ -17,8 +18,11 @@ public class ClientEvents {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 
+        // Only process on initial press, not hold or release
+        if (event.getAction() != GLFW.GLFW_PRESS) return;
+
         PlayerRPGData rpg = mc.player.getData(ModAttachments.PLAYER_RPG);
-        
+
         // Handle Alchemist CONCOCTION mode clicks
         if (rpg.getCurrentClass().equals("ALCHEMIST") && rpg.isAlchemistConcoction()) {
             // Left click = 0, Right click = 1
