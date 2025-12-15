@@ -26,7 +26,8 @@ import java.util.List;
 @EventBusSubscriber(modid = RpgClassesMod.MOD_ID)
 public class AlchemistEventHandler {
 
-    private static LivingEntity previousGlowingTarget = null;
+    // Map to track glowing targets per player
+    private static final java.util.Map<java.util.UUID, LivingEntity> previousGlowingTargets = new java.util.HashMap<>();
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
@@ -199,15 +200,18 @@ public class AlchemistEventHandler {
             }
         }
 
-        // Remove glow from previous target if it's different
-        if (previousGlowingTarget != null && previousGlowingTarget != nearest) {
-            previousGlowingTarget.setGlowingTag(false);
+        // Get previous target for this player
+        LivingEntity previousTarget = previousGlowingTargets.get(player.getUUID());
+
+        // Remove glow from previous target if it's different and still valid
+        if (previousTarget != null && previousTarget != nearest && !previousTarget.isRemoved()) {
+            previousTarget.removeEffect(MobEffects.GLOWING);
         }
 
         if (nearest != null) {
             // Apply glowing effect with duration (2 seconds / 40 ticks)
             nearest.addEffect(new MobEffectInstance(MobEffects.GLOWING, 40, 0, false, false));
-            previousGlowingTarget = nearest;
+            previousGlowingTargets.put(player.getUUID(), nearest);
 
             // Collect and send debuffs to client
             List<String> debuffs = new ArrayList<>();
@@ -222,7 +226,7 @@ public class AlchemistEventHandler {
             }
             ModMessages.sendToPlayer(new PacketSyncEnemyDebuffs(debuffs), player);
         } else {
-            previousGlowingTarget = null;
+            previousGlowingTargets.remove(player.getUUID());
             // Send empty list when no enemy nearby
             ModMessages.sendToPlayer(new PacketSyncEnemyDebuffs(new ArrayList<>()), player);
         }
