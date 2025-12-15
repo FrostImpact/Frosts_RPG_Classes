@@ -7,13 +7,13 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
@@ -265,7 +265,7 @@ public class InjectionBoltEntity extends Projectile {
         // Conjure a holy smite that does massive damage to undead enemies
         float damage = 5.0f;
         
-        if (target.getMobType() == MobType.UNDEAD) {
+        if (target.getType().is(EntityTypeTags.UNDEAD)) {
             damage = 20.0f; // Massive damage to undead
         }
 

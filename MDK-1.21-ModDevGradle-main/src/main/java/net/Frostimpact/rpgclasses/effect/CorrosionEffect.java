@@ -1,5 +1,6 @@
 package net.Frostimpact.rpgclasses.effect;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -13,7 +14,7 @@ public class CorrosionEffect extends MobEffect {
         // Reduce armor effectiveness by 30%
         this.addAttributeModifier(
             Attributes.ARMOR,
-            "corrosion_armor_reduction",
+            ResourceLocation.fromNamespaceAndPath("rpgclasses", "corrosion_armor_reduction"),
             -0.3,
             AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
         );
