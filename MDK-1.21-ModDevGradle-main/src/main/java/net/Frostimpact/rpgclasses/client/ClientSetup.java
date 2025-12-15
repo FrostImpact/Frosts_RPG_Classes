@@ -6,6 +6,7 @@ import net.Frostimpact.rpgclasses.client.renderer.SeekerArrowRenderer;
 import net.Frostimpact.rpgclasses.client.renderer.VaultProjectileRenderer;
 import net.Frostimpact.rpgclasses.client.renderer.StunBoltRenderer;
 import net.Frostimpact.rpgclasses.client.renderer.AfterimageRenderer;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.Frostimpact.rpgclasses.entity.summon.ArcherSummonEntity;
 import net.Frostimpact.rpgclasses.entity.summon.KnightSummonEntity;
 import net.Frostimpact.rpgclasses.entity.summon.TurretSummonEntity;
@@ -32,6 +33,10 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.SEEKER_ARROW.get(), SeekerArrowRenderer::new);
         event.registerEntityRenderer(ModEntities.VAULT_PROJECTILE.get(), VaultProjectileRenderer::new);
         event.registerEntityRenderer(ModEntities.STUN_BOLT.get(), StunBoltRenderer::new);
+
+        // ALCHEMIST projectile entities
+        event.registerEntityRenderer(ModEntities.ALCHEMIST_POTION.get(), ThrownItemRenderer::new);
+        event.registerEntityRenderer(ModEntities.INJECTION_BOLT.get(), ThrownItemRenderer::new);
 
         // RULER summon entities
         event.registerEntityRenderer(ModEntities.KNIGHT_SUMMON.get(), KnightRenderer::new);
