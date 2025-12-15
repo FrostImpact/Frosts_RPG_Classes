@@ -134,6 +134,7 @@ public class InjectionBoltEntity extends Projectile {
                         // Check for slowness or freeze
                         if (livingTarget.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) || 
                             livingTarget.hasEffect(ModEffects.FREEZE)) {
+                            clearReactingEffects(livingTarget);
                             triggerCryostatExplosion(livingTarget);
                             triggered = true;
                         }
@@ -142,6 +143,7 @@ public class InjectionBoltEntity extends Projectile {
                         // Check for poison or wither
                         if (livingTarget.hasEffect(MobEffects.POISON) || 
                             livingTarget.hasEffect(MobEffects.WITHER)) {
+                            clearReactingEffects(livingTarget);
                             triggerCatalystExplosion(livingTarget);
                             triggered = true;
                         }
@@ -150,6 +152,7 @@ public class InjectionBoltEntity extends Projectile {
                         // Check for weakness or corrosion
                         if (livingTarget.hasEffect(MobEffects.WEAKNESS) || 
                             livingTarget.hasEffect(ModEffects.CORROSION)) {
+                            clearReactingEffects(livingTarget);
                             triggerFractureExplosion(livingTarget);
                             triggered = true;
                         }
@@ -157,6 +160,7 @@ public class InjectionBoltEntity extends Projectile {
                     case "SANCTIFIED":
                         // Check for glowing
                         if (livingTarget.hasEffect(MobEffects.GLOWING)) {
+                            clearReactingEffects(livingTarget);
                             triggerSanctifiedSmite(livingTarget);
                             triggered = true;
                         }
@@ -178,6 +182,17 @@ public class InjectionBoltEntity extends Projectile {
 
             this.hasHit = true;
         }
+    }
+
+    private void clearReactingEffects(LivingEntity target) {
+        // Remove any existing "reacting" effects before applying new reagent effect
+        target.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+        target.removeEffect(MobEffects.POISON);
+        target.removeEffect(MobEffects.WITHER);
+        target.removeEffect(MobEffects.WEAKNESS);
+        target.removeEffect(MobEffects.GLOWING);
+        target.removeEffect(ModEffects.FREEZE);
+        target.removeEffect(ModEffects.CORROSION);
     }
 
     private void triggerCryostatExplosion(LivingEntity target) {
