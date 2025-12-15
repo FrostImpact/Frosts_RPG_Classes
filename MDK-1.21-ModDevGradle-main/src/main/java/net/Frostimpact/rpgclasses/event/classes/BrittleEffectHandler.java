@@ -14,7 +14,7 @@ public class BrittleEffectHandler {
     public static void onLivingDamage(LivingIncomingDamageEvent event) {
         if (event.getEntity() instanceof LivingEntity target) {
             // Check if the target has the BRITTLE effect
-            if (target.hasEffect(ModEffects.BRITTLE.get())) {
+            if (target.hasEffect(ModEffects.BRITTLE)) {
                 // Increase damage by 20%
                 float originalDamage = event.getAmount();
                 float increasedDamage = originalDamage * 1.2f;

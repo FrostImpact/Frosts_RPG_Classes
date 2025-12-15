@@ -153,13 +153,13 @@ public class AlchemistPotionEntity extends Projectile {
                 target.addEffect(new MobEffectInstance(MobEffects.POISON, duration, 0));
                 break;
             case "LLR":
-                target.addEffect(new MobEffectInstance(ModEffects.CORROSION.get(), duration, 0));
+                target.addEffect(new MobEffectInstance(ModEffects.CORROSION, duration, 0));
                 break;
             case "LRL":
                 target.addEffect(new MobEffectInstance(MobEffects.WITHER, duration, 0));
                 break;
             case "RRL":
-                target.addEffect(new MobEffectInstance(ModEffects.FREEZE.get(), 30, 0)); // 1.5s
+                target.addEffect(new MobEffectInstance(ModEffects.FREEZE, 30, 0)); // 1.5s
                 break;
             case "RLR":
                 target.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, 0));
@@ -203,13 +203,13 @@ public class AlchemistPotionEntity extends Projectile {
                 effectToAdd = new MobEffectInstance(MobEffects.POISON, duration, 0);
                 break;
             case "LLR":
-                effectToAdd = new MobEffectInstance(ModEffects.CORROSION.get(), duration, 0);
+                effectToAdd = new MobEffectInstance(ModEffects.CORROSION, duration, 0);
                 break;
             case "LRL":
                 effectToAdd = new MobEffectInstance(MobEffects.WITHER, duration, 0);
                 break;
             case "RRL":
-                effectToAdd = new MobEffectInstance(ModEffects.FREEZE.get(), 30, 0);
+                effectToAdd = new MobEffectInstance(ModEffects.FREEZE, 30, 0);
                 break;
             case "RLR":
                 effectToAdd = new MobEffectInstance(MobEffects.GLOWING, duration, 0);
